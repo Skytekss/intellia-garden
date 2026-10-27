@@ -2,6 +2,7 @@ import React from 'react';
 import { Sun, Droplets, Wind } from 'lucide-react';
 import { WeatherTelemetry } from '../../types';
 import { mockWeather } from '../../data/mockData';
+import { useApp } from '../../context/AppContext';
 
 export interface WeatherWidgetProps {
   weather?: WeatherTelemetry;
@@ -12,6 +13,12 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   weather = mockWeather,
   className = '',
 }) => {
+  const { formatTemperature, formatWindSpeed, isEnglish } = useApp();
+
+  const conditionText = isEnglish
+    ? 'Clear, no rain'
+    : weather.condition;
+
   return (
     <div
       data-testid="sidebar-weather-widget"
@@ -24,10 +31,10 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
           </div>
           <div>
             <div className="text-lg font-bold tracking-tight text-white leading-none">
-              {weather.temperature > 0 ? `+${weather.temperature}` : weather.temperature}°C
+              {formatTemperature(weather.temperature)}
             </div>
             <div className="text-xs text-emerald-200/80 font-medium mt-0.5">
-              {weather.condition}
+              {conditionText}
             </div>
           </div>
         </div>
@@ -36,11 +43,11 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
       <div className="mt-2.5 pt-2 border-t border-[#064e3b]/80 flex items-center justify-between text-xs text-emerald-300/70">
         <span className="flex items-center gap-1">
           <Droplets className="w-3 h-3 text-sky-400" />
-          Влажность {weather.humidityPercent}%
+          {isEnglish ? 'Humidity' : 'Влажность'} {weather.humidityPercent}%
         </span>
         <span className="flex items-center gap-1">
           <Wind className="w-3 h-3 text-teal-400" />
-          2.4 м/с
+          {formatWindSpeed(2.4)}
         </span>
       </div>
     </div>

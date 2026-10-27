@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, ChevronDown, MapPin, Check, Bell } from 'lucide-react';
 import { NavigationTab, FarmProfile } from '../../types';
-import { mockFarmProfile } from '../../data/mockData';
+import { useApp } from '../../context/AppContext';
 
 export interface HeaderProps {
   activeTab: NavigationTab;
@@ -11,7 +11,7 @@ export interface HeaderProps {
   onNavigate?: (tab: NavigationTab) => void;
 }
 
-const TAB_TITLES: Record<NavigationTab, string> = {
+const TAB_TITLES_RU: Record<NavigationTab, string> = {
   overview: 'Сводка по саду',
   map: 'Интерактивная карта сада',
   data: 'Спектральные и агро-данные',
@@ -19,6 +19,16 @@ const TAB_TITLES: Record<NavigationTab, string> = {
   notifications: 'Центр уведомлений',
   settings: 'Настройки системы',
   support: 'Служба агрономической поддержки',
+};
+
+const TAB_TITLES_EN: Record<NavigationTab, string> = {
+  overview: 'Garden Overview',
+  map: 'Interactive Garden Map',
+  data: 'Spectral & Agro Data',
+  forecasts: 'Ripening Forecasts',
+  notifications: 'Notification Center',
+  settings: 'System Settings',
+  support: 'Agronomic Support Service',
 };
 
 const AVAILABLE_FARMS = [
@@ -30,15 +40,31 @@ const AVAILABLE_FARMS = [
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onOpenMobileMenu,
-  farmProfile = mockFarmProfile,
+  farmProfile,
   title,
   onNavigate,
 }) => {
-  const [selectedFarm, setSelectedFarm] = useState(farmProfile.name);
+  const app = useApp();
+  const effectiveFarm = farmProfile || app.farmProfile;
+  const isEn = app.isEnglish;
+
+  const [selectedFarm, setSelectedFarm] = useState(effectiveFarm.name);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const displayTitle = title || TAB_TITLES[activeTab] || 'Сводка по саду';
+  // Sync selectedFarm when farmProfile updates
+  useEffect(() => {
+    setSelectedFarm(effectiveFarm.name);
+  }, [effectiveFarm.name]);
+
+  const displayTitle =
+    title ||
+    (isEn ? TAB_TITLES_EN[activeTab] : TAB_TITLES_RU[activeTab]) ||
+    (isEn ? 'Garden Overview' : 'Сводка по саду');
+
+  const areaDisplay = app.isImperial
+    ? `${(effectiveFarm.areaHa * 2.471).toFixed(1)} ${isEn ? 'ac' : 'акров'}`
+    : `${effectiveFarm.areaHa} ${isEn ? 'ha' : 'га'}`;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -64,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={onOpenMobileMenu}
               className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
-              aria-label="Открыть меню навигации"
+              aria-label={isEn ? 'Open navigation menu' : 'Открыть меню навигации'}
               data-testid="mobile-menu-trigger"
             >
               <Menu className="w-5 h-5" />
@@ -76,12 +102,12 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="truncate">{displayTitle}</span>
               {activeTab === 'overview' && (
                 <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200/60 shrink-0">
-                  Активный сезон
+                  {isEn ? 'Active Season' : 'Активный сезон'}
                 </span>
               )}
             </h1>
             <p className="text-xs text-slate-500 hidden sm:block">
-              {farmProfile.region} • Площадь: {farmProfile.areaHa} га
+              {effectiveFarm.region} • {isEn ? 'Area:' : 'Площадь:'} {areaDisplay}
             </p>
           </div>
         </div>
@@ -94,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={() => onNavigate('notifications')}
               className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-colors cursor-pointer"
-              aria-label="Уведомления"
+              aria-label={isEn ? 'Notifications' : 'Уведомления'}
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-[#f4f7f6]" />
@@ -113,7 +139,9 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                 <MapPin className="w-3.5 h-3.5" />
               </div>
-              <span className="hidden sm:inline truncate max-w-[140px] md:max-w-[200px]">{selectedFarm}</span>
+              <span className="hidden sm:inline truncate max-w-[140px] md:max-w-[200px]">
+                {selectedFarm}
+              </span>
               <ChevronDown
                 className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
                   isDropdownOpen ? 'rotate-180' : ''
@@ -128,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
               >
                 <div className="px-3.5 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Выбор хозяйства
+                  {isEn ? 'Select Farm' : 'Выбор хозяйства'}
                 </div>
                 {AVAILABLE_FARMS.map((farm) => {
                   const isSelected = farm === selectedFarm;
@@ -139,9 +167,15 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => {
                         setSelectedFarm(farm);
                         setIsDropdownOpen(false);
+                        app.updateFarmProfile({
+                          ...effectiveFarm,
+                          name: farm,
+                        });
                       }}
                       className={`w-full flex items-center justify-between px-3.5 py-2 text-xs sm:text-sm text-left hover:bg-slate-50 transition-colors ${
-                        isSelected ? 'text-emerald-700 font-semibold bg-emerald-50/50' : 'text-slate-700'
+                        isSelected
+                          ? 'text-emerald-700 font-semibold bg-emerald-50/50'
+                          : 'text-slate-700'
                       }`}
                     >
                       <span className="truncate">{farm}</span>
@@ -156,7 +190,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* User profile avatar */}
           <div
             className="flex items-center gap-2 pl-1 border-l border-slate-200/80 cursor-pointer"
-            title="Профиль пользователя: Алексей Смирнов (Главный агроном)"
+            title={
+              isEn
+                ? 'User profile: Alexey Smirnov (Chief Agronomist)'
+                : 'Профиль пользователя: Алексей Смирнов (Главный агроном)'
+            }
           >
             <div className="relative">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-800 to-teal-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
@@ -167,10 +205,10 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="hidden xl:flex flex-col text-left">
               <span className="text-xs font-semibold text-slate-800 leading-tight">
-                Алексей С.
+                {isEn ? 'Alexey S.' : 'Алексей С.'}
               </span>
               <span className="text-xs text-slate-500 leading-tight">
-                Главный агроном
+                {isEn ? 'Chief Agronomist' : 'Главный агроном'}
               </span>
             </div>
           </div>

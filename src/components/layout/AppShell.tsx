@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { NavigationTab, FarmProfile } from '../../types';
-import { mockFarmProfile } from '../../data/mockData';
 import { LayoutDashboard, Map, TrendingUp, Menu } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
 
 export interface AppShellProps {
   activeTab: NavigationTab;
@@ -16,9 +16,12 @@ export const AppShell: React.FC<AppShellProps> = ({
   activeTab,
   onSelectTab,
   children,
-  farmProfile = mockFarmProfile,
+  farmProfile,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const app = useApp();
+  const effectiveFarmProfile = farmProfile || app.farmProfile;
+  const isEn = app.isEnglish;
 
   return (
     <div className="min-h-screen w-full bg-[#f4f7f6] flex text-slate-800 overflow-x-hidden">
@@ -58,7 +61,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         <Header
           activeTab={activeTab}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-          farmProfile={farmProfile}
+          farmProfile={effectiveFarmProfile}
           onNavigate={onSelectTab}
         />
 
@@ -69,7 +72,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
       {/* 4. Mobile Quick Bottom Navigation Bar (Visible only on < lg screens) */}
       <nav
-        aria-label="Мобильная навигация"
+        aria-label={isEn ? 'Mobile navigation' : 'Мобильная навигация'}
         className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-3 py-1.5 z-40 flex items-center justify-around shadow-lg"
       >
         <button
@@ -80,7 +83,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
-          <span>Главная</span>
+          <span>{isEn ? 'Dashboard' : 'Главная'}</span>
         </button>
 
         <button
@@ -91,7 +94,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           }`}
         >
           <Map className="w-4 h-4" />
-          <span>Карта</span>
+          <span>{isEn ? 'Map' : 'Карта'}</span>
         </button>
 
         <button
@@ -102,7 +105,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>Прогнозы</span>
+          <span>{isEn ? 'Forecasts' : 'Прогнозы'}</span>
         </button>
 
         <button
@@ -111,7 +114,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           className="flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
         >
           <Menu className="w-4 h-4" />
-          <span>Ещё</span>
+          <span>{isEn ? 'More' : 'Ещё'}</span>
         </button>
       </nav>
     </div>

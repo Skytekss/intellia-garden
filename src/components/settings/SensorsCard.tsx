@@ -10,6 +10,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { HardwareSensor, SensorIconType } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface SensorsCardProps {
   sensors: HardwareSensor[];
@@ -35,6 +36,7 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
   sensors,
   onConfigureHardware,
 }) => {
+  const { t, isEnglish } = useApp();
   const allOnline = sensors.every((s) => s.status === 'online');
 
   return (
@@ -49,10 +51,10 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-            Датчики и оборудование
+            {t('settings.sensors.title') || 'Датчики и оборудование'}
           </h2>
           <p className="text-xs text-slate-500 truncate">
-            Управление подключёнными устройствами
+            {t('settings.sensors.subtitle') || 'Управление подключёнными устройствами'}
           </p>
         </div>
       </div>
@@ -67,7 +69,9 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
         <div className="flex items-center gap-2.5 min-w-0">
           <BarChart2 className="w-4 h-4 text-emerald-700 shrink-0" />
           <span className="text-xs font-semibold text-emerald-900 truncate">
-            {allOnline ? 'Все датчики работают нормально' : 'Требуется проверка датчиков'}
+            {allOnline
+              ? t('settings.sensors.allOnline') || 'Все датчики работают нормально'
+              : t('settings.sensors.needCheck') || 'Требуется проверка датчиков'}
           </span>
         </div>
         <ChevronRight className="w-4 h-4 text-emerald-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
@@ -99,7 +103,13 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
                 }`}
               />
               <span className="text-xs font-medium text-slate-500">
-                {sensor.statusText}
+                {isEnglish
+                  ? sensor.status === 'online'
+                    ? 'Online'
+                    : sensor.status === 'warning'
+                    ? 'Warning'
+                    : 'Offline'
+                  : sensor.statusText}
               </span>
             </div>
           </div>
@@ -117,7 +127,7 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
           <div className="flex items-center gap-2.5">
             <Settings className="w-4 h-4 text-emerald-700" />
             <span className="text-xs sm:text-sm font-semibold text-slate-800">
-              Настроить оборудование
+              {t('settings.sensors.configure') || 'Настроить оборудование'}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />

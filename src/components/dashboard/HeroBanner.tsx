@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Sparkles, Radio, ArrowUpRight } from 'lucide-react';
 import heroBannerClean from '../../assets/hero_banner_clean.png';
 import { NavigationTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface HeroBannerProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -13,6 +14,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onNavigate,
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
+
   return (
     <section
       data-testid="hero-banner"
@@ -22,7 +25,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="absolute inset-0 pointer-events-none">
         <img
           src={heroBannerClean}
-          alt="Яблоневый сад в золотой час с дроном"
+          alt={isEnglish ? 'Sunset orchard with drone' : 'Яблоневый сад в золотой час с дроном'}
           className="w-full h-full object-cover object-right sm:object-center"
         />
         {/* Soft edge darkening for mobile text readability */}
@@ -39,36 +42,36 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span>Агроклиматический AI-мониторинг</span>
+            <span>{t('hero.badge.ai')}</span>
             <span className="hidden sm:inline text-emerald-300/40">•</span>
-            <span className="hidden sm:inline text-emerald-200/80">Сезон 2025</span>
+            <span className="hidden sm:inline text-emerald-200/80">{t('hero.badge.season')}</span>
           </div>
 
           {/* Main Title */}
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-none">
-            ИНТЕЛЛИЯ
+            {t('hero.title')}
           </h1>
 
           {/* Subtitle */}
           <h2 className="text-sm sm:text-lg lg:text-xl font-bold text-emerald-200 mt-1.5 sm:mt-2.5 leading-snug">
-            Прогнозирование сроков сбора урожая яблок
+            {t('hero.subtitle')}
           </h2>
 
           {/* Detailed Description */}
           <p className="text-xs sm:text-sm text-slate-100/90 mt-2 sm:mt-3 leading-relaxed max-w-lg">
-            Гиперспектральные данные, агротехника, метеоданные и ИИ — для точного прогнозирования зрелости и оптимальных сроков сбора плодов.
+            {t('hero.description')}
           </p>
 
           {/* Feature Badges */}
           <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-1.5 sm:gap-2.5 text-xs">
             <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/35 backdrop-blur-md border border-white/15 text-white font-medium">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Точность: 94.6%</span>
+              <span>{t('hero.accuracy')}</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/35 backdrop-blur-md border border-white/15 text-white font-medium">
               <Radio className="w-3.5 h-3.5 text-emerald-400" />
-              <span>5 секторов</span>
+              <span>{t('hero.sectors')}</span>
             </div>
 
             {onNavigate && (
@@ -77,7 +80,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 onClick={() => onNavigate('map')}
                 className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-500/30 hover:bg-emerald-500/40 text-emerald-200 hover:text-white transition-colors cursor-pointer"
               >
-                <span>Интерактивная карта</span>
+                <span>{t('hero.interactiveMap')}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -96,7 +99,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-            <span>Дрон в воздухе • Спектральная съемка</span>
+            <span>{t('hero.droneInAir')}</span>
           </motion.div>
         </div>
       </div>

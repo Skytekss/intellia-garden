@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { NavigationTab } from '../../types';
 import { WeatherWidget } from './WeatherWidget';
+import { useApp } from '../../context/AppContext';
 
 export interface SidebarProps {
   activeTab: NavigationTab;
@@ -23,18 +24,19 @@ export interface SidebarProps {
 
 interface NavItemConfig {
   id: NavigationTab;
-  label: string;
+  labelRu: string;
+  labelEn: string;
   icon: React.ElementType;
   badge?: number | string;
 }
 
 const NAV_ITEMS: NavItemConfig[] = [
-  { id: 'overview', label: 'Главная', icon: LayoutDashboard },
-  { id: 'map', label: 'Карта сада', icon: Map },
-  { id: 'data', label: 'Данные', icon: Database },
-  { id: 'forecasts', label: 'Прогнозы', icon: TrendingUp },
-  { id: 'notifications', label: 'Уведомления', icon: Bell, badge: 3 },
-  { id: 'settings', label: 'Настройки', icon: Settings },
+  { id: 'overview', labelRu: 'Главная', labelEn: 'Dashboard', icon: LayoutDashboard },
+  { id: 'map', labelRu: 'Карта сада', labelEn: 'Garden Map', icon: Map },
+  { id: 'data', labelRu: 'Данные', labelEn: 'Agro Data', icon: Database },
+  { id: 'forecasts', labelRu: 'Прогнозы', labelEn: 'Forecasts', icon: TrendingUp },
+  { id: 'notifications', labelRu: 'Уведомления', labelEn: 'Notifications', icon: Bell, badge: 3 },
+  { id: 'settings', labelRu: 'Настройки', labelEn: 'Settings', icon: Settings },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -44,6 +46,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   showMobileClose = false,
 }) => {
+  const { isEnglish } = useApp();
+
   const handleNavClick = (tabId: NavigationTab) => {
     onSelectTab(tabId);
     if (onCloseMobile) {
@@ -70,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ИНТЕЛЛИЯ
               </span>
               <span className="text-xs text-emerald-200/70 font-normal leading-tight mt-0.5">
-                Умные решения для вашего сада
+                {isEnglish ? 'Smart solutions for your garden' : 'Умные решения для вашего сада'}
               </span>
             </div>
           </div>
@@ -80,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onCloseMobile}
               className="lg:hidden p-1.5 rounded-lg text-emerald-200/70 hover:text-white hover:bg-emerald-800/40 transition-colors"
-              aria-label="Закрыть меню"
+              aria-label={isEnglish ? 'Close menu' : 'Закрыть меню'}
             >
               <X className="w-5 h-5" />
             </button>
@@ -92,10 +96,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Main Navigation links */}
-      <nav aria-label="Основная навигация" className="flex-1 px-3.5 py-2 space-y-1.5 overflow-y-auto">
+      <nav aria-label={isEnglish ? 'Main navigation' : 'Основная навигация'} className="flex-1 px-3.5 py-2 space-y-1.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
+          const label = isEnglish ? item.labelEn : item.labelRu;
 
           return (
             <button
@@ -115,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isActive ? 'text-white' : 'text-emerald-300/80'
                   }`}
                 />
-                <span>{item.label}</span>
+                <span>{label}</span>
               </div>
 
               {item.badge !== undefined && (
@@ -152,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               activeTab === 'support' ? 'text-white' : 'text-emerald-300/80'
             }`}
           />
-          <span>Поддержка</span>
+          <span>{isEnglish ? 'Support' : 'Поддержка'}</span>
         </button>
 
         {/* Weather Widget */}

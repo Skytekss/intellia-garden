@@ -81,7 +81,7 @@ export interface FarmProfile {
   name: string;
   areaHa: number;
   region: string;
-  lastSurveyDate: string;
+  lastSurveyDate?: string;
 }
 
 // Data Entry Screen Types

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, X } from 'lucide-react';
 import {
@@ -9,13 +9,6 @@ import {
   DataManagementSettings,
   FarmProfileSettings,
 } from '../../types';
-import {
-  initialGeneralSettings,
-  initialSensors,
-  initialNotificationSettings,
-  initialDataManagementSettings,
-  initialFarmProfileSettings,
-} from '../../data/mockSettings';
 import { GeneralSettingsCard } from './GeneralSettingsCard';
 import { SensorsCard } from './SensorsCard';
 import { NotificationsCard } from './NotificationsCard';
@@ -24,6 +17,7 @@ import { FarmProfileCard } from './FarmProfileCard';
 import { SupportBanner } from './SupportBanner';
 import { EditFarmModal } from './EditFarmModal';
 import { HardwareModal } from './HardwareModal';
+import { useApp } from '../../context/AppContext';
 
 export interface SettingsViewProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -34,16 +28,39 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onNavigate,
   className = '',
 }) => {
-  // State for settings
-  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(initialGeneralSettings);
-  const [sensors, setSensors] = useState<HardwareSensor[]>(initialSensors);
+  const app = useApp();
+
+  // State for settings initialized from app context
+  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(app.generalSettings);
+  const [sensors, setSensors] = useState<HardwareSensor[]>(app.sensors);
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(
-    initialNotificationSettings
+    app.notificationSettings
   );
   const [dataManagementSettings, setDataManagementSettings] = useState<DataManagementSettings>(
-    initialDataManagementSettings
+    app.dataManagementSettings
   );
-  const [farmProfile, setFarmProfile] = useState<FarmProfileSettings>(initialFarmProfileSettings);
+  const [farmProfile, setFarmProfile] = useState<FarmProfileSettings>(app.farmProfile);
+
+  // Synchronize when app context changes
+  useEffect(() => {
+    setGeneralSettings(app.generalSettings);
+  }, [app.generalSettings]);
+
+  useEffect(() => {
+    setFarmProfile(app.farmProfile);
+  }, [app.farmProfile]);
+
+  useEffect(() => {
+    setSensors(app.sensors);
+  }, [app.sensors]);
+
+  useEffect(() => {
+    setNotificationSettings(app.notificationSettings);
+  }, [app.notificationSettings]);
+
+  useEffect(() => {
+    setDataManagementSettings(app.dataManagementSettings);
+  }, [app.dataManagementSettings]);
 
   // Modals state
   const [isEditFarmModalOpen, setIsEditFarmModalOpen] = useState(false);
@@ -59,23 +76,51 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }, 3500);
   };
 
+  const handleGeneralChange = (updated: GeneralSettings) => {
+    setGeneralSettings(updated);
+    app.updateGeneralSettings(updated);
+    showToast(
+      updated.language === 'English'
+        ? 'Settings updated successfully!'
+        : 'Настройки успешно обновлены!'
+    );
+  };
+
   const handleSaveFarm = (updated: FarmProfileSettings) => {
     setFarmProfile(updated);
-    showToast(`Данные хозяйства «${updated.name}» успешно обновлены!`);
+    app.updateFarmProfile(updated);
+    showToast(
+      app.isEnglish
+        ? `Farm «${updated.name}» successfully updated!`
+        : `Данные хозяйства «${updated.name}» успешно обновлены!`
+    );
+  };
+
+  const handleNotificationsChange = (updated: NotificationSettings) => {
+    setNotificationSettings(updated);
+    app.updateNotificationSettings(updated);
+  };
+
+  const handleDataManagementChange = (updated: DataManagementSettings) => {
+    setDataManagementSettings(updated);
+    app.updateDataManagementSettings(updated);
   };
 
   const handleBackupSuccess = (timestamp: string) => {
-    showToast(`Резервная копия от ${timestamp} успешно создана!`);
+    showToast(
+      app.isEnglish
+        ? `Backup from ${timestamp} created successfully!`
+        : `Резервная копия от ${timestamp} успешно создана!`
+    );
   };
 
   const handleRefreshSensors = () => {
-    // Simulated ping updates
-    setSensors((prev) =>
-      prev.map((s) => ({
-        ...s,
-        lastPing: 'только что',
-      }))
-    );
+    const updated = sensors.map((s) => ({
+      ...s,
+      lastPing: app.isEnglish ? 'just now' : 'только что',
+    }));
+    setSensors(updated);
+    app.updateSensors(updated);
   };
 
   return (
@@ -116,7 +161,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="space-y-4 sm:space-y-5 min-w-0">
           <GeneralSettingsCard
             settings={generalSettings}
-            onChange={setGeneralSettings}
+            onChange={handleGeneralChange}
           />
 
           <SensorsCard
@@ -129,12 +174,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="space-y-4 sm:space-y-5 min-w-0">
           <NotificationsCard
             settings={notificationSettings}
-            onChange={setNotificationSettings}
+            onChange={handleNotificationsChange}
           />
 
           <DataManagementCard
             settings={dataManagementSettings}
-            onChange={setDataManagementSettings}
+            onChange={handleDataManagementChange}
             onBackupSuccess={handleBackupSuccess}
           />
 

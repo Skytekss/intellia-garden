@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, Pencil } from 'lucide-react';
 import { FarmProfileSettings } from '../../types';
 import farmThumbImg from '../../assets/farm_thumb.jpg';
+import { useApp } from '../../context/AppContext';
 
 export interface FarmProfileCardProps {
   farm: FarmProfileSettings;
@@ -12,6 +13,12 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
   farm,
   onEdit,
 }) => {
+  const { isEnglish, isImperial } = useApp();
+
+  const areaDisplay = isImperial
+    ? `${(farm.areaHa * 2.471).toFixed(1)} ${isEnglish ? 'ac' : 'акров'}`
+    : `${farm.areaHa} ${isEnglish ? 'ha' : 'га'}`;
+
   return (
     <div
       data-testid="farm-profile-card"
@@ -24,10 +31,10 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-            Профиль хозяйства
+            {isEnglish ? 'Farm Profile' : 'Профиль хозяйства'}
           </h2>
           <p className="text-xs text-slate-500 truncate">
-            Информация о вашей ферме
+            {isEnglish ? 'Information about your farm' : 'Информация о вашей ферме'}
           </p>
         </div>
       </div>
@@ -40,7 +47,6 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
             alt={farm.name}
             className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl object-cover border border-slate-200/80 shadow-xs shrink-0 bg-slate-100"
             onError={(e) => {
-              // Graceful fallback if image asset is missing
               (e.target as HTMLElement).style.display = 'none';
             }}
           />
@@ -53,17 +59,17 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
               <button
                 type="button"
                 onClick={onEdit}
-                aria-label="Редактировать название хозяйства"
+                aria-label={isEnglish ? 'Edit farm name' : 'Редактировать название хозяйства'}
                 className="text-slate-400 hover:text-emerald-700 transition-colors cursor-pointer shrink-0"
               >
                 <Pencil className="w-3 h-3" />
               </button>
             </div>
             <p className="text-xs text-slate-500 truncate">
-              Площадь: {farm.areaHa} га
+              {isEnglish ? 'Area:' : 'Площадь:'} {areaDisplay}
             </p>
             <p className="text-xs text-slate-500 truncate">
-              Регион: {farm.region}
+              {isEnglish ? 'Region:' : 'Регион:'} {farm.region}
             </p>
           </div>
         </div>
@@ -72,10 +78,10 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
           type="button"
           data-testid="edit-farm-button"
           onClick={onEdit}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/80 hover:border-emerald-300 hover:bg-emerald-50/50 text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-all cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/80 hover:border-emerald-300 hover:bg-emerald-50/50 text-xs font-semibold text-slate-700 hover:text-emerald-800 transition-colors cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
         >
           <Pencil className="w-3.5 h-3.5 text-slate-500" />
-          <span>Редактировать</span>
+          <span>{isEnglish ? 'Edit' : 'Редактировать'}</span>
         </button>
       </div>
     </div>

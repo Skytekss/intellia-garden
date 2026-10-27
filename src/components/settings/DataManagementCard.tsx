@@ -11,6 +11,7 @@ import {
   Check,
 } from 'lucide-react';
 import { DataManagementSettings } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface DataManagementCardProps {
   settings: DataManagementSettings;
@@ -32,6 +33,7 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
   onChange,
   onBackupSuccess,
 }) => {
+  const { t, isEnglish } = useApp();
   const [backupStatus, setBackupStatus] = useState<'idle' | 'creating' | 'success'>('idle');
 
   const handleToggleAutoSync = () => {
@@ -87,10 +89,10 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-            Управление данными
+            {t('settings.data.title') || 'Управление данными'}
           </h2>
           <p className="text-xs text-slate-500 truncate">
-            Хранение и синхронизация информации
+            {t('settings.data.subtitle') || 'Хранение и синхронизация информации'}
           </p>
         </div>
       </div>
@@ -102,7 +104,7 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
           <div className="flex items-center gap-3 min-w-0">
             <Cloud className="w-4 h-4 text-emerald-700 shrink-0" />
             <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
-              Автоматическая синхронизация
+              {t('settings.data.autoSync') || 'Автоматическая синхронизация'}
             </span>
           </div>
 
@@ -110,7 +112,7 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
             type="button"
             role="switch"
             aria-checked={settings.autoSync}
-            aria-label="Автоматическая синхронизация"
+            aria-label={t('settings.data.autoSync') || 'Автоматическая синхронизация'}
             data-testid="toggle-auto-sync"
             onClick={handleToggleAutoSync}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
@@ -135,14 +137,14 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
               htmlFor="retention-period-select"
               className="text-xs sm:text-sm font-medium text-slate-700 truncate cursor-pointer"
             >
-              Период сохранения данных
+              {t('settings.data.retention') || 'Период сохранения данных'}
             </label>
           </div>
 
           <div className="relative shrink-0">
             <select
               id="retention-period-select"
-              aria-label="Период сохранения данных"
+              aria-label={t('settings.data.retention') || 'Период сохранения данных'}
               data-testid="select-retention-period"
               value={settings.retentionPeriod}
               onChange={(e) => handleChangeRetention(e.target.value)}
@@ -164,11 +166,11 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
             <Archive className="w-4 h-4 text-emerald-700 shrink-0" />
             <div className="min-w-0">
               <span className="text-xs sm:text-sm font-medium text-slate-700 block truncate">
-                Резервное копирование
+                {t('settings.data.backup') || 'Резервное копирование'}
               </span>
               {settings.lastBackupDate && (
                 <span className="text-xs text-slate-500 block truncate">
-                  Последняя: {settings.lastBackupDate}
+                  {t('settings.data.lastBackup') || 'Последняя:'} {settings.lastBackupDate}
                 </span>
               )}
             </div>
@@ -190,17 +192,17 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
             {backupStatus === 'creating' ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
-                <span>Создание...</span>
+                <span>{isEnglish ? 'Creating...' : 'Создание...'}</span>
               </>
             ) : backupStatus === 'success' ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Копия создана!</span>
+                <span>{isEnglish ? 'Backup created!' : 'Копия создана!'}</span>
               </>
             ) : (
               <>
                 <CloudUpload className="w-3.5 h-3.5 text-slate-600" />
-                <span>Создать резервную копию</span>
+                <span>{t('settings.data.createBackup') || 'Создать резервную копию'}</span>
               </>
             )}
           </button>

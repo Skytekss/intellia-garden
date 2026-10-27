@@ -7,7 +7,7 @@ export interface GeneralSettingsCardProps {
   onChange: (settings: GeneralSettings) => void;
 }
 
-const LANGUAGE_OPTIONS = ['Русский', 'English', 'Deutsch', 'Español'];
+const LANGUAGE_OPTIONS = ['Русский', 'English'];
 
 const UNIT_OPTIONS = [
   'Метрическая (°C, мм, га)',
@@ -16,6 +16,8 @@ const UNIT_OPTIONS = [
 
 const TIMEZONE_OPTIONS = [
   '(UTC+3) Москва',
+  '(UTC+0) Лондон',
+  '(UTC-5) Нью-Йорк',
   '(UTC+2) Калининград',
   '(UTC+4) Самара',
   '(UTC+5) Екатеринбург',
@@ -31,6 +33,8 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
   settings,
   onChange,
 }) => {
+  const isEn = settings.language === 'English';
+
   const handleChange = <K extends keyof GeneralSettings>(
     key: K,
     value: GeneralSettings[K]
@@ -53,10 +57,10 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-            Основные настройки
+            {isEn ? 'General Settings' : 'Основные настройки'}
           </h2>
           <p className="text-xs text-slate-500 truncate">
-            Общие параметры приложения
+            {isEn ? 'General application parameters' : 'Общие параметры приложения'}
           </p>
         </div>
       </div>
@@ -71,7 +75,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
               htmlFor="general-language"
               className="text-xs sm:text-sm font-medium text-slate-700 truncate cursor-pointer"
             >
-              Язык интерфейса
+              {isEn ? 'Interface Language' : 'Язык интерфейса'}
             </label>
           </div>
           <div className="relative shrink-0 sm:max-w-none">
@@ -101,7 +105,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
               htmlFor="general-measurement-unit"
               className="text-xs sm:text-sm font-medium text-slate-700 truncate cursor-pointer"
             >
-              Единицы измерения
+              {isEn ? 'Measurement Units' : 'Единицы измерения'}
             </label>
           </div>
           <div className="relative shrink-0 sm:max-w-none">
@@ -131,7 +135,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
               htmlFor="general-timezone"
               className="text-xs sm:text-sm font-medium text-slate-700 truncate cursor-pointer"
             >
-              Часовой пояс
+              {isEn ? 'Timezone' : 'Часовой пояс'}
             </label>
           </div>
           <div className="relative shrink-0 sm:max-w-none">
@@ -161,7 +165,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
               htmlFor="general-date-format"
               className="text-xs sm:text-sm font-medium text-slate-700 truncate cursor-pointer"
             >
-              Формат даты
+              {isEn ? 'Date Format' : 'Формат даты'}
             </label>
           </div>
           <div className="relative shrink-0 sm:max-w-none">

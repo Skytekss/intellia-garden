@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavigationTab } from './types';
+import { AppProvider } from './context/AppContext';
 import { AppShell } from './components/layout/AppShell';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { GardenMapView } from './components/map/GardenMapView';
@@ -10,7 +11,7 @@ import { SettingsView } from './components/settings';
 import { SupportView } from './components/support';
 import { PlaceholderView } from './components/placeholder/PlaceholderView';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavigationTab>(() => {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
@@ -45,6 +46,14 @@ export const App: React.FC = () => {
         />
       )}
     </AppShell>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 };
 

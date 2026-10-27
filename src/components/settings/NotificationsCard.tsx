@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Bell, Apple, Sun, ShieldCheck, Sparkles } from 'lucide-react';
 import { NotificationSettings } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface NotificationsCardProps {
   settings: NotificationSettings;
@@ -10,7 +11,8 @@ export interface NotificationsCardProps {
 
 interface ToggleItem {
   key: 'harvestAndMaturity' | 'weatherConditions' | 'agrotechnicalWorks' | 'systemUpdates';
-  label: string;
+  labelKey: string;
+  defaultLabel: string;
   icon: React.ReactNode;
 }
 
@@ -18,6 +20,8 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({
   settings,
   onChange,
 }) => {
+  const { t } = useApp();
+
   const toggleSetting = (key: keyof NotificationSettings) => {
     onChange({
       ...settings,
@@ -28,22 +32,26 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({
   const items: ToggleItem[] = [
     {
       key: 'harvestAndMaturity',
-      label: 'Урожай и зрелость плодов',
+      labelKey: 'settings.notifications.harvest',
+      defaultLabel: 'Урожай и зрелость плодов',
       icon: <Apple className="w-4 h-4 text-emerald-700 shrink-0" />,
     },
     {
       key: 'weatherConditions',
-      label: 'Погодные условия',
+      labelKey: 'settings.notifications.weather',
+      defaultLabel: 'Погодные условия',
       icon: <Sun className="w-4 h-4 text-emerald-700 shrink-0" />,
     },
     {
       key: 'agrotechnicalWorks',
-      label: 'Агротехнические работы',
+      labelKey: 'settings.notifications.agrotechnical',
+      defaultLabel: 'Агротехнические работы',
       icon: <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />,
     },
     {
       key: 'systemUpdates',
-      label: 'Обновления системы',
+      labelKey: 'settings.notifications.system',
+      defaultLabel: 'Обновления системы',
       icon: <Sparkles className="w-4 h-4 text-emerald-700 shrink-0" />,
     },
   ];
@@ -60,18 +68,19 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-            Уведомления
+            {t('settings.notifications.title') || 'Уведомления'}
           </h2>
           <p className="text-xs text-slate-500 truncate">
-            Настройте, о каких событиях вы хотите получать уведомления
+            {t('settings.notifications.subtitle') || 'Настройте, о каких событиях вы хотите получать уведомления'}
           </p>
         </div>
       </div>
 
       {/* Toggles list */}
       <div className="space-y-3.5 pt-1">
-        {items.map(({ key, label, icon }) => {
+        {items.map(({ key, labelKey, defaultLabel, icon }) => {
           const isEnabled = settings[key];
+          const displayLabel = t(labelKey) || defaultLabel;
 
           return (
             <div
@@ -81,7 +90,7 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({
               <div className="flex items-center gap-3 min-w-0">
                 {icon}
                 <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
-                  {label}
+                  {displayLabel}
                 </span>
               </div>
 
@@ -89,7 +98,7 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({
                 type="button"
                 role="switch"
                 aria-checked={isEnabled}
-                aria-label={label}
+                aria-label={displayLabel}
                 data-testid={`toggle-${key}`}
                 onClick={() => toggleSetting(key)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${

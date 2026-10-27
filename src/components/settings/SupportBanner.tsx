@@ -1,12 +1,15 @@
 import React from 'react';
 import { ArrowRight, Headphones } from 'lucide-react';
 import { NavigationTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface SupportBannerProps {
   onNavigate?: (tab: NavigationTab) => void;
 }
 
 export const SupportBanner: React.FC<SupportBannerProps> = ({ onNavigate }) => {
+  const { t } = useApp();
+
   return (
     <div
       data-testid="support-banner"
@@ -20,10 +23,11 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({ onNavigate }) => {
 
         <div className="min-w-0 space-y-0.5">
           <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-            ИНТЕЛЛИЯ всегда рядом
+            {t('settings.support.title') || 'ИНТЕЛЛИЯ всегда рядом'}
           </h3>
           <p className="text-xs text-slate-500 leading-relaxed max-w-3xl">
-            Мы постоянно улучшаем алгоритмы, чтобы ваш сад приносил больше урожая. Если у вас есть вопросы или предложения — напишите нам в поддержку.
+            {t('settings.support.description') ||
+              'Мы постоянно улучшаем алгоритмы, чтобы ваш сад приносил больше урожая. Если у вас есть вопросы или предложения — напишите нам в поддержку.'}
           </p>
         </div>
       </div>
@@ -36,7 +40,7 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({ onNavigate }) => {
         className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-900 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-300 transition-all cursor-pointer shadow-xs shrink-0 self-start md:self-center group"
       >
         <Headphones className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-700 transition-colors" />
-        <span>Связаться с поддержкой</span>
+        <span>{t('settings.support.contact') || 'Связаться с поддержкой'}</span>
         <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 transition-all" />
       </button>
     </div>

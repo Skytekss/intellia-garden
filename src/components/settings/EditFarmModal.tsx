@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Building2, MapPin, Maximize2, Save } from 'lucide-react';
 import { FarmProfileSettings } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface EditFarmModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
   currentFarm,
   onSave,
 }) => {
+  const { isEnglish } = useApp();
   const [name, setName] = useState(currentFarm.name);
   const [areaHa, setAreaHa] = useState<number | string>(currentFarm.areaHa);
   const [region, setRegion] = useState(currentFarm.region);
@@ -50,17 +52,17 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
     const trimmedRegion = region.trim();
 
     if (!trimmedName) {
-      setError('Название хозяйства не может быть пустым');
+      setError(isEnglish ? 'Farm name cannot be empty' : 'Название хозяйства не может быть пустым');
       return;
     }
 
     if (isNaN(parsedArea) || parsedArea <= 0) {
-      setError('Укажите корректную площадь хозяйства (> 0 га)');
+      setError(isEnglish ? 'Please specify a valid orchard area (> 0)' : 'Укажите корректную площадь хозяйства (> 0 га)');
       return;
     }
 
     if (!trimmedRegion) {
-      setError('Укажите регион расположения хозяйства');
+      setError(isEnglish ? 'Please specify the location region' : 'Укажите регион расположения хозяйства');
       return;
     }
 
@@ -111,10 +113,10 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                     id="edit-farm-title"
                     className="text-sm sm:text-base font-bold text-slate-900"
                   >
-                    Редактирование профиля хозяйства
+                    {isEnglish ? 'Edit Farm Profile' : 'Редактирование профиля хозяйства'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Обновите основные параметры сада
+                    {isEnglish ? 'Update core orchard parameters' : 'Обновите основные параметры сада'}
                   </p>
                 </div>
               </div>
@@ -123,7 +125,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                 type="button"
                 data-testid="close-edit-farm-modal"
                 onClick={onClose}
-                aria-label="Закрыть окно"
+                aria-label={isEnglish ? 'Close modal' : 'Закрыть окно'}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -148,7 +150,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   className="flex items-center gap-2 text-xs font-semibold text-slate-700"
                 >
                   <Building2 className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Название хозяйства</span>
+                  <span>{isEnglish ? 'Farm Name' : 'Название хозяйства'}</span>
                 </label>
                 <input
                   id="farm-name-input"
@@ -156,7 +158,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Например: Ферма «Золотой Сад»"
+                  placeholder={isEnglish ? 'e.g. Golden Orchard Farm' : 'Например: Ферма «Золотой Сад»'}
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all placeholder:text-slate-400"
                 />
               </div>
@@ -168,7 +170,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   className="flex items-center gap-2 text-xs font-semibold text-slate-700"
                 >
                   <Maximize2 className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Площадь сада (в гектарах)</span>
+                  <span>{isEnglish ? 'Orchard Area (ha)' : 'Площадь сада (в гектарах)'}</span>
                 </label>
                 <input
                   id="farm-area-input"
@@ -178,7 +180,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   min="0.1"
                   value={areaHa}
                   onChange={(e) => setAreaHa(e.target.value)}
-                  placeholder="4.2"
+                  placeholder="22.0"
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all placeholder:text-slate-400"
                 />
               </div>
@@ -190,7 +192,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   className="flex items-center gap-2 text-xs font-semibold text-slate-700"
                 >
                   <MapPin className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Регион расположения</span>
+                  <span>{isEnglish ? 'Location Region' : 'Регион расположения'}</span>
                 </label>
                 <input
                   id="farm-region-input"
@@ -198,7 +200,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   type="text"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  placeholder="Например: Тульская область"
+                  placeholder={isEnglish ? 'e.g. Tula Region' : 'Например: Тульская область'}
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all placeholder:text-slate-400"
                 />
               </div>
@@ -211,7 +213,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  Отмена
+                  {isEnglish ? 'Cancel' : 'Отмена'}
                 </button>
                 <button
                   type="submit"
@@ -219,7 +221,7 @@ export const EditFarmModal: React.FC<EditFarmModalProps> = ({
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#07503b] hover:bg-[#096047] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>Сохранить изменения</span>
+                  <span>{isEnglish ? 'Save Changes' : 'Сохранить изменения'}</span>
                 </button>
               </div>
             </form>
