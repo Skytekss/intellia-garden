@@ -36,7 +36,7 @@ export const SpectralSampleCard: React.FC<SpectralSampleCardProps> = ({ classNam
             {/* Gradient vertical bar from 1.0 (emerald/cyan) to 0.0 (red) */}
             <div
               data-testid="maturity-gradient-bar"
-              className="w-3 rounded-full bg-gradient-to-b from-[#0d9488] via-[#10b981] via-[#eab308] via-[#f97316] to-[#ef4444] shadow-inner"
+              className="w-3 rounded-full bg-gradient-to-b from-[#dc2626] via-[#ea580c] via-[#d97706] via-[#059669] to-[#0284c7] shadow-inner"
               title="Шкала зрелости плодов от 1.0 до 0.0"
             />
 

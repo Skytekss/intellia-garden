@@ -150,7 +150,7 @@ describe('SettingsView Component', () => {
 
     // Verify initial farm profile
     expect(screen.getByText('Ферма «Золотой Сад»')).toBeInTheDocument();
-    expect(screen.getByText('Площадь: 4.2 га')).toBeInTheDocument();
+    expect(screen.getByText('Площадь: 22 га')).toBeInTheDocument();
     expect(screen.getByText('Регион: Тульская область')).toBeInTheDocument();
 
     // Click edit button

@@ -8,52 +8,23 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { NavigationTab } from '../../types';
+import { mockRecommendations } from '../../data/mockData';
 
 interface ForecastRecommendationsProps {
   onNavigate?: (tab: NavigationTab) => void;
   className?: string;
 }
 
+const ICON_MAP = {
+  calendar: CalendarCheck,
+  truck: Truck,
+  sparkles: Sparkles,
+};
+
 export const ForecastRecommendations: React.FC<ForecastRecommendationsProps> = ({
   onNavigate,
   className = '',
 }) => {
-  const recommendations = [
-    {
-      id: 'rec-1',
-      priority: 'Высокий приоритет',
-      priorityColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      title: 'Участок 1 (Гала) — старт сбора 10 – 12 сентября',
-      description:
-        'Зрелость плодов достигла 85%, сахаристость 14.5 °Bx, плотность оптимальна для закладки на длительное хранение. Задержка более 5 дней может привести к перезреванию и падению лежкости.',
-      actionText: 'Перейти к карте сектора',
-      targetTab: 'map' as NavigationTab,
-      icon: CalendarCheck,
-    },
-    {
-      id: 'rec-2',
-      priority: 'Средний приоритет',
-      priorityColor: 'bg-amber-100 text-amber-800 border-amber-200',
-      title: 'Участок 5 (Гала) — подготовка тары и бригад на 18 сентября',
-      description:
-        'Зрелость 78%. Рекомендуется прекратить внекорневые подкормки за 7 дней до начала сбора и зарезервировать калиброванные деревянные контейнеры.',
-      actionText: 'Просмотреть агро-данные',
-      targetTab: 'data' as NavigationTab,
-      icon: Truck,
-    },
-    {
-      id: 'rec-3',
-      priority: 'Плановый контроль',
-      priorityColor: 'bg-sky-100 text-sky-800 border-sky-200',
-      title: 'Участки 2, 3 и 4 (Фуджи, Голден, Ред Делишес) — контроль полива',
-      description:
-        'Степень зрелости от 45% до 72%. Оптимальный режим влажности почвы — 65–70%. Рекомендуется повторный мониторинг дроном 5 сентября для уточнения динамики накопления антоцианов.',
-      actionText: 'Открыть карту сада',
-      targetTab: 'map' as NavigationTab,
-      icon: Sparkles,
-    },
-  ];
-
   const storageAdvice = [
     {
       title: 'Температурный режим',
@@ -95,15 +66,15 @@ export const ForecastRecommendations: React.FC<ForecastRecommendationsProps> = (
 
       {/* Recommendations Cards */}
       <div className="space-y-3 sm:space-y-4">
-        {recommendations.map((rec, index) => {
-          const Icon = rec.icon;
+        {mockRecommendations.map((rec, index) => {
+          const Icon = ICON_MAP[rec.iconName] || Sparkles;
           return (
             <motion.div
               key={rec.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: index * 0.08 }}
-              className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 hover:shadow-md transition-all"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: index * 0.04 }}
+              className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div className="flex items-start gap-3.5">
@@ -131,7 +102,7 @@ export const ForecastRecommendations: React.FC<ForecastRecommendationsProps> = (
                   <button
                     type="button"
                     onClick={() => onNavigate(rec.targetTab)}
-                    className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-800 hover:border-emerald-300 hover:bg-slate-50 transition-all cursor-pointer whitespace-nowrap"
+                    className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-800 hover:border-emerald-300 hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <span>{rec.actionText}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

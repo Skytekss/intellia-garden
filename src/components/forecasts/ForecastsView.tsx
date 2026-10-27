@@ -22,7 +22,16 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   forecastRows,
   className = '',
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<ForecastSubTab>(initialSubTab);
+  const [activeSubTab, setActiveSubTab] = useState<ForecastSubTab>(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const sub = searchParams.get('subtab') as ForecastSubTab | null;
+      if (sub && ['maturity-map', 'harvest-dates', 'recommendations'].includes(sub)) {
+        return sub;
+      }
+    }
+    return initialSubTab;
+  });
 
   const subTabs: Array<{ id: ForecastSubTab; label: string; testId: string }> = [
     {
@@ -45,24 +54,23 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   return (
     <div
       data-testid="forecasts-view"
-      className={`space-y-6 w-full min-w-0 transition-opacity duration-200 ${className}`}
+      className={`space-y-6 w-full min-w-0 ${className}`}
     >
-      {/* 1. Header with Title and Sub-tabs */}
+      {/* 1. Header & Sub-tabs */}
       <div className="space-y-4">
-        {/* Title */}
-        <h1
-          data-testid="forecasts-title"
-          className="text-2xl font-bold text-slate-900 tracking-tight"
-        >
-          Прогнозы
-        </h1>
+        <div>
+          <h2
+            data-testid="forecasts-title"
+            className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight"
+          >
+            Прогнозы
+          </h2>
+        </div>
 
-        {/* Sub-tabs Bar matching reference */}
+        {/* Sub-tabs Navigation */}
         <div
           data-testid="forecasts-subtabs-bar"
-          className="flex items-center gap-2 sm:gap-6 border-b border-slate-200/90 overflow-x-auto min-w-0 pb-px"
-          role="tablist"
-          aria-label="Вкладки раздела прогнозов"
+          className="flex items-center gap-2 sm:gap-4 border-b border-slate-200 overflow-x-auto no-scrollbar scroll-smooth"
         >
           {subTabs.map((tab) => {
             const isActive = activeSubTab === tab.id;
@@ -85,7 +93,7 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
                   <motion.div
                     layoutId="forecast-subtab-indicator"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-700 rounded-full"
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.15 }}
                   />
                 )}
               </button>
@@ -94,13 +102,13 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Content based on active subtab */}
+      {/* 2. Content based on active subtab with stable opacity transition */}
       {activeSubTab === 'harvest-dates' && (
         <motion.div
           key="harvest-dates"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
           className="space-y-6 w-full min-w-0"
           data-testid="subtab-content-harvest-dates"
         >
@@ -118,9 +126,9 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
       {activeSubTab === 'maturity-map' && (
         <motion.div
           key="maturity-map"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
           data-testid="subtab-content-maturity-map"
         >
           <ForecastMaturityPreview onNavigate={onNavigate} />
@@ -130,9 +138,9 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
       {activeSubTab === 'recommendations' && (
         <motion.div
           key="recommendations"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
           data-testid="subtab-content-recommendations"
         >
           <ForecastRecommendations onNavigate={onNavigate} />

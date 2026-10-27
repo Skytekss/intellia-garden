@@ -50,17 +50,17 @@ describe('NotificationsView Component', () => {
     render(<NotificationsView />);
 
     // 1. Important
-    expect(screen.getByText('Участок 4 — созревание плодов достигло 45%')).toBeInTheDocument();
+    expect(screen.getByText('Участок 4 готов к сбору')).toBeInTheDocument();
     expect(
-      screen.getByText('До оптимального срока сбора ориентировочно 10–17 дней.')
+      screen.getByText('Степень зрелости — 85%. Рекомендуемый период сбора: 10–15 сентября.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('notification-badge-notif-1')).toHaveTextContent('Важно');
 
     // 2. Harvest
-    expect(screen.getByText('Участок 1 готов к сбору')).toBeInTheDocument();
+    expect(screen.getByText('Участок 5 приближается к созреванию')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Степень зрелости — 85%. Рекомендуемый период сбора: 10–15 сентября.'
+        'Степень зрелости — 78%. Окно сбора: 15–22 сентября.'
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId('notification-badge-notif-2')).toHaveTextContent('Урожай');
@@ -117,8 +117,8 @@ describe('NotificationsView Component', () => {
     // 2. Click Урожай tab (Cards 1 and 2 should be displayed)
     fireEvent.click(screen.getByTestId('filter-tab-harvest'));
 
-    expect(screen.getByText('Участок 4 — созревание плодов достигло 45%')).toBeInTheDocument();
-    expect(screen.getByText('Участок 1 готов к сбору')).toBeInTheDocument();
+    expect(screen.getByText('Участок 4 готов к сбору')).toBeInTheDocument();
+    expect(screen.getByText('Участок 5 приближается к созреванию')).toBeInTheDocument();
     expect(screen.queryByText('Изменение прогноза погоды')).not.toBeInTheDocument();
     expect(screen.queryByText('Новые данные обработаны')).not.toBeInTheDocument();
 
@@ -135,7 +135,7 @@ describe('NotificationsView Component', () => {
 
     // 4. Reset to all from empty state button
     fireEvent.click(screen.getByTestId('reset-filter-button'));
-    expect(screen.getByText('Участок 4 — созревание плодов достигло 45%')).toBeInTheDocument();
+    expect(screen.getByText('Участок 4 готов к сбору')).toBeInTheDocument();
     expect(screen.getByText('Новые данные обработаны')).toBeInTheDocument();
   });
 

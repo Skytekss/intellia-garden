@@ -73,7 +73,7 @@ export interface ForecastSectorRow {
   name: string;
   variety: AppleVariety;
   maturityPercent: number;
-  statusColor: 'green' | 'light-green' | 'yellow' | 'orange';
+  statusColor: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'light-green';
   recommendedDate: string;
 }
 

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ForecastSectorRow } from '../../types';
-import { mockForecastRows } from '../../data/mockData';
+import { mockForecastRows, getMaturityColor, getMaturityMetadata } from '../../data/mockData';
 
 interface ForecastTableProps {
   rows?: ForecastSectorRow[];
@@ -22,31 +22,14 @@ type SortField = 'name' | 'variety' | 'maturityPercent' | 'recommendedDate';
 type SortOrder = 'asc' | 'desc';
 
 export const getStatusDotColor = (
-  color: ForecastSectorRow['statusColor'],
+  _color: ForecastSectorRow['statusColor'],
   percent: number
 ): string => {
-  switch (color) {
-    case 'green':
-      return '#10b981';
-    case 'light-green':
-      return '#84cc16';
-    case 'yellow':
-      return '#eab308';
-    case 'orange':
-      return '#f97316';
-    default:
-      if (percent >= 75) return '#10b981';
-      if (percent >= 65) return '#84cc16';
-      if (percent >= 50) return '#eab308';
-      return '#f97316';
-  }
+  return getMaturityColor(percent);
 };
 
 export const getStatusLabel = (percent: number): string => {
-  if (percent >= 75) return 'Готов к сбору';
-  if (percent >= 65) return 'Активное созревание';
-  if (percent >= 50) return 'Умеренная зрелость';
-  return 'Ранняя фаза';
+  return getMaturityMetadata(percent).label;
 };
 
 export const ForecastTable: React.FC<ForecastTableProps> = ({

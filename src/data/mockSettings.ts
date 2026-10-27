@@ -79,7 +79,7 @@ export const initialDataManagementSettings: DataManagementSettings = {
 
 export const initialFarmProfileSettings: FarmProfileSettings = {
   name: 'Ферма «Золотой Сад»',
-  areaHa: 4.2,
+  areaHa: 22.0,
   region: 'Тульская область',
   lastSurveyDate: '12.08.2025',
 };

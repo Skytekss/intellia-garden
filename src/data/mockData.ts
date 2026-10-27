@@ -1,8 +1,8 @@
-import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile, AgroRecord, MeteoTelemetryData, ForecastSectorRow } from '../types';
+import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile, AgroRecord, MeteoTelemetryData, ForecastSectorRow, NavigationTab } from '../types';
 
 export const mockFarmProfile: FarmProfile = {
   name: 'Ферма «Золотой Сад»',
-  areaHa: 4.2,
+  areaHa: 22.0,
   region: 'Тульская область',
   lastSurveyDate: '12.08.2025',
 };
@@ -157,6 +157,144 @@ export const mockSectors: GardenSector[] = [
   },
 ];
 
+// Computed metrics from single source of truth
+export const totalFarmAreaHa = Number(mockSectors.reduce((acc, s) => acc + s.area, 0).toFixed(1)); // 22.0
+export const averageFruitReadiness = Math.round(mockSectors.reduce((acc, s) => acc + s.maturityPercent, 0) / mockSectors.length); // 64
+export const averageSoilMoisture = Math.round(mockSectors.reduce((acc, s) => acc + s.soilMoisturePercent, 0) / mockSectors.length); // 68
+
+// Unified maturity color and status metadata (SSOT)
+export interface MaturityMeta {
+  label: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  progressBarBg: string;
+  hexColor: string;
+  statusColorName: 'red' | 'orange' | 'yellow' | 'green' | 'blue';
+}
+
+export const getMaturityColor = (percent: number): string => {
+  if (percent >= 80) return '#dc2626'; // Red (ready)
+  if (percent >= 70) return '#ea580c'; // Orange (active ripening)
+  if (percent >= 58) return '#d97706'; // Amber / Yellow (moderate)
+  if (percent >= 50) return '#059669'; // Green (early phase)
+  return '#0284c7'; // Blue (<50%)
+};
+
+export const getMaturityMetadata = (percent: number): MaturityMeta => {
+  if (percent >= 80) {
+    return {
+      label: 'Готов к сбору',
+      badgeBg: 'bg-red-50',
+      badgeText: 'text-red-700',
+      badgeBorder: 'border-red-200',
+      progressBarBg: 'bg-red-500',
+      hexColor: '#dc2626',
+      statusColorName: 'red',
+    };
+  }
+  if (percent >= 70) {
+    return {
+      label: 'Активное созревание',
+      badgeBg: 'bg-orange-50',
+      badgeText: 'text-orange-700',
+      badgeBorder: 'border-orange-200',
+      progressBarBg: 'bg-orange-500',
+      hexColor: '#ea580c',
+      statusColorName: 'orange',
+    };
+  }
+  if (percent >= 58) {
+    return {
+      label: 'Умеренная зрелость',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
+      progressBarBg: 'bg-amber-500',
+      hexColor: '#d97706',
+      statusColorName: 'yellow',
+    };
+  }
+  if (percent >= 50) {
+    return {
+      label: 'Раннее созревание',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
+      progressBarBg: 'bg-emerald-500',
+      hexColor: '#059669',
+      statusColorName: 'green',
+    };
+  }
+  return {
+    label: 'Начальная фаза',
+    badgeBg: 'bg-sky-50',
+    badgeText: 'text-sky-700',
+    badgeBorder: 'border-sky-200',
+    progressBarBg: 'bg-sky-500',
+    hexColor: '#0284c7',
+    statusColorName: 'blue',
+  };
+};
+
+export const mockForecastRows: ForecastSectorRow[] = mockSectors.map((sector) => {
+  const meta = getMaturityMetadata(sector.maturityPercent);
+  return {
+    id: sector.id.replace('sector-', 'forecast-'),
+    name: sector.name,
+    variety: sector.variety,
+    maturityPercent: sector.maturityPercent,
+    statusColor: meta.statusColorName,
+    recommendedDate: sector.recommendedDate,
+  };
+});
+
+export interface ForecastRecommendationItem {
+  id: string;
+  priority: string;
+  priorityColor: string;
+  title: string;
+  description: string;
+  actionText: string;
+  targetTab: NavigationTab;
+  iconName: 'calendar' | 'truck' | 'sparkles';
+}
+
+export const mockRecommendations: ForecastRecommendationItem[] = [
+  {
+    id: 'rec-1',
+    priority: 'Высокий приоритет',
+    priorityColor: 'bg-red-50 text-red-700 border-red-200',
+    title: 'Участок 4 (Ред Делишес) — старт сбора 10 – 15 сентября',
+    description:
+      'Зрелость плодов достигла 85%, сахаристость 14.5 °Bx, плотность 6.8 кг/см² оптимальна для закладки на длительное хранение. Задержка более 5 дней может привести к перезреванию и падению лежкости.',
+    actionText: 'Перейти к карте сектора',
+    targetTab: 'map',
+    iconName: 'calendar',
+  },
+  {
+    id: 'rec-2',
+    priority: 'Средний приоритет',
+    priorityColor: 'bg-orange-50 text-orange-700 border-orange-200',
+    title: 'Участок 5 (Гала) — подготовка тары и бригад на 15 – 22 сентября',
+    description:
+      'Зрелость 78%. Рекомендуется прекратить внекорневые подкормки за 7 дней до начала сбора и зарезервировать калиброванные деревянные контейнеры.',
+    actionText: 'Просмотреть агро-данные',
+    targetTab: 'data',
+    iconName: 'truck',
+  },
+  {
+    id: 'rec-3',
+    priority: 'Плановый контроль',
+    priorityColor: 'bg-sky-50 text-sky-700 border-sky-200',
+    title: 'Участки 1, 2 и 3 (Гала, Фуджи, Голден) — контроль полива',
+    description:
+      'Степень зрелости от 45% до 60%. Оптимальный режим влажности почвы — 65–70%. Рекомендуется повторный мониторинг дроном 5 сентября для контроля темпов созревания.',
+    actionText: 'Открыть карту сада',
+    targetTab: 'map',
+    iconName: 'sparkles',
+  },
+];
 
 export const initialAgroRecords: AgroRecord[] = [
   {
@@ -197,50 +335,6 @@ export const droneModelsList: string[] = [
   'DJI Matrice 350 RTK + MS600',
   'AgEagle eBee X',
   'WingtraOne GEN II',
-];
-
-
-export const mockForecastRows: ForecastSectorRow[] = [
-  {
-    id: 'forecast-4',
-    name: 'Участок 4',
-    variety: 'Ред Делишес',
-    maturityPercent: 85,
-    statusColor: 'green',
-    recommendedDate: '10 – 15 сентября',
-  },
-  {
-    id: 'forecast-5',
-    name: 'Участок 5',
-    variety: 'Гала',
-    maturityPercent: 78,
-    statusColor: 'green',
-    recommendedDate: '15 – 22 сентября',
-  },
-  {
-    id: 'forecast-3',
-    name: 'Участок 3',
-    variety: 'Голден',
-    maturityPercent: 60,
-    statusColor: 'yellow',
-    recommendedDate: '18 – 25 сентября',
-  },
-  {
-    id: 'forecast-2',
-    name: 'Участок 2',
-    variety: 'Фуджи',
-    maturityPercent: 52,
-    statusColor: 'light-green',
-    recommendedDate: '20 – 28 сентября',
-  },
-  {
-    id: 'forecast-1',
-    name: 'Участок 1',
-    variety: 'Гала',
-    maturityPercent: 45,
-    statusColor: 'orange',
-    recommendedDate: '25 сентября – 5 октября',
-  },
 ];
 
 export * from './mockSettings';

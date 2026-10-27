@@ -40,7 +40,7 @@ const CATEGORY_DETAILS: Record<string, BentoMetaDetail> = {
   },
   ai: {
     metric: 'Точность 94.6%',
-    badge: 'Сектор 1: через 3–5 дней',
+    badge: 'Сектор 4: готов к сбору (85%)',
     icon: BrainCircuit,
   },
 };

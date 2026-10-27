@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, Apple, BarChart3 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { averageFruitReadiness } from '../../data/mockData';
 
 export interface ForecastKpiData {
   averageHarvestDate: string;
@@ -14,7 +15,7 @@ export interface ForecastKpiData {
 const defaultKpiData: ForecastKpiData = {
   averageHarvestDate: '12 – 25 сентября',
   averageHarvestDateSubtext: '(по саду)',
-  fruitReadinessPercent: 68,
+  fruitReadinessPercent: averageFruitReadiness,
   fruitReadinessSubtext: '(в среднем)',
   forecastAccuracyPercent: 92,
   forecastAccuracySubtext: '(по прошлым сезонам)',
@@ -78,11 +79,11 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
           <motion.div
             key={card.id}
             data-testid={card.testId}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.08 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: index * 0.04 }}
             whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-4 lg:p-5 flex items-center gap-3.5 lg:gap-4 transition-all duration-200 hover:shadow-md ${card.borderColor}`}
+            className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-4 lg:p-5 flex items-center gap-3.5 lg:gap-4 transition-shadow duration-200 hover:shadow-md ${card.borderColor}`}
           >
             {/* Circular Icon Container */}
             <div

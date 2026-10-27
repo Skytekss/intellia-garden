@@ -46,7 +46,7 @@ describe('ForecastsView Component', () => {
     // Card 2: Готовность плодов
     const cardFruitReadiness = screen.getByTestId('kpi-card-fruit-readiness');
     expect(cardFruitReadiness).toHaveTextContent('Готовность плодов');
-    expect(cardFruitReadiness).toHaveTextContent('68%');
+    expect(cardFruitReadiness).toHaveTextContent('64%');
     expect(cardFruitReadiness).toHaveTextContent('(в среднем)');
 
     // Card 3: Точность прогноза
@@ -144,7 +144,7 @@ describe('ForecastsView Component', () => {
 
     expect(screen.getByTestId('forecast-recommendations-panel')).toBeInTheDocument();
     expect(screen.getByText('AI-Агрорекомендации')).toBeInTheDocument();
-    expect(screen.getByText(/Участок 1 \(Гала\) — старт сбора 10 – 12 сентября/i)).toBeInTheDocument();
+    expect(screen.getByText(/Участок 4 \(Ред Делишес\) — старт сбора 10 – 15 сентября/i)).toBeInTheDocument();
 
     // Switch back to «Сроки сбора»
     const harvestDatesTab = screen.getByTestId('subtab-harvest-dates');

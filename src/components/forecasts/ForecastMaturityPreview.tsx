@@ -2,7 +2,7 @@ import React from 'react';
 import { Map, ArrowRight, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import { NavigationTab, GardenSector } from '../../types';
-import { mockSectors } from '../../data/mockData';
+import { mockSectors, getMaturityMetadata } from '../../data/mockData';
 
 interface ForecastMaturityPreviewProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -49,29 +49,16 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
       {/* Grid of Sector Ripening Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {mockSectors.map((sector: GardenSector, index: number) => {
-          const isHigh = sector.maturityPercent >= 75;
-          const isMedium = sector.maturityPercent >= 60 && sector.maturityPercent < 75;
-
-          const badgeColor = isHigh
-            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-            : isMedium
-            ? 'bg-amber-100 text-amber-800 border-amber-200'
-            : 'bg-orange-100 text-orange-800 border-orange-200';
-
-          const progressColor = isHigh
-            ? 'bg-emerald-500'
-            : isMedium
-            ? 'bg-amber-500'
-            : 'bg-orange-500';
+          const meta = getMaturityMetadata(sector.maturityPercent);
 
           return (
             <motion.div
               key={sector.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: index * 0.05 }}
-              whileHover={{ y: -3, transition: { duration: 0.2 } }}
-              className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition-all"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: index * 0.03 }}
+              whileHover={{ y: -3, transition: { duration: 0.15 } }}
+              className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 flex flex-col justify-between hover:shadow-md transition-shadow duration-200"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -82,7 +69,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
                     </h4>
                   </div>
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor}`}
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${meta.badgeBg} ${meta.badgeText} ${meta.badgeBorder}`}
                   >
                     {sector.maturityPercent}%
                   </span>
@@ -103,6 +90,12 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
                       {sector.recommendedDate}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Фаза:</span>
+                    <span className={`font-semibold ${meta.badgeText}`}>
+                      {meta.label}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Ripening Progress Bar */}
@@ -113,7 +106,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${progressColor} transition-all duration-500`}
+                      className={`h-full rounded-full ${meta.progressBarBg} transition-all duration-500`}
                       style={{ width: `${sector.maturityPercent}%` }}
                     />
                   </div>

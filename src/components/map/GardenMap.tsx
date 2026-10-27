@@ -8,7 +8,10 @@ import {
   Radio
 } from 'lucide-react';
 import { GardenSector } from '../../types';
+import { getMaturityColor } from '../../data/mockData';
 import gardenMapRef from '../../assets/garden_map_ref.jpg';
+
+export { getMaturityColor };
 
 interface GardenMapProps {
   sectors: GardenSector[];
@@ -56,14 +59,6 @@ const SECTOR_GEOMETRIES: SectorGeometry[] = [
     badge: { x: 122, y: 244 },
   },
 ];
-
-export const getMaturityColor = (percent: number): string => {
-  if (percent >= 80) return '#dc2626'; // Red (зона "Выше" в легенде)
-  if (percent >= 70) return '#ea580c'; // Orange-red
-  if (percent >= 58) return '#d97706'; // Amber-yellow
-  if (percent >= 50) return '#059669'; // Green
-  return '#0284c7'; // Blue/Cyan (зона "Ниже" в легенде)
-};
 
 export const GardenMap: React.FC<GardenMapProps> = ({
   sectors,
