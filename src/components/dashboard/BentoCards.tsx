@@ -101,7 +101,7 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
               <span className="font-semibold text-slate-800">
                 {detail.metric}
               </span>
-              <span className="text-xs text-slate-500 truncate max-w-[130px]">
+              <span className="text-xs text-slate-500 truncate text-right">
                 {detail.badge}
               </span>
             </div>

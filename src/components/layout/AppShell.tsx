@@ -62,7 +62,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           onNavigate={onSelectTab}
         />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full min-w-0 mx-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-6 lg:py-8 w-full min-w-0">
           {children}
         </main>
       </div>

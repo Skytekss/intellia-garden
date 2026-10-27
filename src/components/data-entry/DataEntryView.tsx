@@ -56,7 +56,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
   return (
     <div
       data-testid="data-entry-view"
-      className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 min-w-0"
+      className="space-y-6 w-full min-w-0"
     >
       {/* Toast Notification */}
       <AnimatePresence>
