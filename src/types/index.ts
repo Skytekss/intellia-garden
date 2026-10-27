@@ -71,3 +71,46 @@ export interface FarmProfile {
   region: string;
   lastSurveyDate: string;
 }
+
+// Data Entry Screen Types
+export type SpectralChannel = 'RGB' | 'NIR' | 'Red Edge' | 'SWIR';
+
+export type DroneModel = 
+  | 'DJI Mavic 3M'
+  | 'DJI Matrice 350 RTK + MS600'
+  | 'AgEagle eBee X'
+  | 'WingtraOne GEN II'
+  | string;
+
+export type AgroOperationType = 
+  | 'Полив' 
+  | 'Удобрения' 
+  | 'Обработка' 
+  | 'Обрезка' 
+  | 'Прореживание плодов';
+
+export interface AgroRecord {
+  id: string;
+  type: AgroOperationType;
+  title: string;
+  date: string;
+  sector?: string;
+  notes?: string;
+}
+
+export interface MeteoTelemetryData {
+  temperature: number;
+  precipitationMm: number;
+  humidityPercent: number;
+  lastSyncTime?: string;
+}
+
+export interface HyperspectralUploadState {
+  surveyDate: string;
+  droneModel: string;
+  channels: SpectralChannel[];
+  files: File[];
+}
+
+export type DataSubTab = 'spectral' | 'agro' | 'meteo';
+
