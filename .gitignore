@@ -2,3 +2,5 @@ node_modules
 dist
 .system_generated
 *.log
+screenshots/
+

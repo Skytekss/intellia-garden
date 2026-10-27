@@ -17,6 +17,11 @@ export interface GardenSector {
   status: 'ready' | 'ripening' | 'early';
   recommendedDate: string;
   area: number; // площадь в гектарах
+  brix: number; // сахаристость (°Bx)
+  firmnessKgCm2: number; // плотность мякоти (кг/см²)
+  starchIndex: number; // индекс крахмала (1-10)
+  soilMoisturePercent: number; // влажность почвы (%)
+  ndviIndex: number; // вегетационный индекс NDVI
   ripeningHistory: Array<{
     date: string;
     percent: number;

@@ -12,22 +12,21 @@ describe('App Root Component', () => {
     expect(screen.getByTestId('cta-go-to-map')).toBeInTheDocument();
   });
 
-  it('switches to map view placeholder when clicking CTA button', () => {
+  it('switches to real interactive map view when clicking CTA button', () => {
     render(<App />);
 
     const ctaButton = screen.getByTestId('cta-go-to-map');
     fireEvent.click(ctaButton);
 
-    // Placeholder for map should now be visible
-    const placeholderView = screen.getByTestId('placeholder-view');
-    expect(placeholderView).toBeInTheDocument();
-    expect(
-      within(placeholderView).getByRole('heading', { level: 2, name: 'Интерактивная карта сада' })
-    ).toBeInTheDocument();
+    // Live GardenMapView should now be visible
+    const gardenMapView = screen.getByTestId('garden-map-view');
+    expect(gardenMapView).toBeInTheDocument();
+    expect(screen.getByTestId('garden-map-container')).toBeInTheDocument();
+    expect(screen.getByTestId('sector-detail-panel')).toBeInTheDocument();
 
-    // Click back button to return to overview
-    const backButton = screen.getByTestId('placeholder-back-button');
-    fireEvent.click(backButton);
+    // Click Overview navigation item in sidebar to return to dashboard
+    const overviewNav = screen.getByTestId('nav-item-overview');
+    fireEvent.click(overviewNav);
 
     // Dashboard should be back
     expect(screen.getByTestId('hero-banner')).toBeInTheDocument();
