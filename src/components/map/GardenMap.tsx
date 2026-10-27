@@ -1,10 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { 
-  BookOpen, 
-  Layers, 
   Plus, 
   Minus, 
-  Navigation 
+  Navigation,
+  Eye,
+  EyeOff,
+  Radio
 } from 'lucide-react';
 import { GardenSector } from '../../types';
 import gardenMapRef from '../../assets/garden_map_ref.jpg';
@@ -55,6 +56,14 @@ const SECTOR_GEOMETRIES: SectorGeometry[] = [
     badge: { x: 122, y: 244 },
   },
 ];
+
+export const getMaturityColor = (percent: number): string => {
+  if (percent >= 80) return '#dc2626'; // Red (зона "Выше" в легенде)
+  if (percent >= 70) return '#ea580c'; // Orange-red
+  if (percent >= 58) return '#d97706'; // Amber-yellow
+  if (percent >= 50) return '#059669'; // Green
+  return '#0284c7'; // Blue/Cyan (зона "Ниже" в легенде)
+};
 
 export const GardenMap: React.FC<GardenMapProps> = ({
   sectors,
@@ -121,12 +130,6 @@ export const GardenMap: React.FC<GardenMapProps> = ({
 
   const sectorMap = new Map(sectors.map((s) => [s.id, s]));
 
-  const getMaturityColor = (percent: number) => {
-    if (percent >= 75) return '#059669'; // deep emerald
-    if (percent >= 60) return '#d97706'; // amber
-    return '#dc2626'; // red
-  };
-
   return (
     <div
       ref={containerRef}
@@ -182,6 +185,9 @@ export const GardenMap: React.FC<GardenMapProps> = ({
             {SECTOR_GEOMETRIES.map((geom) => {
               const isSelected = selectedSectorId === geom.id;
               const isHovered = hoveredSectorId === geom.id;
+              const sectorData = sectorMap.get(geom.id);
+              const percent = sectorData?.maturityPercent ?? 60;
+              const maturityColor = getMaturityColor(percent);
 
               return (
                 <polygon
@@ -191,9 +197,11 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                   className="pointer-events-auto transition-all duration-200 cursor-pointer"
                   fill={
                     isSelected
-                      ? 'rgba(16, 185, 129, 0.22)'
+                      ? 'rgba(16, 185, 129, 0.24)'
                       : isHovered
-                      ? 'rgba(255, 255, 255, 0.18)'
+                      ? 'rgba(255, 255, 255, 0.20)'
+                      : showLayers
+                      ? `${maturityColor}12` // subtle tint
                       : 'transparent'
                   }
                   stroke={
@@ -202,11 +210,11 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                       : showLayers
                       ? isHovered
                         ? '#ffffff'
-                        : 'rgba(255, 255, 255, 0.5)'
+                        : 'rgba(255, 255, 255, 0.65)'
                       : 'transparent'
                   }
                   strokeWidth={isSelected ? '2.5' : isHovered ? '2' : showLayers ? '1.2' : '0'}
-                  strokeDasharray={isSelected ? 'none' : showLayers ? '3 2' : 'none'}
+                  strokeDasharray={isSelected ? 'none' : showLayers ? '4 2' : 'none'}
                   filter={isSelected ? 'url(#activeGlow)' : undefined}
                   onClick={() => onSelectSector(geom.id)}
                   onMouseEnter={() => setHoveredSectorId(geom.id)}
@@ -220,7 +228,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
               const isSelected = selectedSectorId === geom.id;
               const isHovered = hoveredSectorId === geom.id;
               const sectorData = sectorMap.get(geom.id);
-              const percent = sectorData?.maturityPercent ?? 70;
+              const percent = sectorData?.maturityPercent ?? 60;
               const maturityColor = getMaturityColor(percent);
 
               return (
@@ -251,7 +259,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                     rx="8"
                     fill="#ffffff"
                     stroke={isSelected ? '#047857' : isHovered ? '#10b981' : '#e2e8f0'}
-                    strokeWidth={isSelected ? '2' : '1'}
+                    strokeWidth={isSelected ? '2.5' : '1'}
                     className="transition-colors"
                   />
 
@@ -287,93 +295,112 @@ export const GardenMap: React.FC<GardenMapProps> = ({
         </div>
       </div>
 
-      {/* Floating Toolbar: Lower-left position matching reference */}
+      {/* --- 1. NEW TOP FLOATING TOOLBAR: Clear layer mode & contours toggle --- */}
       <div
-        className="absolute left-3 sm:left-4 bottom-3 sm:bottom-4 z-20 flex flex-col items-center gap-1 p-1 sm:p-1.5 rounded-2xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90 text-slate-700 pointer-events-auto"
+        className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 flex flex-wrap items-center gap-2 pointer-events-auto"
         data-testid="map-toolbar"
       >
-        {/* Toggle NDVI / RGB */}
-        <button
-          type="button"
-          onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
-          title={mapMode === 'ndvi' ? 'Режим: Спектральный NDVI (клик для RGB)' : 'Режим: Ортофото RGB (клик для NDVI)'}
-          aria-label="Переключить спектральный режим NDVI / RGB"
-          data-testid="btn-toggle-mode"
-          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
-            mapMode === 'ndvi'
-              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-              : 'hover:bg-slate-100 text-slate-600'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-        </button>
+        {/* Layer Mode Segmented Controller */}
+        <div className="flex items-center p-1 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90">
+          <button
+            type="button"
+            onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
+            data-testid="btn-toggle-mode"
+            title="Переключить режим: NDVI Спектр / Ортофото RGB"
+            aria-label="Переключить спектральный режим"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-[#07503b] text-white shadow-xs"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>{mapMode === 'ndvi' ? 'NDVI Спектр' : 'Ортофото RGB'}</span>
+          </button>
 
-        {/* Toggle Layers */}
+          <button
+            type="button"
+            onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100/70 transition-colors cursor-pointer"
+          >
+            {mapMode === 'ndvi' ? '→ Ортофото RGB' : '→ NDVI Спектр'}
+          </button>
+        </div>
+
+        {/* Contour Boundaries Toggle Button */}
         <button
           type="button"
           onClick={() => setShowLayers((prev) => !prev)}
-          title={showLayers ? 'Скрыть контуры секторов' : 'Показать контуры секторов'}
-          aria-label="Включить/выключить границы участков"
           data-testid="btn-toggle-layers"
-          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
+          title={showLayers ? 'Скрыть контуры секторов' : 'Показать границы секторов'}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md shadow-md border text-xs font-semibold transition-all cursor-pointer ${
             showLayers
-              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-              : 'hover:bg-slate-100 text-slate-400'
+              ? 'border-emerald-500/60 text-emerald-900 bg-emerald-50/90 shadow-xs'
+              : 'border-slate-200/90 text-slate-600 hover:bg-slate-100/80'
           }`}
         >
-          <Layers className="w-4 h-4" />
+          {showLayers ? (
+            <Eye className="w-3.5 h-3.5 text-emerald-700" />
+          ) : (
+            <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+          )}
+          <span>Контуры: {showLayers ? 'Вкл' : 'Скрыты'}</span>
+        </button>
+      </div>
+
+      {/* --- 2. BOTTOM-RIGHT NAVIGATION & ZOOM CONTROLS --- */}
+      <div
+        className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-20 flex items-center gap-1 p-1 sm:p-1.5 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90 text-slate-700 pointer-events-auto"
+        data-testid="map-zoom-controls"
+      >
+        {/* Zoom Out (-) */}
+        <button
+          type="button"
+          onClick={handleZoomOut}
+          disabled={zoom <= 1}
+          title="Отдалить карту"
+          aria-label="Отдалить карту"
+          data-testid="btn-zoom-out"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        >
+          <Minus className="w-4 h-4" />
         </button>
 
-        <div className="w-5 h-px bg-slate-200 my-0.5" />
+        {/* Zoom Level Indicator */}
+        <span className="px-2 text-xs font-bold text-slate-800 min-w-[42px] text-center select-none">
+          {Math.round(zoom * 100)}%
+        </span>
 
         {/* Zoom In (+) */}
         <button
           type="button"
           onClick={handleZoomIn}
           disabled={zoom >= 2}
-          title="Приблизить (+)"
+          title="Приблизить карту"
           aria-label="Приблизить карту"
           data-testid="btn-zoom-in"
-          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
         </button>
 
-        {/* Zoom Out (-) */}
-        <button
-          type="button"
-          onClick={handleZoomOut}
-          disabled={zoom <= 1}
-          title="Отдалить (-)"
-          aria-label="Отдалить карту"
-          data-testid="btn-zoom-out"
-          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
+        {/* Divider */}
+        <div className="w-px h-4 bg-slate-200 mx-0.5" />
 
-        {/* Reset & Center */}
+        {/* Reset & Center Button */}
         <button
           type="button"
           onClick={handleResetCenter}
-          title="Центрировать и сбросить зум"
-          aria-label="Сбросить центрирование и масштаб"
+          title="Сбросить масштаб и центрировать"
+          aria-label="Сбросить масштаб и центрировать"
           data-testid="btn-reset-center"
-          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 text-slate-700 hover:text-emerald-700 transition-colors cursor-pointer"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-emerald-800 text-xs font-semibold transition-colors cursor-pointer"
         >
-          <Navigation className="w-4 h-4" />
+          <Navigation className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Сброс</span>
         </button>
       </div>
 
-      {/* Floating Status & Zoom Pill (Bottom Right, visible on sm+) */}
-      <div className="hidden sm:flex absolute right-3.5 bottom-3.5 z-20 items-center gap-2 pointer-events-none">
-        <div className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-xs border border-slate-200/80 text-xs font-semibold text-slate-700 shadow-xs">
-          {Math.round(zoom * 100)}%
-        </div>
-        <div className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-xs border border-slate-200/80 text-xs font-semibold text-emerald-800 shadow-xs flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          {mapMode === 'ndvi' ? 'NDVI Спектр' : 'Ортофото RGB'}
-        </div>
+      {/* --- 3. BOTTOM-LEFT TELEMETRY BADGE --- */}
+      <div className="hidden md:flex absolute left-3.5 bottom-3.5 z-20 items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-white/10 text-white/90 text-xs font-medium pointer-events-none shadow-lg">
+        <Radio className="w-3.5 h-3.5 text-emerald-400" />
+        <span>Съемка БПЛА • 5 см/пикс • DJI Mavic 3M</span>
       </div>
     </div>
   );

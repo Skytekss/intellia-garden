@@ -11,12 +11,12 @@ interface GardenMapViewProps {
 }
 
 export const GardenMapView: React.FC<GardenMapViewProps> = () => {
-  const [selectedSectorId, setSelectedSectorId] = useState<string>('sector-2');
+  const [selectedSectorId, setSelectedSectorId] = useState<string>('sector-4');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeModalSector, setActiveModalSector] = useState<GardenSector | null>(null);
 
   const selectedSector =
-    mockSectors.find((s) => s.id === selectedSectorId) || mockSectors[1];
+    mockSectors.find((s) => s.id === selectedSectorId) || mockSectors[3];
 
   const handleOpenDetails = (sector: GardenSector) => {
     setActiveModalSector(sector);

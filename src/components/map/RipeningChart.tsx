@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export interface RipeningDataPoint {
   date: string;
@@ -11,32 +11,54 @@ interface RipeningChartProps {
   className?: string;
 }
 
+export const getMaturityStage = (percent: number): { text: string; color: string; bg: string } => {
+  if (percent >= 75) {
+    return { text: 'Готов к сбору', color: '#047857', bg: '#d1fae5' };
+  }
+  if (percent >= 60) {
+    return { text: 'Активное созревание', color: '#b45309', bg: '#fef3c7' };
+  }
+  return { text: 'Ранняя фаза', color: '#0369a1', bg: '#e0f2fe' };
+};
+
 export const RipeningChart: React.FC<RipeningChartProps> = ({
   history,
   currentPercent,
   className = '',
 }) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   if (!history || history.length === 0) {
     return null;
   }
 
-  const width = 340;
-  const height = 150;
-  const paddingX = 30;
+  // Dimensions with room for Y-axis steps and top tooltip
+  const width = 360;
+  const height = 175;
+  const paddingLeft = 44;
+  const paddingRight = 24;
   const paddingTop = 36;
   const paddingBottom = 30;
-  const plotWidth = width - paddingX * 2;
+  const plotWidth = width - paddingLeft - paddingRight;
   const plotHeight = height - paddingTop - paddingBottom;
 
+  // Step ranking along Y axis (0%, 25%, 50%, 75%, 100%)
+  const ySteps = [
+    { value: 100, label: '100%' },
+    { value: 75, label: '75%' },
+    { value: 50, label: '50%' },
+    { value: 25, label: '25%' },
+    { value: 0, label: '0%' },
+  ];
+
   const points = history.map((item, index) => {
-    const x = paddingX + (index / (history.length - 1)) * plotWidth;
-    // Map percent 0..100 to y
+    const x = paddingLeft + (index / (history.length - 1)) * plotWidth;
     const normalizedPercent = Math.max(0, Math.min(100, item.percent));
     const y = paddingTop + plotHeight - (normalizedPercent / 100) * plotHeight;
     return { ...item, x, y };
   });
 
-  // Generate smooth cubic bezier SVG path
+  // Smooth cubic bezier path
   const generateSmoothPath = (pts: Array<{ x: number; y: number }>) => {
     if (pts.length < 2) return '';
     let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
@@ -54,138 +76,223 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
   const firstPoint = points[0];
   const areaPath = `${linePath} L ${lastPoint.x.toFixed(1)} ${paddingTop + plotHeight} L ${firstPoint.x.toFixed(1)} ${paddingTop + plotHeight} Z`;
 
-  const activeBadgeValue = currentPercent ?? lastPoint.percent;
+  // Determine active point to highlight
+  const activeIndex = hoveredIndex ?? points.length - 1;
+  const activePoint = points[activeIndex] || lastPoint;
+  const activePercent = hoveredIndex !== null ? activePoint.percent : (currentPercent ?? lastPoint.percent);
+  const stage = getMaturityStage(activePercent);
+
+  // Compute safe tooltip position (keep inside SVG bounds)
+  const tooltipX = Math.max(65, Math.min(width - 65, activePoint.x));
+  const tooltipY = Math.max(26, activePoint.y - 12);
 
   return (
-    <div className={`w-full overflow-hidden ${className}`} data-testid="ripening-chart">
+    <div
+      className={`w-full overflow-hidden select-none ${className}`}
+      data-testid="ripening-chart"
+      onMouseLeave={() => setHoveredIndex(null)}
+    >
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-auto overflow-visible select-none"
-        aria-label="График динамики созревания"
+        className="w-full h-auto overflow-visible"
+        aria-label="Интерактивный график динамики созревания с ранжированием"
       >
         <defs>
-          <linearGradient id="ripeningFillGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
-            <stop offset="85%" stopColor="#10b981" stopOpacity="0.04" />
+          {/* Gradient area under curve */}
+          <linearGradient id="ripeningFillGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+            <stop offset="60%" stopColor="#10b981" stopOpacity="0.10" />
             <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
           </linearGradient>
 
-          <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#047857" floodOpacity="0.15" />
+          {/* Glow shadow for hover badge */}
+          <filter id="interactiveTooltipShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#047857" floodOpacity="0.2" />
           </filter>
         </defs>
 
-        {/* Horizontal grid lines */}
-        <line
-          x1={paddingX}
-          y1={paddingTop}
-          x2={width - paddingX}
-          y2={paddingTop}
-          stroke="#f1f5f9"
-          strokeDasharray="3 3"
-          strokeWidth="1"
-        />
-        <line
-          x1={paddingX}
-          y1={paddingTop + plotHeight / 2}
-          x2={width - paddingX}
-          y2={paddingTop + plotHeight / 2}
-          stroke="#f1f5f9"
-          strokeDasharray="3 3"
-          strokeWidth="1"
-        />
-        <line
-          x1={paddingX}
-          y1={paddingTop + plotHeight}
-          x2={width - paddingX}
-          y2={paddingTop + plotHeight}
-          stroke="#e2e8f0"
-          strokeWidth="1"
-        />
-
-        {/* Gradient fill under line */}
-        <path
-          d={areaPath}
-          fill="url(#ripeningFillGradient)"
-          className="transition-opacity duration-300"
-        />
-
-        {/* Smooth line */}
-        <path
-          d={linePath}
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        {/* Data points */}
-        {points.map((pt, idx) => {
-          const isLast = idx === points.length - 1;
+        {/* --- Y-Axis Step Rankings & Horizontal Grid Lines --- */}
+        {ySteps.map((step) => {
+          const yPos = paddingTop + plotHeight - (step.value / 100) * plotHeight;
+          const isBase = step.value === 0;
           return (
-            <g key={pt.date}>
-              {/* Outer halo for last point */}
-              {isLast && (
-                <circle
-                  cx={pt.x}
-                  cy={pt.y}
-                  r="7"
-                  fill="#10b981"
-                  fillOpacity="0.25"
-                />
-              )}
-              {/* Point circle */}
-              <circle
-                cx={pt.x}
-                cy={pt.y}
-                r={isLast ? '4.5' : '3.5'}
-                fill="#ffffff"
-                stroke="#10b981"
-                strokeWidth={isLast ? '2.5' : '2'}
+            <g key={`step-${step.value}`}>
+              {/* Y Axis Label */}
+              <text
+                x={paddingLeft - 8}
+                y={yPos + 3.5}
+                textAnchor="end"
+                fontSize="12"
+                fontWeight="500"
+                fill="#94a3b8"
+                className="select-none font-sans"
+              >
+                {step.label}
+              </text>
+
+              {/* Grid Line */}
+              <line
+                x1={paddingLeft}
+                y1={yPos}
+                x2={width - paddingRight}
+                y2={yPos}
+                stroke={isBase ? '#cbd5e1' : '#e2e8f0'}
+                strokeDasharray={isBase ? undefined : '3 3'}
+                strokeWidth={isBase ? '1.2' : '0.8'}
               />
             </g>
           );
         })}
 
-        {/* Active badge above the last point */}
-        <g
-          transform={`translate(${lastPoint.x - 22}, ${lastPoint.y - 30})`}
-          filter="url(#badgeShadow)"
-        >
-          <path
-            d="M 10 0 L 34 0 C 39.5 0 44 4.5 44 10 C 44 15.5 39.5 20 34 20 L 26 20 L 22 25 L 18 20 L 10 20 C 4.5 20 0 15.5 0 10 C 0 4.5 4.5 0 10 0 Z"
-            fill="#d1fae5"
-            stroke="#6ee7b7"
-            strokeWidth="1"
-          />
-          <text
-            x="22"
-            y="14"
-            textAnchor="middle"
-            fill="#047857"
-            fontSize="12"
-            fontWeight="700"
-            className="select-none font-sans"
-          >
-            {activeBadgeValue}%
-          </text>
-        </g>
+        {/* Gradient fill under curve */}
+        <path
+          d={areaPath}
+          fill="url(#ripeningFillGrad)"
+          className="transition-all duration-300 pointer-events-none"
+        />
 
-        {/* Date labels on X axis */}
-        {points.map((pt) => (
-          <text
-            key={`label-${pt.date}`}
-            x={pt.x}
-            y={height - 8}
-            textAnchor="middle"
-            fontSize="12"
-            fill="#94a3b8"
-            className="select-none font-medium"
+        {/* Smooth ripening line */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke="#059669"
+          strokeWidth="2.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="pointer-events-none"
+        />
+
+        {/* Vertical Crosshair Line on hover or active point */}
+        <line
+          x1={activePoint.x}
+          y1={paddingTop}
+          x2={activePoint.x}
+          y2={paddingTop + plotHeight}
+          stroke="#10b981"
+          strokeWidth="1.2"
+          strokeDasharray="2 2"
+          strokeOpacity={hoveredIndex !== null ? '0.9' : '0.4'}
+          className="pointer-events-none transition-all duration-150"
+        />
+
+        {/* Data points with interactive hit areas */}
+        {points.map((pt, idx) => {
+          const isPointActive = idx === activeIndex;
+
+          return (
+            <g
+              key={pt.date}
+              className="cursor-pointer"
+              onMouseEnter={() => setHoveredIndex(idx)}
+              onClick={() => setHoveredIndex(idx)}
+              role="button"
+              tabIndex={0}
+              aria-label={`${pt.date}: ${pt.percent}%`}
+            >
+              {/* Invisible large touch/hover target */}
+              <circle
+                cx={pt.x}
+                cy={pt.y}
+                r="16"
+                fill="transparent"
+              />
+
+              {/* Halo ring for active/hovered point */}
+              {isPointActive && (
+                <circle
+                  cx={pt.x}
+                  cy={pt.y}
+                  r="9"
+                  fill="#10b981"
+                  fillOpacity="0.25"
+                  className="animate-pulse"
+                />
+              )}
+
+              {/* Visible Point Circle */}
+              <circle
+                cx={pt.x}
+                cy={pt.y}
+                r={isPointActive ? '5' : '3.5'}
+                fill="#ffffff"
+                stroke="#059669"
+                strokeWidth={isPointActive ? '2.5' : '2'}
+                className="transition-all duration-150"
+              />
+            </g>
+          );
+        })}
+
+        {/* Floating Tooltip (Interactive on hover, or default badge when idle) */}
+        {hoveredIndex !== null ? (
+          <g
+            transform={`translate(${tooltipX}, ${tooltipY})`}
+            filter="url(#interactiveTooltipShadow)"
+            className="pointer-events-none transition-transform duration-150"
           >
-            {pt.date}
-          </text>
-        ))}
+            <rect
+              x="-56"
+              y="-22"
+              width="112"
+              height="26"
+              rx="8"
+              fill="#ffffff"
+              stroke={stage.color}
+              strokeWidth="1.2"
+            />
+            <polygon points="-4,4 4,4 0,8" fill="#ffffff" />
+            <text x="-48" y="-5" fontSize="12" fontWeight="600" fill="#64748b" className="font-sans">
+              {activePoint.date}
+            </text>
+            <text x="48" y="-5" textAnchor="end" fontSize="12" fontWeight="800" fill={stage.color} className="font-sans">
+              {activePercent}%
+            </text>
+          </g>
+        ) : (
+          <g
+            transform={`translate(${lastPoint.x - 22}, ${lastPoint.y - 30})`}
+            filter="url(#interactiveTooltipShadow)"
+            className="pointer-events-none"
+          >
+            <path
+              d="M 10 0 L 34 0 C 39.5 0 44 4.5 44 10 C 44 15.5 39.5 20 34 20 L 26 20 L 22 25 L 18 20 L 10 20 C 4.5 20 0 15.5 0 10 C 0 4.5 4.5 0 10 0 Z"
+              fill={stage.bg}
+              stroke={stage.color}
+              strokeWidth="1"
+            />
+            <text
+              x="22"
+              y="14"
+              textAnchor="middle"
+              fill={stage.color}
+              fontSize="12"
+              fontWeight="700"
+              className="select-none font-sans"
+            >
+              {activePercent}%
+            </text>
+          </g>
+        )}
+
+        {/* X Axis Date labels with active highlight */}
+        {points.map((pt, idx) => {
+          const isDateActive = idx === activeIndex;
+          return (
+            <text
+              key={`label-${pt.date}`}
+              x={pt.x}
+              y={height - 8}
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight={isDateActive ? '700' : '500'}
+              fill={isDateActive ? '#047857' : '#94a3b8'}
+              className="select-none font-sans cursor-pointer transition-colors"
+              onMouseEnter={() => setHoveredIndex(idx)}
+            >
+              {pt.date}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );

@@ -70,35 +70,35 @@ describe('ForecastsView Component', () => {
     const row4 = screen.getByTestId('forecast-row-forecast-4');
     const row5 = screen.getByTestId('forecast-row-forecast-5');
 
-    // Row 1: Участок 1, Гала, 85%, 10 – 15 сентября
+    // Row 1: Участок 1, Гала, 45%, 25 сентября – 5 октября
     expect(row1).toHaveTextContent('Участок 1');
     expect(row1).toHaveTextContent('Гала');
-    expect(row1).toHaveTextContent('85%');
-    expect(row1).toHaveTextContent('10 – 15 сентября');
+    expect(row1).toHaveTextContent('45%');
+    expect(row1).toHaveTextContent('25 сентября – 5 октября');
 
-    // Row 2: Участок 2, Фуджи, 72%, 15 – 22 сентября
+    // Row 2: Участок 2, Фуджи, 52%, 20 – 28 сентября
     expect(row2).toHaveTextContent('Участок 2');
     expect(row2).toHaveTextContent('Фуджи');
-    expect(row2).toHaveTextContent('72%');
-    expect(row2).toHaveTextContent('15 – 22 сентября');
+    expect(row2).toHaveTextContent('52%');
+    expect(row2).toHaveTextContent('20 – 28 сентября');
 
-    // Row 3: Участок 3, Голден, 60%, 20 – 28 сентября
+    // Row 3: Участок 3, Голден, 60%, 18 – 25 сентября
     expect(row3).toHaveTextContent('Участок 3');
     expect(row3).toHaveTextContent('Голден');
     expect(row3).toHaveTextContent('60%');
-    expect(row3).toHaveTextContent('20 – 28 сентября');
+    expect(row3).toHaveTextContent('18 – 25 сентября');
 
-    // Row 4: Участок 4, Ред Делишес, 45%, 25 сентября – 5 октября
+    // Row 4: Участок 4, Ред Делишес, 85%, 10 – 15 сентября
     expect(row4).toHaveTextContent('Участок 4');
     expect(row4).toHaveTextContent('Ред Делишес');
-    expect(row4).toHaveTextContent('45%');
-    expect(row4).toHaveTextContent('25 сентября – 5 октября');
+    expect(row4).toHaveTextContent('85%');
+    expect(row4).toHaveTextContent('10 – 15 сентября');
 
-    // Row 5: Участок 5, Гала, 78%, 18 – 25 сентября
+    // Row 5: Участок 5, Гала, 78%, 15 – 22 сентября
     expect(row5).toHaveTextContent('Участок 5');
     expect(row5).toHaveTextContent('Гала');
     expect(row5).toHaveTextContent('78%');
-    expect(row5).toHaveTextContent('18 – 25 сентября');
+    expect(row5).toHaveTextContent('15 – 22 сентября');
   });
 
   it('renders the AI card and explanation matching the design', () => {
@@ -207,7 +207,7 @@ describe('ForecastsView Component', () => {
     const detailSummary = screen.getByTestId('forecast-row-detail-summary');
     expect(detailSummary).toBeInTheDocument();
     expect(detailSummary).toHaveTextContent('Детализация: Участок 1 (Гала)');
-    expect(detailSummary).toHaveTextContent('10 – 15 сентября');
+    expect(detailSummary).toHaveTextContent('25 сентября – 5 октября');
 
     // Clicking again toggles it off
     fireEvent.click(row1);
