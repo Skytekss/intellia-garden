@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --sidebar-bg: #05382b;
+    --sidebar-border: rgba(16, 185, 129, 0.15);
+    --sidebar-active: #047857;
+    --surface-bg: #f4f7f6;
+    --card-bg: #ffffff;
+    --cta-primary: #07503b;
+    --cta-hover: #096047;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background-color: var(--surface-bg);
+    color: #1e293b;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(5, 56, 43, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 56, 43, 0.3);
+}
