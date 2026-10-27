@@ -29,6 +29,26 @@ const DATE_FORMAT_OPTIONS = [
   'ММ/ДД/ГГГГ',
 ];
 
+const UNIT_MAP_EN: Record<string, string> = {
+  'Метрическая (°C, мм, га)': 'Metric (°C, mm, ha)',
+  'Имперская (°F, дюймы, акры)': 'Imperial (°F, in, ac)',
+};
+
+const TIMEZONE_MAP_EN: Record<string, string> = {
+  '(UTC+3) Москва': '(UTC+3) Moscow',
+  '(UTC+0) Лондон': '(UTC+0) London',
+  '(UTC-5) Нью-Йорк': '(UTC-5) New York',
+  '(UTC+2) Калининград': '(UTC+2) Kaliningrad',
+  '(UTC+4) Самара': '(UTC+4) Samara',
+  '(UTC+5) Екатеринбург': '(UTC+5) Yekaterinburg',
+};
+
+const DATE_FORMAT_MAP_EN: Record<string, string> = {
+  'ДД.ММ.ГГГГ': 'DD.MM.YYYY',
+  'ГГГГ-ММ-ДД': 'YYYY-MM-DD',
+  'ММ/ДД/ГГГГ': 'MM/DD/YYYY',
+};
+
 export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
   settings,
   onChange,
@@ -81,7 +101,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
           <div className="relative shrink-0 sm:max-w-none">
             <select
               id="general-language"
-              aria-label="Язык интерфейса"
+              aria-label={isEn ? 'Interface Language' : 'Язык интерфейса'}
               data-testid="select-language"
               value={settings.language}
               onChange={(e) => handleChange('language', e.target.value)}
@@ -89,7 +109,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
             >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {isEn ? (opt === 'Русский' ? 'Russian' : opt) : opt}
                 </option>
               ))}
             </select>
@@ -111,7 +131,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
           <div className="relative shrink-0 sm:max-w-none">
             <select
               id="general-measurement-unit"
-              aria-label="Единицы измерения"
+              aria-label={isEn ? 'Measurement Units' : 'Единицы измерения'}
               data-testid="select-measurement-unit"
               value={settings.measurementUnit}
               onChange={(e) => handleChange('measurementUnit', e.target.value)}
@@ -119,7 +139,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
             >
               {UNIT_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {isEn ? UNIT_MAP_EN[opt] || opt : opt}
                 </option>
               ))}
             </select>
@@ -141,7 +161,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
           <div className="relative shrink-0 sm:max-w-none">
             <select
               id="general-timezone"
-              aria-label="Часовой пояс"
+              aria-label={isEn ? 'Timezone' : 'Часовой пояс'}
               data-testid="select-timezone"
               value={settings.timezone}
               onChange={(e) => handleChange('timezone', e.target.value)}
@@ -149,7 +169,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
             >
               {TIMEZONE_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {isEn ? TIMEZONE_MAP_EN[opt] || opt : opt}
                 </option>
               ))}
             </select>
@@ -171,7 +191,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
           <div className="relative shrink-0 sm:max-w-none">
             <select
               id="general-date-format"
-              aria-label="Формат даты"
+              aria-label={isEn ? 'Date Format' : 'Формат даты'}
               data-testid="select-date-format"
               value={settings.dateFormat}
               onChange={(e) => handleChange('dateFormat', e.target.value)}
@@ -179,7 +199,7 @@ export const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({
             >
               {DATE_FORMAT_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {isEn ? DATE_FORMAT_MAP_EN[opt] || opt : opt}
                 </option>
               ))}
             </select>

@@ -6,6 +6,8 @@ import { ForecastTable } from './ForecastTable';
 import { ForecastAiCard } from './ForecastAiCard';
 import { ForecastMaturityPreview } from './ForecastMaturityPreview';
 import { ForecastRecommendations } from './ForecastRecommendations';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedForecastRows } from '../../context/localizedData';
 
 export type ForecastSubTab = 'maturity-map' | 'harvest-dates' | 'recommendations';
 
@@ -22,6 +24,9 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   forecastRows,
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
+  const effectiveRows = forecastRows || getLocalizedForecastRows(isEnglish);
+
   const [activeSubTab, setActiveSubTab] = useState<ForecastSubTab>(() => {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
@@ -36,17 +41,17 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   const subTabs: Array<{ id: ForecastSubTab; label: string; testId: string }> = [
     {
       id: 'maturity-map',
-      label: 'Карта зрелости',
+      label: t('forecasts.tab.maturity') || 'Карта зрелости',
       testId: 'subtab-maturity-map',
     },
     {
       id: 'harvest-dates',
-      label: 'Сроки сбора',
+      label: t('forecasts.tab.dates') || 'Сроки сбора',
       testId: 'subtab-harvest-dates',
     },
     {
       id: 'recommendations',
-      label: 'Рекомендации',
+      label: t('forecasts.tab.recommendations') || 'Рекомендации',
       testId: 'subtab-recommendations',
     },
   ];
@@ -63,7 +68,7 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
             data-testid="forecasts-title"
             className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight"
           >
-            Прогнозы
+            {t('forecasts.title') || 'Прогнозы'}
           </h2>
         </div>
 
@@ -116,7 +121,7 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
           <ForecastKpiCards />
 
           {/* Interactive Table «Рекомендованные даты сбора» */}
-          <ForecastTable rows={forecastRows} />
+          <ForecastTable rows={effectiveRows} />
 
           {/* Bottom AI Card */}
           <ForecastAiCard />

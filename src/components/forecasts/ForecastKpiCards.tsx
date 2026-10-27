@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, Apple, BarChart3 } from 'lucide-react';
-import { motion } from 'motion/react';
 import { averageFruitReadiness } from '../../data/mockData';
+import { useApp } from '../../context/AppContext';
 
 export interface ForecastKpiData {
   averageHarvestDate: string;
@@ -12,15 +12,6 @@ export interface ForecastKpiData {
   forecastAccuracySubtext: string;
 }
 
-const defaultKpiData: ForecastKpiData = {
-  averageHarvestDate: '12 – 25 сентября',
-  averageHarvestDateSubtext: '(по саду)',
-  fruitReadinessPercent: averageFruitReadiness,
-  fruitReadinessSubtext: '(в среднем)',
-  forecastAccuracyPercent: 92,
-  forecastAccuracySubtext: '(по прошлым сезонам)',
-};
-
 interface ForecastKpiCardsProps {
   data?: Partial<ForecastKpiData>;
   className?: string;
@@ -30,13 +21,24 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
   data,
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
+
+  const defaultKpiData: ForecastKpiData = {
+    averageHarvestDate: isEnglish ? 'Sep 12 – 25' : '12 – 25 сентября',
+    averageHarvestDateSubtext: isEnglish ? '(orchard average)' : '(по саду)',
+    fruitReadinessPercent: averageFruitReadiness,
+    fruitReadinessSubtext: isEnglish ? '(in average)' : '(в среднем)',
+    forecastAccuracyPercent: 92,
+    forecastAccuracySubtext: isEnglish ? '(past seasons)' : '(по прошлым сезонам)',
+  };
+
   const metrics = { ...defaultKpiData, ...data };
 
   const cards = [
     {
       id: 'harvest-date',
       testId: 'kpi-card-harvest-date',
-      label: 'Средняя дата сбора',
+      label: t('forecasts.kpi.harvestDate') || 'Средняя дата сбора',
       value: metrics.averageHarvestDate,
       subtext: metrics.averageHarvestDateSubtext,
       icon: Calendar,
@@ -47,7 +49,7 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
     {
       id: 'fruit-readiness',
       testId: 'kpi-card-fruit-readiness',
-      label: 'Готовность плодов',
+      label: t('forecasts.kpi.fruitReadiness') || 'Готовность плодов',
       value: `${metrics.fruitReadinessPercent}%`,
       subtext: metrics.fruitReadinessSubtext,
       icon: Apple,
@@ -58,7 +60,7 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
     {
       id: 'forecast-accuracy',
       testId: 'kpi-card-forecast-accuracy',
-      label: 'Точность прогноза',
+      label: t('forecasts.kpi.accuracy') || 'Точность прогноза',
       value: `${metrics.forecastAccuracyPercent}%`,
       subtext: metrics.forecastAccuracySubtext,
       icon: BarChart3,
@@ -73,39 +75,33 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
       data-testid="forecast-kpi-cards"
       className={`grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ${className}`}
     >
-      {cards.map((card, index) => {
-        const IconComponent = card.icon;
+      {cards.map((card) => {
+        const Icon = card.icon;
+
         return (
-          <motion.div
+          <div
             key={card.id}
             data-testid={card.testId}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, delay: index * 0.04 }}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-4 lg:p-5 flex items-center gap-3.5 lg:gap-4 transition-shadow duration-200 hover:shadow-md ${card.borderColor}`}
+            className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 flex items-center justify-between transition-all duration-200 hover:shadow-md ${card.borderColor}`}
           >
-            {/* Circular Icon Container */}
-            <div
-              className={`w-11 h-11 lg:w-12 lg:h-12 rounded-full ${card.iconBg} ${card.iconColor} flex items-center justify-center shrink-0 shadow-xs`}
-              aria-hidden="true"
-            >
-              <IconComponent className="w-5 h-5 lg:w-6 lg:h-6 stroke-[2]" />
-            </div>
-
-            {/* Metric Information */}
-            <div className="min-w-0 flex-1">
-              <span className="block text-xs text-slate-500 font-medium truncate">
+            <div className="space-y-1">
+              <span className="text-xs sm:text-sm font-semibold text-slate-500 block">
                 {card.label}
               </span>
-              <div className="text-base lg:text-xl font-bold text-slate-900 tracking-tight leading-snug whitespace-nowrap">
+              <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 {card.value}
               </div>
-              <span className="block text-xs text-slate-400 font-normal truncate">
+              <span className="text-xs text-slate-400 font-medium block">
                 {card.subtext}
               </span>
             </div>
-          </motion.div>
+
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${card.iconBg} ${card.iconColor}`}
+            >
+              <Icon className="w-6 h-6" />
+            </div>
+          </div>
         );
       })}
     </div>

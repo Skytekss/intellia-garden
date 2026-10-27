@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Leaf } from 'lucide-react';
 import supportBotImg from '../../assets/support_bot.jpg';
+import { useApp } from '../../context/AppContext';
 
 export interface SupportBannerProps {
   onOpenFeedback: () => void;
@@ -11,6 +12,7 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({
   onOpenFeedback,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   return (
     <div
       data-testid="support-banner"
@@ -24,22 +26,24 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({
         <div className="relative shrink-0">
           <img
             src={supportBotImg}
-            alt="AI Ассистент ИНТЕЛЛИЯ"
+            alt={isEnglish ? 'INTELLIA AI Assistant' : 'AI Ассистент ИНТЕЛЛИЯ'}
             data-testid="support-bot-avatar"
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white shadow-md"
           />
           <span
-            title="Онлайн"
+            title={isEnglish ? 'Online' : 'Онлайн'}
             className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-xs"
           />
         </div>
 
         <div className="min-w-0">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
-            Нужна помощь?
+            {isEnglish ? 'Need Help?' : 'Нужна помощь?'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed break-words">
-            Наши специалисты всегда готовы ответить на ваши вопросы и помочь решить любую проблему.
+            {isEnglish
+              ? 'Our specialists are always ready to answer your questions and solve any issue.'
+              : 'Наши специалисты всегда готовы ответить на ваши вопросы и помочь решить любую проблему.'}
           </p>
 
           <div className="mt-4">
@@ -49,7 +53,7 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({
               onClick={onOpenFeedback}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#07503b] hover:bg-[#096047] active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <span>Написать в поддержку</span>
+              <span>{isEnglish ? 'Contact Support' : 'Написать в поддержку'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -62,7 +66,7 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({
           data-testid="support-slogan"
           className="font-serif italic text-2xl sm:text-3xl text-[#05382b] font-medium tracking-wide select-none drop-shadow-xs"
         >
-          Успешного урожая!
+          {isEnglish ? 'Have a fruitful harvest!' : 'Успешного урожая!'}
         </span>
         <Leaf className="w-7 h-7 text-emerald-600 shrink-0 transform -rotate-12 animate-pulse" />
       </div>

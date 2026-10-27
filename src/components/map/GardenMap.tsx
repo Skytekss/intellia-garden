@@ -10,6 +10,7 @@ import {
 import { GardenSector } from '../../types';
 import { getMaturityColor } from '../../data/mockData';
 import gardenMapRef from '../../assets/garden_map_ref.jpg';
+import { useApp } from '../../context/AppContext';
 
 export { getMaturityColor };
 
@@ -66,6 +67,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
   onSelectSector,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   const [zoom, setZoom] = useState<number>(1);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -268,7 +270,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                     fill="#1e293b"
                     className="select-none font-sans"
                   >
-                    {geom.name}
+                    {isEnglish ? geom.name.replace('Участок', 'Sector') : geom.name}
                   </text>
 
                   {/* Value: XX% */}
@@ -301,12 +303,20 @@ export const GardenMap: React.FC<GardenMapProps> = ({
             type="button"
             onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
             data-testid="btn-toggle-mode"
-            title="Переключить режим: NDVI Спектр / Ортофото RGB"
-            aria-label="Переключить спектральный режим"
+            title={isEnglish ? 'Toggle mode: NDVI Spectrum / RGB Orthophoto' : 'Переключить режим: NDVI Спектр / Ортофото RGB'}
+            aria-label={isEnglish ? 'Toggle spectral mode' : 'Переключить спектральный режим'}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-[#07503b] text-white shadow-xs"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{mapMode === 'ndvi' ? 'NDVI Спектр' : 'Ортофото RGB'}</span>
+            <span>
+              {isEnglish
+                ? mapMode === 'ndvi'
+                  ? 'NDVI Spectrum'
+                  : 'RGB Orthophoto'
+                : mapMode === 'ndvi'
+                ? 'NDVI Спектр'
+                : 'Ортофото RGB'}
+            </span>
           </button>
 
           <button
@@ -314,7 +324,13 @@ export const GardenMap: React.FC<GardenMapProps> = ({
             onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
             className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100/70 transition-colors cursor-pointer"
           >
-            {mapMode === 'ndvi' ? '→ Ортофото RGB' : '→ NDVI Спектр'}
+            {isEnglish
+              ? mapMode === 'ndvi'
+                ? '→ RGB Orthophoto'
+                : '→ NDVI Spectrum'
+              : mapMode === 'ndvi'
+              ? '→ Ортофото RGB'
+              : '→ NDVI Спектр'}
           </button>
         </div>
 
@@ -323,7 +339,15 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           type="button"
           onClick={() => setShowLayers((prev) => !prev)}
           data-testid="btn-toggle-layers"
-          title={showLayers ? 'Скрыть контуры секторов' : 'Показать границы секторов'}
+          title={
+            isEnglish
+              ? showLayers
+                ? 'Hide sector contours'
+                : 'Show sector boundaries'
+              : showLayers
+              ? 'Скрыть контуры секторов'
+              : 'Показать границы секторов'
+          }
           className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md shadow-md border text-xs font-semibold transition-all cursor-pointer ${
             showLayers
               ? 'border-emerald-500/60 text-emerald-900 bg-emerald-50/90 shadow-xs'
@@ -335,7 +359,11 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           ) : (
             <EyeOff className="w-3.5 h-3.5 text-slate-400" />
           )}
-          <span>Контуры: {showLayers ? 'Вкл' : 'Скрыты'}</span>
+          <span>
+            {isEnglish
+              ? `Contours: ${showLayers ? 'On' : 'Hidden'}`
+              : `Контуры: ${showLayers ? 'Вкл' : 'Скрыты'}`}
+          </span>
         </button>
       </div>
 
@@ -349,8 +377,8 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           type="button"
           onClick={handleZoomOut}
           disabled={zoom <= 1}
-          title="Отдалить карту"
-          aria-label="Отдалить карту"
+          title={isEnglish ? 'Zoom out' : 'Отдалить карту'}
+          aria-label={isEnglish ? 'Zoom out' : 'Отдалить карту'}
           data-testid="btn-zoom-out"
           className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
@@ -367,8 +395,8 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           type="button"
           onClick={handleZoomIn}
           disabled={zoom >= 2}
-          title="Приблизить карту"
-          aria-label="Приблизить карту"
+          title={isEnglish ? 'Zoom in' : 'Приблизить карту'}
+          aria-label={isEnglish ? 'Zoom in' : 'Приблизить карту'}
           data-testid="btn-zoom-in"
           className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
@@ -382,20 +410,24 @@ export const GardenMap: React.FC<GardenMapProps> = ({
         <button
           type="button"
           onClick={handleResetCenter}
-          title="Сбросить масштаб и центрировать"
-          aria-label="Сбросить масштаб и центрировать"
+          title={isEnglish ? 'Reset zoom and re-center' : 'Сбросить масштаб и центрировать'}
+          aria-label={isEnglish ? 'Reset zoom and re-center' : 'Сбросить масштаб и центрировать'}
           data-testid="btn-reset-center"
           className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-emerald-800 text-xs font-semibold transition-colors cursor-pointer"
         >
           <Navigation className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Сброс</span>
+          <span className="hidden sm:inline">{isEnglish ? 'Reset' : 'Сброс'}</span>
         </button>
       </div>
 
       {/* --- 3. BOTTOM-LEFT TELEMETRY BADGE --- */}
       <div className="hidden md:flex absolute left-3.5 bottom-3.5 z-20 items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-white/10 text-white/90 text-xs font-medium pointer-events-none shadow-lg">
         <Radio className="w-3.5 h-3.5 text-emerald-400" />
-        <span>Съемка БПЛА • 5 см/пикс • DJI Mavic 3M</span>
+        <span>
+          {isEnglish
+            ? 'UAV Survey • 5 cm/px • DJI Mavic 3M'
+            : 'Съемка БПЛА • 5 см/пикс • DJI Mavic 3M'}
+        </span>
       </div>
     </div>
   );

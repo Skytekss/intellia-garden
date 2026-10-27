@@ -15,6 +15,8 @@ import {
   Info,
 } from 'lucide-react';
 import { HardwareSensor, SensorIconType } from '../../types';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedSensors } from '../../context/localizedData';
 
 export interface HardwareModalProps {
   isOpen: boolean;
@@ -44,6 +46,9 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
   sensors,
   onRefreshSensors,
 }) => {
+  const { isEnglish } = useApp();
+  const effectiveSensors = getLocalizedSensors(sensors, isEnglish);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
@@ -61,7 +66,11 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
     setIsRefreshing(true);
     setTimeout(() => {
       setIsRefreshing(false);
-      setRefreshMessage('Телеметрия всех датчиков успешно обновлена!');
+      setRefreshMessage(
+        isEnglish
+          ? 'Telemetry of all sensors successfully updated!'
+          : 'Телеметрия всех датчиков успешно обновлена!'
+      );
       onRefreshSensors?.();
       setTimeout(() => {
         setRefreshMessage(null);
@@ -107,10 +116,12 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                     id="hardware-modal-title"
                     className="text-sm sm:text-base font-bold text-slate-900"
                   >
-                    Датчики и оборудование
+                    {isEnglish ? 'Sensors & Equipment' : 'Датчики и оборудование'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Статусы подключённых IoT-устройств и метеостанций
+                    {isEnglish
+                      ? 'Connected IoT devices and weather stations statuses'
+                      : 'Статусы подключённых IoT-устройств и метеостанций'}
                   </p>
                 </div>
               </div>
@@ -119,7 +130,7 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                 type="button"
                 data-testid="close-hardware-modal"
                 onClick={onClose}
-                aria-label="Закрыть окно"
+                aria-label={isEnglish ? 'Close window' : 'Закрыть окно'}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -132,7 +143,9 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
               <div className="flex items-center gap-3 p-3.5 bg-emerald-50/80 border border-emerald-100 rounded-xl">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div className="text-xs text-emerald-950 font-medium">
-                  Все подключенные устройства находятся на связи и передают телеметрию без задержек.
+                  {isEnglish
+                    ? 'All connected devices are online and transmitting telemetry without delay.'
+                    : 'Все подключенные устройства находятся на связи и передают телеметрию без задержек.'}
                 </div>
               </div>
 
@@ -148,7 +161,7 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
 
               {/* Sensor cards */}
               <div className="space-y-3">
-                {sensors.map((sensor) => (
+                {effectiveSensors.map((sensor) => (
                   <div
                     key={sensor.id}
                     data-testid={`hardware-detail-${sensor.id}`}
@@ -164,7 +177,7 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                             {sensor.name}
                           </h4>
                           <p className="text-xs text-slate-500 truncate">
-                            Модель: {sensor.model}
+                            {isEnglish ? 'Model:' : 'Модель:'} {sensor.model}
                           </p>
                         </div>
                       </div>
@@ -189,17 +202,21 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                       {sensor.batteryLevel !== undefined && (
                         <div className="flex items-center gap-1.5">
                           <Battery className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                          <span>Заряд: {sensor.batteryLevel}%</span>
+                          <span>
+                            {isEnglish ? 'Battery:' : 'Заряд:'} {sensor.batteryLevel}%
+                          </span>
                         </div>
                       )}
                       <div className="flex items-center gap-1.5">
                         <Wifi className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                        <span>Сигнал: Отличный</span>
+                        <span>{isEnglish ? 'Signal: Excellent' : 'Сигнал: Отличный'}</span>
                       </div>
                       {sensor.lastPing && (
                         <div className="flex items-center gap-1.5 col-span-2 sm:col-span-1">
                           <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>Синхронизация: {sensor.lastPing}</span>
+                          <span>
+                            {isEnglish ? 'Sync:' : 'Синхронизация:'} {sensor.lastPing}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -222,7 +239,15 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                     isRefreshing ? 'animate-spin' : ''
                   }`}
                 />
-                <span>{isRefreshing ? 'Обновление...' : 'Обновить статус'}</span>
+                <span>
+                  {isRefreshing
+                    ? isEnglish
+                      ? 'Refreshing...'
+                      : 'Обновление...'
+                    : isEnglish
+                    ? 'Refresh Status'
+                    : 'Обновить статус'}
+                </span>
               </button>
 
               <button
@@ -231,7 +256,7 @@ export const HardwareModal: React.FC<HardwareModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 rounded-xl bg-[#07503b] hover:bg-[#096047] text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
               >
-                Готово
+                {isEnglish ? 'Done' : 'Готово'}
               </button>
             </div>
           </motion.div>

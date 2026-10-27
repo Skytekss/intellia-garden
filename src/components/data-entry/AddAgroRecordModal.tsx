@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, FileText, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, MapPin, FileText, CheckCircle2, ClipboardList } from 'lucide-react';
 import { AgroOperationType, AgroRecord } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 interface AddAgroRecordModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ interface AddAgroRecordModalProps {
   onSubmit: (record: Omit<AgroRecord, 'id'>) => void;
 }
 
-const OPERATION_TYPES: AgroOperationType[] = [
+const OPERATION_TYPES_RU: AgroOperationType[] = [
   'Полив',
   'Удобрения',
   'Обработка',
@@ -17,7 +18,15 @@ const OPERATION_TYPES: AgroOperationType[] = [
   'Прореживание плодов',
 ];
 
-const SECTORS = [
+const OPERATION_TYPES_EN: AgroOperationType[] = [
+  'Irrigation',
+  'Fertilization',
+  'Treatment',
+  'Pruning',
+  'Fruit Thinning',
+];
+
+const SECTORS_RU = [
   'Все участки',
   'Участок 1 (Гала)',
   'Участок 2 (Фуджи)',
@@ -26,16 +35,36 @@ const SECTORS = [
   'Участок 5 (Гала)',
 ];
 
+const SECTORS_EN = [
+  'All Sectors',
+  'Sector 1 (Gala)',
+  'Sector 2 (Fuji)',
+  'Sector 3 (Golden Delicious)',
+  'Sector 4 (Red Delicious)',
+  'Sector 5 (Gala)',
+];
+
 export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
 }) => {
-  const [type, setType] = useState<AgroOperationType>('Полив');
+  const { isEnglish } = useApp();
+
+  const operationTypes = isEnglish ? OPERATION_TYPES_EN : OPERATION_TYPES_RU;
+  const sectorsList = isEnglish ? SECTORS_EN : SECTORS_RU;
+
+  const [type, setType] = useState<AgroOperationType>(operationTypes[0]);
   const [date, setDate] = useState('2025-08-12');
-  const [sector, setSector] = useState('Все участки');
+  const [sector, setSector] = useState(sectorsList[0]);
   const [notes, setNotes] = useState('');
-  const [title, setTitle] = useState('Полив');
+  const [title, setTitle] = useState(operationTypes[0]);
+
+  useEffect(() => {
+    setType(operationTypes[0]);
+    setTitle(operationTypes[0]);
+    setSector(sectorsList[0]);
+  }, [isEnglish]);
 
   useEffect(() => {
     setTitle(type);
@@ -57,7 +86,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Format date from YYYY-MM-DD to DD.MM.YYYY if needed
+    // Format date from YYYY-MM-DD to DD.MM.YYYY
     let formattedDate = date;
     if (date.includes('-')) {
       const parts = date.split('-');
@@ -68,14 +97,12 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
 
     onSubmit({
       type,
-      title: title.trim() || type,
+      title: title || type,
       date: formattedDate,
-      sector,
-      notes: notes.trim() || undefined,
+      sector: sector !== (isEnglish ? 'All Sectors' : 'Все участки') ? sector : undefined,
+      notes: notes || undefined,
     });
 
-    // Reset fields
-    setNotes('');
     onClose();
   };
 
@@ -83,42 +110,41 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="agro-modal-title"
           data-testid="add-agro-modal"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
         >
-          {/* Backdrop */}
+          {/* Backdrop Click */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             onClick={onClose}
-            data-testid="agro-modal-backdrop"
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs cursor-pointer"
+            className="absolute inset-0"
           />
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden z-10 my-8"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="relative bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-lg z-10 overflow-hidden"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                  +
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <ClipboardList className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 id="agro-modal-title" className="text-sm font-bold text-slate-800">
-                    Добавить агротехническую запись
+                    {isEnglish ? 'Add Agrotechnical Record' : 'Добавить агротехническую запись'}
                   </h3>
-                  <p className="text-xs text-slate-500">Внесите данные об операции в журнал сада</p>
+                  <p className="text-xs text-slate-500">
+                    {isEnglish
+                      ? 'Record operation details into the garden log'
+                      : 'Внесите данные об операции в журнал сада'}
+                  </p>
                 </div>
               </div>
 
@@ -127,7 +153,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                 data-testid="close-agro-modal"
                 onClick={onClose}
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                aria-label="Закрыть окно"
+                aria-label={isEnglish ? 'Close' : 'Закрыть окно'}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -141,7 +167,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   htmlFor="operation-type-select"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Тип агрооперации
+                  {isEnglish ? 'Operation Type' : 'Тип агрооперации'}
                 </label>
                 <select
                   id="operation-type-select"
@@ -150,7 +176,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   onChange={(e) => setType(e.target.value as AgroOperationType)}
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 cursor-pointer"
                 >
-                  {OPERATION_TYPES.map((op) => (
+                  {operationTypes.map((op) => (
                     <option key={op} value={op}>
                       {op}
                     </option>
@@ -164,7 +190,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   htmlFor="operation-title-input"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Название операции
+                  {isEnglish ? 'Operation Title' : 'Название операции'}
                 </label>
                 <input
                   id="operation-title-input"
@@ -172,7 +198,11 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Например, Полив или Внесение калия"
+                  placeholder={
+                    isEnglish
+                      ? 'e.g. Irrigation or Calcium application'
+                      : 'Например, Полив или Внесение калия'
+                  }
                   required
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
                 />
@@ -186,7 +216,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                     className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
                   >
                     <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                    Дата выполнения
+                    {isEnglish ? 'Execution Date' : 'Дата выполнения'}
                   </label>
                   <input
                     id="operation-date-input"
@@ -205,7 +235,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                     className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
                   >
                     <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                    Участок
+                    {isEnglish ? 'Sector' : 'Участок'}
                   </label>
                   <select
                     id="operation-sector-select"
@@ -214,7 +244,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                     onChange={(e) => setSector(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 cursor-pointer"
                   >
-                    {SECTORS.map((sec) => (
+                    {sectorsList.map((sec) => (
                       <option key={sec} value={sec}>
                         {sec}
                       </option>
@@ -230,7 +260,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
                 >
                   <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                  Примечания и расходные материалы
+                  {isEnglish ? 'Notes & Consumables' : 'Примечания и расходные материалы'}
                 </label>
                 <textarea
                   id="operation-notes-input"
@@ -238,7 +268,11 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Укажите препарат, дозировку или условия проведения..."
+                  placeholder={
+                    isEnglish
+                      ? 'Specify dosage, product, or microclimate context...'
+                      : 'Укажите препарат, дозировку или условия проведения...'
+                  }
                   className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 resize-none"
                 />
               </div>
@@ -251,7 +285,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-medium text-slate-600 transition-colors cursor-pointer"
                 >
-                  Отмена
+                  {isEnglish ? 'Cancel' : 'Отмена'}
                 </button>
                 <button
                   type="submit"
@@ -259,7 +293,7 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   className="px-5 py-2.5 bg-[#07503b] hover:bg-[#096047] active:scale-[0.98] text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Добавить запись</span>
+                  <span>{isEnglish ? 'Add Record' : 'Добавить запись'}</span>
                 </button>
               </div>
             </form>

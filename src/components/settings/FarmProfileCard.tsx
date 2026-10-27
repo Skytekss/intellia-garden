@@ -19,6 +19,22 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
     ? `${(farm.areaHa * 2.471).toFixed(1)} ${isEnglish ? 'ac' : 'акров'}`
     : `${farm.areaHa} ${isEnglish ? 'ha' : 'га'}`;
 
+  const farmNameDisplay = isEnglish
+    ? farm.name === 'Ферма «Золотой Сад»'
+      ? 'Golden Garden Farm'
+      : farm.name
+    : farm.name;
+
+  const farmRegionDisplay = isEnglish
+    ? farm.region === 'Тульская область'
+      ? 'Tula Region'
+      : farm.region === 'Краснодарский край'
+      ? 'Krasnodar Krai'
+      : farm.region === 'Воронежская область'
+      ? 'Voronezh Region'
+      : farm.region
+    : farm.region;
+
   return (
     <div
       data-testid="farm-profile-card"
@@ -44,7 +60,7 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
         <div className="flex items-center gap-3.5 min-w-0">
           <img
             src={farmThumbImg}
-            alt={farm.name}
+            alt={farmNameDisplay}
             className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl object-cover border border-slate-200/80 shadow-xs shrink-0 bg-slate-100"
             onError={(e) => {
               (e.target as HTMLElement).style.display = 'none';
@@ -54,7 +70,7 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                {farm.name}
+                {farmNameDisplay}
               </span>
               <button
                 type="button"
@@ -69,7 +85,7 @@ export const FarmProfileCard: React.FC<FarmProfileCardProps> = ({
               {isEnglish ? 'Area:' : 'Площадь:'} {areaDisplay}
             </p>
             <p className="text-xs text-slate-500 truncate">
-              {isEnglish ? 'Region:' : 'Регион:'} {farm.region}
+              {isEnglish ? 'Region:' : 'Регион:'} {farmRegionDisplay}
             </p>
           </div>
         </div>

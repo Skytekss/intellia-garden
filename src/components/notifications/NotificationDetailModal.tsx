@@ -7,6 +7,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { NotificationItem, NavigationTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface NotificationDetailModalProps {
   notification: NotificationItem | null;
@@ -21,6 +22,7 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
   onClose,
   onNavigate,
 }) => {
+  const { isEnglish } = useApp();
   // ESC key handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -93,7 +95,7 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
                 data-testid="close-notification-modal"
                 onClick={onClose}
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                aria-label="Закрыть окно"
+                aria-label={isEnglish ? 'Close window' : 'Закрыть окно'}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -120,7 +122,7 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-[#07503b]">
-                      Рекомендация агронома-эксперта
+                      {isEnglish ? 'Expert Agronomist Recommendation' : 'Рекомендация агронома-эксперта'}
                     </h3>
                     <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
                       {notification.details.recommendation}
@@ -133,7 +135,7 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
               {metadataEntries.length > 0 && (
                 <div className="pt-2 border-t border-slate-100">
                   <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                    Параметры оповещения
+                    {isEnglish ? 'Alert Parameters' : 'Параметры оповещения'}
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {metadataEntries.map(([key, value]) => (
@@ -160,7 +162,7 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
                 onClick={onClose}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-medium text-slate-600 transition-colors cursor-pointer"
               >
-                Закрыть
+                {isEnglish ? 'Close' : 'Закрыть'}
               </button>
 
               <button

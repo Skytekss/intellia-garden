@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bot } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useApp } from '../../context/AppContext';
 
 interface ForecastAiCardProps {
   className?: string;
@@ -9,6 +10,7 @@ interface ForecastAiCardProps {
 export const ForecastAiCard: React.FC<ForecastAiCardProps> = ({
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   return (
     <motion.div
       data-testid="forecast-ai-card"
@@ -39,13 +41,15 @@ export const ForecastAiCard: React.FC<ForecastAiCardProps> = ({
           data-testid="forecast-ai-heading"
           className="font-semibold text-slate-900 text-sm md:text-base tracking-tight"
         >
-          Искусственный интеллект:
+          {isEnglish ? 'Artificial Intelligence:' : 'Искусственный интеллект:'}
         </h3>
         <p
           data-testid="forecast-ai-description"
           className="text-xs md:text-sm text-slate-600 mt-0.5 leading-relaxed"
         >
-          Учитывает данные с дрона, историю агротехнических мероприятий и прогнозы погоды для точного расчёта срока сбора.
+          {isEnglish
+            ? 'Incorporates drone telemetry, historical field treatments, and microclimate forecasts for precise harvest window prediction.'
+            : 'Учитывает данные с дрона, историю агротехнических мероприятий и прогнозы погоды для точного расчёта срока сбора.'}
         </p>
       </div>
     </motion.div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { NotificationFilterTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface FilterTabConfig {
   id: NotificationFilterTab;
@@ -31,6 +32,7 @@ export const NotificationFilterBar: React.FC<NotificationFilterBarProps> = ({
   onMarkAllAsRead,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   return (
     <div
       data-testid="notification-filter-bar"
@@ -41,13 +43,26 @@ export const NotificationFilterBar: React.FC<NotificationFilterBarProps> = ({
         {FILTER_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const count = counts[tab.id] ?? 0;
+          const tabLabel = isEnglish
+            ? tab.id === 'all'
+              ? 'All'
+              : tab.id === 'important'
+              ? 'Important'
+              : tab.id === 'harvest'
+              ? 'Harvest'
+              : tab.id === 'weather'
+              ? 'Weather'
+              : tab.id === 'diseases'
+              ? 'Diseases'
+              : 'System'
+            : tab.label;
 
           return (
             <button
               key={tab.id}
               type="button"
               data-testid={`filter-tab-${tab.id}`}
-              aria-label={`${tab.label} (${count})`}
+              aria-label={`${tabLabel} (${count})`}
               onClick={() => onSelectTab(tab.id)}
               className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer select-none ${
                 isActive
@@ -55,7 +70,7 @@ export const NotificationFilterBar: React.FC<NotificationFilterBarProps> = ({
                   : 'bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80 font-medium shadow-2xs'
               }`}
             >
-              <span>{tab.label}</span>
+              <span>{tabLabel}</span>
               <span
                 data-testid={`filter-count-${tab.id}`}
                 className={`inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-xs font-bold leading-none ${
@@ -80,7 +95,7 @@ export const NotificationFilterBar: React.FC<NotificationFilterBarProps> = ({
         className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 hover:bg-emerald-100/80 text-[#07503b] border border-emerald-200/70 shadow-2xs transition-all cursor-pointer active:scale-95 w-full sm:w-auto shrink-0"
       >
         <Check className="w-3.5 h-3.5 text-[#07503b] stroke-[2.5]" />
-        <span>Отметить всё как прочитанное</span>
+        <span>{isEnglish ? 'Mark all as read' : 'Отметить всё как прочитанное'}</span>
       </button>
     </div>
   );

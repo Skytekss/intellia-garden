@@ -28,6 +28,15 @@ const RETENTION_OPTIONS = [
   'Бессрочно',
 ];
 
+const RETENTION_MAP_EN: Record<string, string> = {
+  '14 дней': '14 days',
+  '30 дней': '30 days',
+  '60 дней': '60 days',
+  '90 дней': '90 days',
+  '1 год': '1 year',
+  'Бессрочно': 'Indefinitely',
+};
+
 export const DataManagementCard: React.FC<DataManagementCardProps> = ({
   settings,
   onChange,
@@ -152,7 +161,7 @@ export const DataManagementCard: React.FC<DataManagementCardProps> = ({
             >
               {RETENTION_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {isEnglish ? RETENTION_MAP_EN[opt] || opt : opt}
                 </option>
               ))}
             </select>

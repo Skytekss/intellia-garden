@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, CheckCircle2 } from 'lucide-react';
 import { FaqItem } from './types';
 import { FAQ_ITEMS } from './supportData';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedFaqItems } from '../../context/localizedData';
 
 export interface FaqAccordionProps {
   items?: FaqItem[];
@@ -15,6 +17,8 @@ export const FaqAccordion: React.FC<FaqAccordionProps> = ({
   className = '',
   defaultExpandedIds = ['faq-1'],
 }) => {
+  const { isEnglish } = useApp();
+  const effectiveItems = items !== FAQ_ITEMS ? items : getLocalizedFaqItems(isEnglish);
   const [expandedIds, setExpandedIds] = useState<string[]>(defaultExpandedIds);
 
   const toggleItem = (id: string) => {
@@ -23,13 +27,13 @@ export const FaqAccordion: React.FC<FaqAccordionProps> = ({
     );
   };
 
-  const areAllExpanded = items.length > 0 && expandedIds.length === items.length;
+  const areAllExpanded = effectiveItems.length > 0 && expandedIds.length === effectiveItems.length;
 
   const handleToggleAll = () => {
     if (areAllExpanded) {
       setExpandedIds([]);
     } else {
-      setExpandedIds(items.map((i) => i.id));
+      setExpandedIds(effectiveItems.map((i) => i.id));
     }
   };
 
@@ -42,7 +46,7 @@ export const FaqAccordion: React.FC<FaqAccordionProps> = ({
       {/* Header matching reference */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <h2 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">
-          Популярные вопросы
+          {isEnglish ? 'Frequently Asked Questions' : 'Популярные вопросы'}
         </h2>
 
         <button
@@ -51,13 +55,15 @@ export const FaqAccordion: React.FC<FaqAccordionProps> = ({
           data-testid="faq-toggle-all-button"
           className="text-xs font-medium text-slate-500 hover:text-emerald-700 hover:bg-slate-50 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
         >
-          {areAllExpanded ? 'Свернуть все' : 'Смотреть все'}
+          {areAllExpanded
+            ? (isEnglish ? 'Collapse all' : 'Свернуть все')
+            : (isEnglish ? 'Expand all' : 'Смотреть все')}
         </button>
       </div>
 
       {/* FAQ Items List */}
       <div className="divide-y divide-slate-100">
-        {items.map((item) => {
+        {effectiveItems.map((item) => {
           const isExpanded = expandedIds.includes(item.id);
 
           return (

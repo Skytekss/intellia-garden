@@ -3,6 +3,8 @@ import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { SupportCategoryItem, SupportCategoryId } from './types';
 import { SUPPORT_CATEGORIES } from './supportData';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedSupportCategories } from '../../context/localizedData';
 
 export interface SupportCategoryCardsProps {
   categories?: SupportCategoryItem[];
@@ -15,12 +17,14 @@ export const SupportCategoryCards: React.FC<SupportCategoryCardsProps> = ({
   onSelectCategory,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
+  const items = categories !== SUPPORT_CATEGORIES ? categories : getLocalizedSupportCategories(isEnglish);
   return (
     <div
       data-testid="support-category-cards"
       className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 ${className}`}
     >
-      {categories.map((category) => {
+      {items.map((category) => {
         const IconComponent = category.icon;
 
         return (

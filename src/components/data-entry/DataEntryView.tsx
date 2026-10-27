@@ -11,6 +11,7 @@ import { NavigationTab, DataSubTab, HyperspectralUploadState, AgroRecord } from 
 import { HyperspectralUploadCard } from './HyperspectralUploadCard';
 import { AgroWidget } from './AgroWidget';
 import { MeteoWidget } from './MeteoWidget';
+import { useApp } from '../../context/AppContext';
 
 interface DataEntryViewProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -23,6 +24,7 @@ interface ToastState {
 }
 
 export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
+  const { isEnglish, t } = useApp();
   const [activeSubTab, setActiveSubTab] = useState<DataSubTab>('spectral');
   const [toast, setToast] = useState<ToastState | null>(null);
 
@@ -35,22 +37,38 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
   };
 
   const handleSaveHyperspectral = (_data: HyperspectralUploadState) => {
-    showToast('Гиперспектральные данные успешно сохранены в реестр сада!');
+    showToast(
+      isEnglish
+        ? 'Hyperspectral data successfully saved to orchard registry!'
+        : 'Гиперспектральные данные успешно сохранены в реестр сада!'
+    );
   };
 
   const handleContinue = () => {
-    showToast('Данные сохранены. Переход к аналитике и прогнозам...');
+    showToast(
+      isEnglish
+        ? 'Data saved. Proceeding to ripening analytics & forecasts...'
+        : 'Данные сохранены. Переход к аналитике и прогнозам...'
+    );
     if (onNavigate) {
       onNavigate('forecasts');
     }
   };
 
   const handleAddAgroRecord = (record: AgroRecord) => {
-    showToast(`Запись «${record.title}» успешно добавлена в агрожурнал!`);
+    showToast(
+      isEnglish
+        ? `Record "${record.title}" successfully added to agro journal!`
+        : `Запись «${record.title}» успешно добавлена в агрожурнал!`
+    );
   };
 
   const handleImportMeteo = () => {
-    showToast('Метеоданные успешно синхронизированы с метеостанцией!');
+    showToast(
+      isEnglish
+        ? 'Meteo data synchronized with weather station successfully!'
+        : 'Метеоданные успешно синхронизированы с метеостанцией!'
+    );
   };
 
   return (
@@ -86,11 +104,12 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <span>Ввод</span>
-            <span>данных</span>
+            <span>{isEnglish ? 'Data' : 'Ввод'}</span>
+            <span>{isEnglish ? 'Entry' : 'данных'}</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Загрузка снимков БПЛА, ведение агротехнических операций и телеметрия сада
+            {t('data.subtitle') ||
+              'Загрузка снимков БПЛА, ведение агротехнических операций и телеметрия сада'}
           </p>
         </div>
       </div>
@@ -111,7 +130,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           }`}
         >
           <Layers className="w-4 h-4 text-emerald-700" />
-          <span>Гиперспектральные данные</span>
+          <span>{t('data.tab.spectral') || 'Гиперспектральные данные'}</span>
         </button>
 
         <button
@@ -125,7 +144,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           }`}
         >
           <ClipboardList className="w-4 h-4 text-emerald-700" />
-          <span>Агротехнические данные</span>
+          <span>{t('data.tab.agro') || 'Агротехнические данные'}</span>
         </button>
 
         <button
@@ -139,7 +158,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           }`}
         >
           <CloudSun className="w-4 h-4 text-emerald-700" />
-          <span>Метеоданные</span>
+          <span>{t('data.tab.meteo') || 'Метеоданные'}</span>
         </button>
       </div>
 

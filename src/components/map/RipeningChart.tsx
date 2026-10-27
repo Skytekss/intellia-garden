@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 
 export interface RipeningDataPoint {
   date: string;
@@ -11,14 +12,29 @@ interface RipeningChartProps {
   className?: string;
 }
 
-export const getMaturityStage = (percent: number): { text: string; color: string; bg: string } => {
+export const getMaturityStage = (
+  percent: number,
+  isEnglish: boolean = false
+): { text: string; color: string; bg: string } => {
   if (percent >= 75) {
-    return { text: 'Готов к сбору', color: '#047857', bg: '#d1fae5' };
+    return {
+      text: isEnglish ? 'Ready for Harvest' : 'Готов к сбору',
+      color: '#047857',
+      bg: '#d1fae5',
+    };
   }
   if (percent >= 60) {
-    return { text: 'Активное созревание', color: '#b45309', bg: '#fef3c7' };
+    return {
+      text: isEnglish ? 'Active Ripening' : 'Активное созревание',
+      color: '#b45309',
+      bg: '#fef3c7',
+    };
   }
-  return { text: 'Ранняя фаза', color: '#0369a1', bg: '#e0f2fe' };
+  return {
+    text: isEnglish ? 'Early Phase' : 'Ранняя фаза',
+    color: '#0369a1',
+    bg: '#e0f2fe',
+  };
 };
 
 export const RipeningChart: React.FC<RipeningChartProps> = ({
@@ -26,6 +42,7 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
   currentPercent,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   if (!history || history.length === 0) {
@@ -80,7 +97,7 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
   const activeIndex = hoveredIndex ?? points.length - 1;
   const activePoint = points[activeIndex] || lastPoint;
   const activePercent = hoveredIndex !== null ? activePoint.percent : (currentPercent ?? lastPoint.percent);
-  const stage = getMaturityStage(activePercent);
+  const stage = getMaturityStage(activePercent, isEnglish);
 
   // Compute safe tooltip position (keep inside SVG bounds)
   const tooltipX = Math.max(65, Math.min(width - 65, activePoint.x));
@@ -95,7 +112,11 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-auto overflow-visible"
-        aria-label="Интерактивный график динамики созревания с ранжированием"
+        aria-label={
+          isEnglish
+            ? 'Interactive fruit ripening dynamics chart with step rankings'
+            : 'Интерактивный график динамики созревания с ранжированием'
+        }
       >
         <defs>
           {/* Gradient area under curve */}

@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { App } from '../App';
 
 describe('App Root Component - All Screens Integration', () => {
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/');
+    window.localStorage.clear();
+  });
   it('renders DashboardView by default when activeTab is overview', () => {
     render(<App />);
 
@@ -98,5 +102,27 @@ describe('App Root Component - All Screens Integration', () => {
     fireEvent.click(secondFarmOption);
 
     expect(farmSelector).toHaveTextContent('Участок «Яблоневый Яр»');
+  });
+
+  it('persists selected tab to localStorage and restores it on reload', () => {
+    // 1. Initial render defaults to overview
+    window.localStorage.removeItem('intellia_active_tab');
+    const { unmount } = render(<App />);
+    expect(screen.getByTestId('hero-banner')).toBeInTheDocument();
+
+    // 2. Click Forecasts tab
+    const forecastsNav = screen.getByTestId('nav-item-forecasts');
+    fireEvent.click(forecastsNav);
+    expect(screen.getByTestId('forecasts-view')).toBeInTheDocument();
+    expect(window.localStorage.getItem('intellia_active_tab')).toBe('forecasts');
+
+    unmount();
+
+    // 3. Simulate page reload - App should read 'forecasts' from localStorage
+    render(<App />);
+    expect(screen.getByTestId('forecasts-view')).toBeInTheDocument();
+    expect(screen.queryByTestId('hero-banner')).not.toBeInTheDocument();
+
+    window.localStorage.removeItem('intellia_active_tab');
   });
 });

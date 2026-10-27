@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-wider text-white uppercase leading-tight">
-                ИНТЕЛЛИЯ
+                {isEnglish ? 'INTELLIA' : 'ИНТЕЛЛИЯ'}
               </span>
               <span className="text-xs text-emerald-200/70 font-normal leading-tight mt-0.5">
                 {isEnglish ? 'Smart solutions for your garden' : 'Умные решения для вашего сада'}

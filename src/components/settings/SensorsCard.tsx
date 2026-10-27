@@ -32,6 +32,13 @@ const renderSensorIcon = (type: SensorIconType) => {
   }
 };
 
+const SENSOR_NAME_EN: Record<string, string> = {
+  'Метеостанция': 'Weather Station',
+  'Датчики влажности почвы': 'Soil Moisture Sensors',
+  'Камеры': 'Cameras',
+  'Гиперспектральный модуль': 'Hyperspectral Module',
+};
+
 export const SensorsCard: React.FC<SensorsCardProps> = ({
   sensors,
   onConfigureHardware,
@@ -88,7 +95,7 @@ export const SensorsCard: React.FC<SensorsCardProps> = ({
             <div className="flex items-center gap-3 min-w-0">
               {renderSensorIcon(sensor.iconType)}
               <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
-                {sensor.name}
+                {isEnglish ? SENSOR_NAME_EN[sensor.name] || sensor.name : sensor.name}
               </span>
             </div>
 

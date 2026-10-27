@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { BentoItem } from '../../types';
 import { mockBentoItems } from '../../data/mockData';
+import { useApp } from '../../context/AppContext';
 
 export interface BentoCardsProps {
   items?: BentoItem[];
@@ -16,51 +17,65 @@ export interface BentoCardsProps {
   className?: string;
 }
 
-interface BentoMetaDetail {
-  metric: string;
-  badge: string;
-  icon: React.ElementType;
-}
-
-const CATEGORY_DETAILS: Record<string, BentoMetaDetail> = {
-  drone: {
-    metric: 'NDVI / NDRE 0.84',
-    badge: '8 спектральных зон',
-    icon: Scan,
-  },
-  agritech: {
-    metric: 'Влажность 68%',
-    badge: 'Капельный полив активен',
-    icon: Droplets,
-  },
-  meteo: {
-    metric: '+18°C / 0 мм',
-    badge: 'Благоприятно для сбора',
-    icon: CloudSun,
-  },
-  ai: {
-    metric: 'Точность 94.6%',
-    badge: 'Сектор 4: готов к сбору (85%)',
-    icon: BrainCircuit,
-  },
-};
-
 export const BentoCards: React.FC<BentoCardsProps> = ({
   items = mockBentoItems,
   onSelectCard,
   className = '',
 }) => {
+  const { isEnglish, formatTemperature, formatPrecipitation } = useApp();
+
+  const getBentoDetails = (category: string) => {
+    switch (category) {
+      case 'drone':
+        return {
+          title: isEnglish ? 'Hyperspectral Drone Telemetry' : 'Гиперспектральные данные с дрона',
+          subtitle: isEnglish ? 'Canopy & fruit health assessment' : 'Анализ состояния деревьев и плодов',
+          metric: 'NDVI / NDRE 0.84',
+          badge: isEnglish ? '8 spectral zones' : '8 спектральных зон',
+          icon: Scan,
+        };
+      case 'agritech':
+        return {
+          title: isEnglish ? 'Agrotechnical Data' : 'Агротехнические данные',
+          subtitle: isEnglish ? 'Irrigation, fertilizers, treatments' : 'Полив, удобрения, обработка',
+          metric: isEnglish ? 'Humidity 68%' : 'Влажность 68%',
+          badge: isEnglish ? 'Drip irrigation active' : 'Капельный полив активен',
+          icon: Droplets,
+        };
+      case 'meteo':
+        return {
+          title: isEnglish ? 'Meteo & Climate' : 'Метеоданные',
+          subtitle: isEnglish ? 'Temperature, rain, forecasts' : 'Температура, осадки, погода',
+          metric: `${formatTemperature(18)} / ${formatPrecipitation(0)}`,
+          badge: isEnglish ? 'Favorable for harvest' : 'Благоприятно для сбора',
+          icon: CloudSun,
+        };
+      case 'ai':
+        return {
+          title: isEnglish ? 'AI Harvest Analytics' : 'AI-аналитика',
+          subtitle: isEnglish ? 'Ripening map & harvest recommendations' : 'Карта зрелости и рекомендации',
+          metric: isEnglish ? 'Accuracy 94.6%' : 'Точность 94.6%',
+          badge: isEnglish ? 'Sector 4: ready for harvest (85%)' : 'Сектор 4: готов к сбору (85%)',
+          icon: BrainCircuit,
+        };
+      default:
+        return {
+          title: isEnglish ? 'Monitoring' : 'Мониторинг',
+          subtitle: isEnglish ? 'Garden telemetry' : 'Телеметрия сада',
+          metric: isEnglish ? 'Active' : 'Активно',
+          badge: isEnglish ? 'Telemetry' : 'Телеметрия',
+          icon: Scan,
+        };
+    }
+  };
+
   return (
     <div
       data-testid="bento-grid"
       className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 ${className}`}
     >
       {items.map((item) => {
-        const detail = CATEGORY_DETAILS[item.category] || {
-          metric: 'Активно',
-          badge: 'Мониторинг',
-          icon: Scan,
-        };
+        const detail = getBentoDetails(item.category);
         const IconComponent = detail.icon;
 
         return (
@@ -81,7 +96,7 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
               </div>
 
               <span className="text-xs font-semibold text-slate-400 group-hover:text-emerald-700 transition-colors flex items-center gap-1">
-                Подробнее
+                {isEnglish ? 'Details' : 'Подробнее'}
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
@@ -89,19 +104,17 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
             {/* Middle: Title & Subtitle */}
             <div className="mt-4 flex-1">
               <h3 className="font-bold text-slate-900 text-base leading-snug group-hover:text-emerald-900 transition-colors">
-                {item.title}
+                {detail.title}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-normal">
-                {item.subtitle}
+                {detail.subtitle}
               </p>
             </div>
 
             {/* Bottom Row: Metrics & Status tag */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-800">
-                {detail.metric}
-              </span>
-              <span className="text-xs text-slate-500 truncate text-right">
+              <span className="font-semibold text-slate-700">{detail.metric}</span>
+              <span className="text-slate-400 group-hover:text-emerald-700 transition-colors font-medium">
                 {detail.badge}
               </span>
             </div>

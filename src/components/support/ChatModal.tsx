@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, Bot, User, Sparkles } from 'lucide-react';
 import supportBotImg from '../../assets/support_bot.jpg';
 import { ChatMessage } from './types';
+import { useApp } from '../../context/AppContext';
 
 export interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const INITIAL_MESSAGES: ChatMessage[] = [
+const INITIAL_MESSAGES_RU: ChatMessage[] = [
   {
     id: 'msg-1',
     sender: 'bot',
@@ -17,13 +18,28 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   },
 ];
 
-const QUICK_PROMPTS = [
+const INITIAL_MESSAGES_EN: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    sender: 'bot',
+    text: 'Hello! I am the INTELLIA platform AI assistant. Ready to assist with monitoring, hyperspectral data, and ripening calibration.',
+    timestamp: 'Just now',
+  },
+];
+
+const QUICK_PROMPTS_RU = [
   'Как откалибровать зрелость?',
   'Загрузка KML-контура',
   'Связаться с агрономом',
 ];
 
-const BOT_AUTO_REPLIES: Record<string, string> = {
+const QUICK_PROMPTS_EN = [
+  'How to calibrate maturity?',
+  'Uploading KML contour',
+  'Contact agronomist',
+];
+
+const BOT_AUTO_REPLIES_RU: Record<string, string> = {
   'Как откалибровать зрелость?':
     'Для калибровки перейдите во вкладку «Данные» -> «Агротехнические данные». Добавьте последние замеры плотности мякоти (кг/см²) и сахаристости Brix. Модель автоматически пересчитает процент зрелости секторов с учетом актуальных полевых проб.',
   'Загрузка KML-контура':
@@ -32,11 +48,28 @@ const BOT_AUTO_REPLIES: Record<string, string> = {
     'Передал ваш запрос дежурному агроному. Он подключится к чату или свяжется с вами по телефону в течение 15 минут.',
 };
 
+const BOT_AUTO_REPLIES_EN: Record<string, string> = {
+  'How to calibrate maturity?':
+    'To calibrate, navigate to the "Data" -> "Agrotechnical Data" tab. Add recent measurements of flesh firmness (kg/cm²) and Brix sweetness. The model will automatically recalculate sector ripeness percentages according to actual field samples.',
+  'Uploading KML contour':
+    'You can upload orchard contours in the "Garden Map" section by clicking the sector tool, or send us a KML/GeoJSON file — we will georeference it to your satellite basemap free of charge.',
+  'Contact agronomist':
+    'Your request has been forwarded to the agronomist on duty. They will join this chat or call you within 15 minutes.',
+};
+
 export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const { isEnglish } = useApp();
+  const initialMessages = isEnglish ? INITIAL_MESSAGES_EN : INITIAL_MESSAGES_RU;
+  const quickPrompts = isEnglish ? QUICK_PROMPTS_EN : QUICK_PROMPTS_RU;
+
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMessages(isEnglish ? INITIAL_MESSAGES_EN : INITIAL_MESSAGES_RU);
+  }, [isEnglish]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,9 +110,12 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
     // Bot auto-reply logic
     setTimeout(() => {
-      let botResponse =
-        BOT_AUTO_REPLIES[trimmed] ||
-        'Спасибо за ваш вопрос! Я зафиксировал обращение. Специалисты службы поддержки свяжутся с вами в ближайшее время.';
+      const autoReplies = isEnglish ? BOT_AUTO_REPLIES_EN : BOT_AUTO_REPLIES_RU;
+      const defaultReply = isEnglish
+        ? 'Thank you for your question! I have logged your request. Support specialists will contact you shortly.'
+        : 'Спасибо за ваш вопрос! Я зафиксировал обращение. Специалисты службы поддержки свяжутся с вами в ближайшее время.';
+
+      const botResponse = autoReplies[trimmed] || defaultReply;
 
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
@@ -121,7 +157,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             <div className="relative">
               <img
                 src={supportBotImg}
-                alt="Бот ИНТЕЛЛИЯ"
+                alt={isEnglish ? 'INTELLIA Bot' : 'Бот ИНТЕЛЛИЯ'}
                 className="w-10 h-10 rounded-full object-cover border-2 border-emerald-400/40 shadow-xs"
               />
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#05382b] rounded-full" />
@@ -132,10 +168,12 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                 id="chat-modal-title"
                 className="text-sm font-bold text-white flex items-center gap-1.5"
               >
-                <span>ИНТЕЛЛИЯ Бот</span>
+                <span>{isEnglish ? 'INTELLIA Bot' : 'ИНТЕЛЛИЯ Бот'}</span>
                 <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
               </h3>
-              <p className="text-xs text-emerald-200/80">Онлайн • Ответ за секунды</p>
+              <p className="text-xs text-emerald-200/80">
+                {isEnglish ? 'Online • Replies in seconds' : 'Онлайн • Ответ за секунды'}
+              </p>
             </div>
           </div>
 
@@ -144,7 +182,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             data-testid="chat-modal-close"
             onClick={onClose}
             className="p-1.5 rounded-lg text-emerald-200/70 hover:text-white hover:bg-emerald-800/40 transition-colors cursor-pointer"
-            aria-label="Закрыть чат"
+            aria-label={isEnglish ? 'Close chat' : 'Закрыть чат'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -152,7 +190,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
         {/* Quick prompt pills */}
         <div className="bg-emerald-50/70 border-b border-emerald-100/60 px-3 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {QUICK_PROMPTS.map((prompt) => (
+          {quickPrompts.map((prompt) => (
             <button
               key={prompt}
               type="button"
@@ -214,7 +252,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" />
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.2s]" />
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.4s]" />
-              <span className="text-xs text-slate-500">Бот печатает...</span>
+              <span className="text-xs text-slate-500">
+                {isEnglish ? 'Bot is typing...' : 'Бот печатает...'}
+              </span>
             </div>
           )}
 
@@ -231,7 +271,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             data-testid="chat-input"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Задайте ваш вопрос..."
+            placeholder={isEnglish ? 'Type your question...' : 'Задайте ваш вопрос...'}
             className="flex-1 text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/40 focus:border-emerald-600 transition-all"
           />
 
@@ -240,7 +280,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             disabled={!inputValue.trim()}
             data-testid="chat-send-button"
             className="w-10 h-10 rounded-xl bg-[#07503b] hover:bg-[#096047] disabled:opacity-40 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs"
-            aria-label="Отправить сообщение"
+            aria-label={isEnglish ? 'Send message' : 'Отправить сообщение'}
           >
             <Send className="w-4 h-4" />
           </button>

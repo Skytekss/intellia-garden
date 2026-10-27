@@ -7,7 +7,7 @@ export type NavigationTab =
   | 'settings' 
   | 'support';
 
-export type AppleVariety = 'Гала' | 'Фуджи' | 'Голден' | 'Ред Делишес' | 'Хани Крисп';
+export type AppleVariety = 'Гала' | 'Фуджи' | 'Голден' | 'Ред Делишес' | 'Хани Крисп' | 'Gala' | 'Fuji' | 'Golden Delicious' | 'Red Delicious' | 'Honeycrisp' | string;
 
 export interface GardenSector {
   id: string;
@@ -99,7 +99,8 @@ export type AgroOperationType =
   | 'Удобрения' 
   | 'Обработка' 
   | 'Обрезка' 
-  | 'Прореживание плодов';
+  | 'Прореживание плодов'
+  | string;
 
 export interface AgroRecord {
   id: string;

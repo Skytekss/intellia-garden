@@ -13,6 +13,7 @@ import {
 import { SpectralChannel, HyperspectralUploadState } from '../../types';
 import { droneModelsList } from '../../data/mockData';
 import { SpectralSampleCard } from './SpectralSampleCard';
+import { useApp } from '../../context/AppContext';
 
 interface HyperspectralUploadCardProps {
   onSave?: (data: HyperspectralUploadState) => void;
@@ -27,6 +28,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
   onNavigateNext,
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
   const [surveyDate, setSurveyDate] = useState('2025-08-12');
   const [droneModel, setDroneModel] = useState('DJI Mavic 3M');
   const [channels, setChannels] = useState<SpectralChannel[]>([
@@ -76,27 +78,27 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
     setFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(1)} КБ`;
-    }
-    return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const payload: HyperspectralUploadState = {
+  const handleSubmit = () => {
+    const uploadData: HyperspectralUploadState = {
       surveyDate,
       droneModel,
       channels,
       files,
     };
     if (onSave) {
-      onSave(payload);
+      onSave(uploadData);
     }
     if (onNavigateNext) {
       onNavigateNext();
     }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
   return (
@@ -104,19 +106,26 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
       data-testid="hyperspectral-upload-card"
       className={`bg-white rounded-2xl p-5 sm:p-6 shadow-xs border border-slate-200/80 min-w-0 ${className}`}
     >
-      {/* Title */}
-      <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-5">
-        Гиперспектральные данные с дрона
-      </h3>
+      {/* Card Header */}
+      <div className="mb-5">
+        <h3 className="text-base sm:text-lg font-bold text-slate-900">
+          {isEnglish ? 'Hyperspectral Orchard Survey' : 'Гиперспектральная съемка сада'}
+        </h3>
+        <p className="text-xs text-slate-500 mt-1">
+          {isEnglish
+            ? 'Upload & calibration of multispectral orthomosaics from aerial cameras'
+            : 'Загрузка и калибровка ортофотопланов с мультиспектральных камер'}
+        </p>
+      </div>
 
-      {/* Top Section: Drop Zone & Sample Image */}
+      {/* Top Section: Drop Zone (Left) & Spectral Sample (Right) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch min-w-0">
-        {/* Drop Zone */}
+        {/* Drag & Drop Zone */}
         <div
+          data-testid="drop-zone"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          data-testid="drop-zone"
           className={`md:col-span-7 flex flex-col items-center justify-center p-5 sm:p-6 rounded-xl border-2 border-dashed transition-all text-center min-w-0 ${
             isDragging
               ? 'border-emerald-500 bg-emerald-50/70 scale-[1.01]'
@@ -128,9 +137,11 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
             <UploadCloud className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
 
-          <h4 className="text-sm font-bold text-slate-800 mb-1">Загрузите снимки</h4>
+          <h4 className="text-sm font-bold text-slate-800 mb-1">
+            {t('data.upload.title') || 'Загрузите снимки'}
+          </h4>
           <p className="text-xs text-slate-500 max-w-xs mb-3.5">
-            Перетащите файлы сюда или выберите с компьютера
+            {t('data.upload.drop') || 'Перетащите файлы сюда или выберите с компьютера'}
           </p>
 
           {/* Trigger button */}
@@ -141,7 +152,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
             className="px-4 py-2 bg-[#07503b] hover:bg-[#096047] active:scale-[0.98] text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs transition-colors flex items-center gap-1.5"
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>Выбрать файлы</span>
+            <span>{t('data.upload.select') || 'Выбрать файлы'}</span>
           </button>
 
           {/* Hidden File Input */}
@@ -162,8 +173,12 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
               className="mt-4 w-full space-y-2 text-left border-t border-emerald-200/60 pt-3"
             >
               <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                <span className="font-medium">Выбрано файлов: {files.length}</span>
-                <span className="text-emerald-700 font-medium">Готовы к загрузке</span>
+                <span className="font-medium">
+                  {isEnglish ? `Selected files: ${files.length}` : `Выбрано файлов: ${files.length}`}
+                </span>
+                <span className="text-emerald-700 font-medium">
+                  {isEnglish ? 'Ready for upload' : 'Готовы к загрузке'}
+                </span>
               </div>
               <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                 {files.map((file, idx) => (
@@ -183,14 +198,14 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium text-xs">
                         <CheckCircle2 className="w-3 h-3" />
-                        Готов
+                        {isEnglish ? 'Ready' : 'Готов'}
                       </span>
                       <button
                         type="button"
                         data-testid={`remove-file-${idx}`}
                         onClick={() => handleRemoveFile(idx)}
                         className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                        title="Удалить файл"
+                        title={isEnglish ? 'Remove file' : 'Удалить файл'}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -218,7 +233,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
               className="text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
             >
               <Calendar className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Дата съемки</span>
+              <span>{t('data.upload.date') || 'Дата съемки'}</span>
             </label>
             <input
               id="survey-date"
@@ -237,7 +252,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
               className="text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
             >
               <Send className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Тип дрона</span>
+              <span>{t('data.upload.drone') || 'Модель БПЛА'}</span>
             </label>
             <select
               id="drone-model"
@@ -259,7 +274,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
         <div>
           <label className="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5 text-emerald-700" />
-            <span>Спектральные каналы</span>
+            <span>{t('data.upload.channels') || 'Спектральные каналы'}</span>
           </label>
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             {ALL_CHANNELS.map((ch) => {
@@ -296,7 +311,7 @@ export const HyperspectralUploadCard: React.FC<HyperspectralUploadCardProps> = (
             onClick={handleSubmit}
             className="w-full sm:w-auto px-6 py-2.5 bg-[#07503b] hover:bg-[#096047] active:scale-[0.98] text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Сохранить и Продолжить</span>
+            <span>{isEnglish ? 'Save & Continue' : 'Сохранить и Продолжить'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

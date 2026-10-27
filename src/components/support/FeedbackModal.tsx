@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Send, CheckCircle2, MessageSquareText, AlertCircle } from 'lucide-react';
 import { FeedbackFormData } from './types';
+import { useApp } from '../../context/AppContext';
 
 export interface FeedbackModalProps {
   isOpen: boolean;
@@ -8,7 +9,7 @@ export interface FeedbackModalProps {
   initialCategory?: string;
 }
 
-const CATEGORY_OPTIONS = [
+const CATEGORY_OPTIONS_RU = [
   'Вопрос по функционалу платформы',
   'Техническая ошибка / Баг в системе',
   'Калибровка данных зрелости плодов',
@@ -17,13 +18,25 @@ const CATEGORY_OPTIONS = [
   'Другое',
 ];
 
+const CATEGORY_OPTIONS_EN = [
+  'Platform functionality question',
+  'Technical error / System bug',
+  'Fruit maturity calibration',
+  'KML contours and orthophotos upload',
+  'Consultation with agronomist',
+  'Other',
+];
+
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
   initialCategory,
 }) => {
+  const { isEnglish } = useApp();
+  const categoryOptions = isEnglish ? CATEGORY_OPTIONS_EN : CATEGORY_OPTIONS_RU;
+
   const [formData, setFormData] = useState<FeedbackFormData>({
-    category: initialCategory || CATEGORY_OPTIONS[0],
+    category: initialCategory || categoryOptions[0],
     subject: '',
     message: '',
     email: 'agronomist@goldengarden.ru',
@@ -41,9 +54,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       setErrors({});
       if (initialCategory) {
         setFormData((prev) => ({ ...prev, category: initialCategory }));
+      } else {
+        setFormData((prev) => ({ ...prev, category: categoryOptions[0] }));
       }
     }
-  }, [isOpen, initialCategory]);
+  }, [isOpen, initialCategory, isEnglish]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,12 +75,14 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const validate = (): boolean => {
     const newErrors: { subject?: string; message?: string } = {};
     if (!formData.subject.trim()) {
-      newErrors.subject = 'Укажите тему обращения';
+      newErrors.subject = isEnglish ? 'Specify inquiry subject' : 'Укажите тему обращения';
     }
     if (!formData.message.trim()) {
-      newErrors.message = 'Введите текст сообщения';
+      newErrors.message = isEnglish ? 'Enter message text' : 'Введите текст сообщения';
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = 'Сообщение должно содержать не менее 10 символов';
+      newErrors.message = isEnglish
+        ? 'Message must contain at least 10 characters'
+        : 'Сообщение должно содержать не менее 10 символов';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -111,10 +128,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 id="feedback-modal-title"
                 className="text-lg font-bold text-slate-900 leading-tight"
               >
-                Написать в поддержку
+                {isEnglish ? 'Contact Support' : 'Написать в поддержку'}
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Мы ответим вам в течение 2 часов
+                {isEnglish ? 'We will reply within 2 hours' : 'Мы ответим вам в течение 2 часов'}
               </p>
             </div>
           </div>
@@ -124,7 +141,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             data-testid="feedback-modal-close"
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors cursor-pointer"
-            aria-label="Закрыть окно"
+            aria-label={isEnglish ? 'Close window' : 'Закрыть окно'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -141,13 +158,15 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h4 className="text-xl font-bold text-slate-900">
-                Обращение успешно отправлено!
+                {isEnglish ? 'Inquiry successfully sent!' : 'Обращение успешно отправлено!'}
               </h4>
               <p className="text-xs text-emerald-800 font-semibold bg-emerald-50 px-3 py-1 rounded-full mt-2">
-                Заявка #2048 принята в работу
+                {isEnglish ? 'Ticket #2048 is in progress' : 'Заявка #2048 принята в работу'}
               </p>
               <p className="text-xs sm:text-sm text-slate-600 mt-3 max-w-sm">
-                Специалист агрономической поддержки свяжется с вами по указанному email: {formData.email}.
+                {isEnglish
+                  ? `An agronomy specialist will contact you via email: ${formData.email}.`
+                  : `Специалист агрономической поддержки свяжется с вами по указанному email: ${formData.email}.`}
               </p>
               <button
                 type="button"
@@ -155,7 +174,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 onClick={onClose}
                 className="mt-6 px-6 py-2.5 rounded-xl bg-[#07503b] hover:bg-[#096047] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer"
               >
-                Готово
+                {isEnglish ? 'Done' : 'Готово'}
               </button>
             </div>
           ) : (
@@ -166,7 +185,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   htmlFor="feedback-category"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Категория вопроса
+                  {isEnglish ? 'Inquiry Category' : 'Категория вопроса'}
                 </label>
                 <select
                   id="feedback-category"
@@ -177,7 +196,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   }
                   className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600/40 focus:border-emerald-600 transition-colors"
                 >
-                  {CATEGORY_OPTIONS.map((opt) => (
+                  {categoryOptions.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}
                     </option>
@@ -191,13 +210,17 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   htmlFor="feedback-subject"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Тема обращения *
+                  {isEnglish ? 'Inquiry Subject *' : 'Тема обращения *'}
                 </label>
                 <input
                   id="feedback-subject"
                   type="text"
                   data-testid="feedback-subject-input"
-                  placeholder="Например: Не сходится Brix на участке 2"
+                  placeholder={
+                    isEnglish
+                      ? 'e.g.: Brix reading mismatch on Sector 2'
+                      : 'Например: Не сходится Brix на участке 2'
+                  }
                   value={formData.subject}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, subject: e.target.value }))
@@ -222,13 +245,17 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   htmlFor="feedback-message"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Описание проблемы или вопроса *
+                  {isEnglish ? 'Problem or Inquiry Description *' : 'Описание проблемы или вопроса *'}
                 </label>
                 <textarea
                   id="feedback-message"
                   rows={4}
                   data-testid="feedback-message-textarea"
-                  placeholder="Опишите подробно, с чем возникла сложность..."
+                  placeholder={
+                    isEnglish
+                      ? 'Describe the difficulty in detail...'
+                      : 'Опишите подробно, с чем возникла сложность...'
+                  }
                   value={formData.message}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, message: e.target.value }))
@@ -253,7 +280,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   htmlFor="feedback-email"
                   className="block text-xs font-semibold text-slate-700 mb-1.5"
                 >
-                  Контактный Email для ответа
+                  {isEnglish ? 'Contact Email for reply' : 'Контактный Email для ответа'}
                 </label>
                 <input
                   id="feedback-email"
@@ -274,7 +301,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
-                  Отмена
+                  {isEnglish ? 'Cancel' : 'Отмена'}
                 </button>
 
                 <button
@@ -284,7 +311,15 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#07503b] hover:bg-[#096047] active:scale-[0.99] disabled:opacity-50 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Отправка...' : 'Отправить обращение'}</span>
+                  <span>
+                    {isSubmitting
+                      ? isEnglish
+                        ? 'Sending...'
+                        : 'Отправка...'
+                      : isEnglish
+                      ? 'Send Inquiry'
+                      : 'Отправить обращение'}
+                  </span>
                 </button>
               </div>
             </form>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Leaf, ArrowRight, MapPin } from 'lucide-react';
 import { NavigationTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface CTABarProps {
   onNavigate: (tab: NavigationTab) => void;
@@ -11,6 +12,8 @@ export const CTABar: React.FC<CTABarProps> = ({
   onNavigate,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
+
   return (
     <div className={`w-full ${className}`}>
       <button
@@ -18,7 +21,7 @@ export const CTABar: React.FC<CTABarProps> = ({
         data-testid="cta-go-to-map"
         onClick={() => onNavigate('map')}
         className="w-full bg-[#07503b] hover:bg-[#096047] active:scale-[0.995] text-white rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-lg shadow-emerald-950/15 transition-all duration-200 cursor-pointer group text-left"
-        aria-label="Перейти к карте сада"
+        aria-label={isEnglish ? 'Go to Garden Map' : 'Перейти к карте сада'}
       >
         {/* Left Side: Leaf icon & Titles */}
         <div className="flex items-center gap-3.5 sm:gap-4">
@@ -28,18 +31,20 @@ export const CTABar: React.FC<CTABarProps> = ({
 
           <div>
             <div className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Перейти к карте сада</span>
+              <span>{isEnglish ? 'Go to Garden Map' : 'Перейти к карте сада'}</span>
               <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
-                Интерактивно
+                {isEnglish ? 'Interactive' : 'Интерактивно'}
               </span>
             </div>
             <div className="text-xs sm:text-sm text-emerald-200/80 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                Визуализация 5 секторов
+                {isEnglish ? 'Visualization of 5 sectors' : 'Визуализация 5 секторов'}
               </span>
               <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">Сорта яблок и процент готовности</span>
+              <span className="hidden sm:inline">
+                {isEnglish ? 'Apple varieties & maturity progress' : 'Сорта яблок и процент готовности'}
+              </span>
             </div>
           </div>
         </div>

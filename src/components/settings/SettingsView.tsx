@@ -153,7 +153,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </AnimatePresence>
 
       {/* Screen Title (Accessible H1 for screen readers and automated tests) */}
-      <h1 className="sr-only">Настройки</h1>
+      <h1 className="sr-only">{app.isEnglish ? 'Settings' : 'Настройки'}</h1>
 
       {/* Two-column layout grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-start">

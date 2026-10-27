@@ -7,6 +7,7 @@ import { ContactChannels } from './ContactChannels';
 import { SupportBanner } from './SupportBanner';
 import { FeedbackModal } from './FeedbackModal';
 import { ChatModal } from './ChatModal';
+import { useApp } from '../../context/AppContext';
 
 export interface SupportViewProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -16,9 +17,15 @@ export interface SupportViewProps {
 export const SupportView: React.FC<SupportViewProps> = ({
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
+  const defaultCategory = isEnglish ? 'Platform functionality question' : 'Вопрос по функционалу платформы';
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [feedbackCategory, setFeedbackCategory] = useState<string>('Вопрос по функционалу платформы');
+  const [feedbackCategory, setFeedbackCategory] = useState<string>(defaultCategory);
+
+  React.useEffect(() => {
+    setFeedbackCategory(defaultCategory);
+  }, [defaultCategory]);
 
   const handleSelectCategory = (categoryId: SupportCategoryId) => {
     if (categoryId === 'faq') {
@@ -27,19 +34,19 @@ export const SupportView: React.FC<SupportViewProps> = ({
         faqElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else if (categoryId === 'feedback') {
-      setFeedbackCategory('Вопрос по функционалу платформы');
+      setFeedbackCategory(defaultCategory);
       setIsFeedbackOpen(true);
     } else if (categoryId === 'guides') {
-      setFeedbackCategory('Вопрос по функционалу платформы');
+      setFeedbackCategory(defaultCategory);
       setIsFeedbackOpen(true);
     } else if (categoryId === 'videos') {
-      setFeedbackCategory('Вопрос по функционалу платформы');
+      setFeedbackCategory(defaultCategory);
       setIsFeedbackOpen(true);
     }
   };
 
   const handleOpenFeedbackModal = () => {
-    setFeedbackCategory('Вопрос по функционалу платформы');
+    setFeedbackCategory(defaultCategory);
     setIsFeedbackOpen(true);
   };
 
@@ -55,10 +62,12 @@ export const SupportView: React.FC<SupportViewProps> = ({
       {/* 1. Header Section */}
       <div className="pb-1 border-b border-slate-200/60">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-          Поддержка
+          {t('nav.support') || 'Поддержка'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-snug">
-          Мы всегда рядом, чтобы помочь вам заботиться о вашем саде
+          {isEnglish
+            ? 'We are always by your side to help you care for your orchard'
+            : 'Мы всегда рядом, чтобы помочь вам заботиться о вашем саде'}
         </p>
       </div>
 

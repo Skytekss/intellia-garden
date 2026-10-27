@@ -2,7 +2,9 @@ import React from 'react';
 import { Map, ArrowRight, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import { NavigationTab, GardenSector } from '../../types';
-import { mockSectors, getMaturityMetadata } from '../../data/mockData';
+import { getMaturityMetadata } from '../../data/mockData';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedSectors } from '../../context/localizedData';
 
 interface ForecastMaturityPreviewProps {
   onNavigate?: (tab: NavigationTab) => void;
@@ -13,6 +15,8 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
   onNavigate,
   className = '',
 }) => {
+  const { isEnglish, isImperial } = useApp();
+  const sectors = getLocalizedSectors(isEnglish);
   return (
     <div
       data-testid="forecast-maturity-preview"
@@ -23,13 +27,17 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
             <Map className="w-3.5 h-3.5" />
-            <span>Спектральная карта созревания</span>
+            <span>{isEnglish ? 'Spectral Maturity Map' : 'Спектральная карта созревания'}</span>
           </div>
           <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-            Распределение готовности плодов по секторам сада
+            {isEnglish
+              ? 'Fruit readiness distribution across orchard sectors'
+              : 'Распределение готовности плодов по секторам сада'}
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
-            Картографическая визуализация на основе индекса NDVI и гиперспектральных снимков с БПЛА.
+            {isEnglish
+              ? 'Cartographic visualization based on NDVI index and UAV hyperspectral imagery.'
+              : 'Картографическая визуализация на основе индекса NDVI и гиперспектральных снимков с БПЛА.'}
           </p>
         </div>
 
@@ -40,7 +48,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
             onClick={() => onNavigate('map')}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#07503b] hover:bg-[#096047] active:scale-[0.98] text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer shrink-0"
           >
-            <span>Открыть полную карту сада</span>
+            <span>{isEnglish ? 'Open full orchard map' : 'Открыть полную карту сада'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
@@ -48,7 +56,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
 
       {/* Grid of Sector Ripening Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockSectors.map((sector: GardenSector, index: number) => {
+        {sectors.map((sector: GardenSector, index: number) => {
           const meta = getMaturityMetadata(sector.maturityPercent);
 
           return (
@@ -63,7 +71,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <span className="text-xs text-slate-400 font-medium">Сектор</span>
+                    <span className="text-xs text-slate-400 font-medium">{isEnglish ? 'Sector' : 'Сектор'}</span>
                     <h4 className="text-sm sm:text-base font-bold text-slate-900">
                       {sector.name}
                     </h4>
@@ -77,23 +85,33 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
 
                 <div className="space-y-1.5 text-xs text-slate-600 mb-4">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Сорт:</span>
+                    <span className="text-slate-500">{isEnglish ? 'Variety:' : 'Сорт:'}</span>
                     <span className="font-semibold text-slate-800">{sector.variety}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Площадь:</span>
-                    <span className="font-medium text-slate-700">{sector.area} га</span>
+                    <span className="text-slate-500">{isEnglish ? 'Area:' : 'Площадь:'}</span>
+                    <span className="font-medium text-slate-700">
+                      {isImperial
+                        ? `${(sector.area * 2.471).toFixed(1)} ${isEnglish ? 'ac' : 'акров'}`
+                        : `${sector.area} ${isEnglish ? 'ha' : 'га'}`}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Окно сбора:</span>
+                    <span className="text-slate-500">{isEnglish ? 'Harvest window:' : 'Окно сбора:'}</span>
                     <span className="font-semibold text-emerald-700">
                       {sector.recommendedDate}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Фаза:</span>
+                    <span className="text-slate-500">{isEnglish ? 'Phase:' : 'Фаза:'}</span>
                     <span className={`font-semibold ${meta.badgeText}`}>
-                      {meta.label}
+                      {isEnglish
+                        ? (sector.maturityPercent >= 75
+                            ? 'Ready for harvest'
+                            : sector.maturityPercent >= 55
+                            ? 'Ripening'
+                            : 'Early phase')
+                        : meta.label}
                     </span>
                   </div>
                 </div>
@@ -101,7 +119,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
                 {/* Ripening Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-slate-400 font-medium">
-                    <span>Уровень созревания</span>
+                    <span>{isEnglish ? 'Ripening level' : 'Уровень созревания'}</span>
                     <span>{sector.maturityPercent}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -121,7 +139,7 @@ export const ForecastMaturityPreview: React.FC<ForecastMaturityPreviewProps> = (
                 >
                   <span className="inline-flex items-center gap-1.5">
                     <Eye className="w-3.5 h-3.5" />
-                    <span>Посмотреть на карте</span>
+                    <span>{isEnglish ? 'View on map' : 'Посмотреть на карте'}</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>

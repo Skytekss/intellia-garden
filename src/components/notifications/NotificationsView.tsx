@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ShieldCheck, CheckCircle2, BellOff, RotateCcw } from 'lucide-react';
 import { NavigationTab, NotificationItem, NotificationFilterTab } from '../../types';
 import { mockNotifications } from '../../data/mockNotifications';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedNotifications } from '../../context/localizedData';
 import { NotificationCard } from './NotificationCard';
 import { NotificationFilterBar } from './NotificationFilterBar';
 import { NotificationDetailModal } from './NotificationDetailModal';
@@ -17,7 +19,18 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
   initialNotifications = mockNotifications,
   className = '',
 }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+  const { isEnglish, t } = useApp();
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() =>
+    initialNotifications !== mockNotifications
+      ? initialNotifications
+      : getLocalizedNotifications(isEnglish)
+  );
+
+  React.useEffect(() => {
+    if (initialNotifications === mockNotifications) {
+      setNotifications(getLocalizedNotifications(isEnglish));
+    }
+  }, [isEnglish, initialNotifications]);
   const [activeFilter, setActiveFilter] = useState<NotificationFilterTab>('all');
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,22 +81,28 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
       case 'diseases':
         return {
           icon: ShieldCheck,
-          title: 'Угрозы заболеваний не обнаружены',
+          title: isEnglish ? 'No disease threats detected' : 'Угрозы заболеваний не обнаружены',
           description:
-            'В вашем саду не зафиксировано признаков заболеваний, парши или вредителей. Мониторинг продолжается в штатном режиме.',
+            isEnglish
+              ? 'No signs of diseases, scab, or pests have been detected in your orchard. Monitoring continues normally.'
+              : 'В вашем саду не зафиксировано признаков заболеваний, парши или вредителей. Мониторинг продолжается в штатном режиме.',
         };
       case 'system':
         return {
           icon: CheckCircle2,
-          title: 'Системных оповещений нет',
+          title: isEnglish ? 'No system alerts' : 'Системных оповещений нет',
           description:
-            'Все бортовые модули дронов, базовые станции и алгоритмы анализа данных функционируют стабильно.',
+            isEnglish
+              ? 'All onboard drone modules, base stations, and data analysis algorithms are operating stably.'
+              : 'Все бортовые модули дронов, базовые станции и алгоритмы анализа данных функционируют стабильно.',
         };
       default:
         return {
           icon: BellOff,
-          title: 'Уведомлений не найдено',
-          description: 'В выбранной категории в настоящее время нет активных оповещений.',
+          title: isEnglish ? 'No notifications found' : 'Уведомлений не найдено',
+          description: isEnglish
+            ? 'There are currently no active alerts in the selected category.'
+            : 'В выбранной категории в настоящее время нет активных оповещений.',
         };
     }
   };
@@ -103,10 +122,12 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
             data-testid="notifications-title"
             className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight"
           >
-            Уведомления
+            {t('notif.title') || 'Уведомления'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Оперативные агрономические сводки, риски погоды и рекомендации ИИ
+            {isEnglish
+              ? 'Operational agronomical briefings, weather risks, and AI recommendations'
+              : 'Оперативные агрономические сводки, риски погоды и рекомендации ИИ'}
           </p>
         </div>
       </div>
@@ -153,7 +174,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
               className="mt-6 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-50 hover:bg-emerald-100/80 text-[#07503b] border border-emerald-200/70 text-xs font-semibold rounded-xl transition-all cursor-pointer active:scale-95"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Показать все уведомления</span>
+              <span>{isEnglish ? 'Show all notifications' : 'Показать все уведомления'}</span>
             </button>
           </div>
         )}

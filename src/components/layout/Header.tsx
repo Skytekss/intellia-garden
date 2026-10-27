@@ -37,6 +37,18 @@ const AVAILABLE_FARMS = [
   'Сады Придонья — Сектор Север',
 ];
 
+const FARM_NAMES_EN: Record<string, string> = {
+  'Ферма «Золотой Сад»': 'Farm "Golden Orchard"',
+  'Участок «Яблоневый Яр»': 'Apple Ravine Plot',
+  'Сады Придонья — Сектор Север': 'Don Orchards — North Sector',
+};
+
+const REGION_NAMES_EN: Record<string, string> = {
+  'Тульская область': 'Tula Region',
+  'Липецкая область': 'Lipetsk Region',
+  'Краснодарский край': 'Krasnodar Krai',
+};
+
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onOpenMobileMenu,
@@ -107,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </h1>
             <p className="text-xs text-slate-500 hidden sm:block">
-              {effectiveFarm.region} • {isEn ? 'Area:' : 'Площадь:'} {areaDisplay}
+              {isEn ? (REGION_NAMES_EN[effectiveFarm.region] || effectiveFarm.region) : effectiveFarm.region} • {isEn ? 'Area:' : 'Площадь:'} {areaDisplay}
             </p>
           </div>
         </div>
@@ -140,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <MapPin className="w-3.5 h-3.5" />
               </div>
               <span className="hidden sm:inline truncate max-w-[140px] md:max-w-[200px]">
-                {selectedFarm}
+                {isEn ? (FARM_NAMES_EN[selectedFarm] || selectedFarm) : selectedFarm}
               </span>
               <ChevronDown
                 className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
@@ -160,6 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 {AVAILABLE_FARMS.map((farm) => {
                   const isSelected = farm === selectedFarm;
+                  const farmLabel = isEn ? (FARM_NAMES_EN[farm] || farm) : farm;
                   return (
                     <button
                       key={farm}
@@ -178,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
                           : 'text-slate-700'
                       }`}
                     >
-                      <span className="truncate">{farm}</span>
+                      <span className="truncate">{farmLabel}</span>
                       {isSelected && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
                     </button>
                   );
@@ -198,7 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="relative">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-800 to-teal-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                АС
+                {isEn ? 'AS' : 'АС'}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>

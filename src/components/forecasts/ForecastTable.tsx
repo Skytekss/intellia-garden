@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ForecastSectorRow } from '../../types';
+import { useApp } from '../../context/AppContext';
 import { mockForecastRows, getMaturityColor, getMaturityMetadata } from '../../data/mockData';
 
 interface ForecastTableProps {
@@ -37,6 +38,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
   onSelectRow,
   className = '',
 }) => {
+  const { isEnglish, t } = useApp();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [varietyFilter, setVarietyFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('name');
@@ -118,10 +120,12 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
             data-testid="forecast-table-title"
             className="text-base sm:text-lg font-bold text-slate-800 tracking-tight"
           >
-            Рекомендованные даты сбора
+            {t('forecasts.table.title') || 'Рекомендованные даты сбора'}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Оперативный расчет зрелости по участкам на основе мультиспектрального анализа
+            {isEnglish
+              ? 'Operational calculation of sector maturity based on multispectral analysis'
+              : 'Оперативный расчет зрелости по участкам на основе мультиспектрального анализа'}
           </p>
         </div>
 
@@ -135,7 +139,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
               data-testid="forecast-table-search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Поиск по участку или сорту..."
+              placeholder={isEnglish ? 'Search by sector or variety...' : 'Поиск по участку или сорту...'}
               className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
             />
             {searchQuery && (
@@ -143,7 +147,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
-                aria-label="Очистить поиск"
+                aria-label={isEnglish ? 'Clear search' : 'Очистить поиск'}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -159,7 +163,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
               onChange={(e) => setVarietyFilter(e.target.value)}
               className="pl-8 pr-7 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white cursor-pointer appearance-none transition-all"
             >
-              <option value="all">Все сорта</option>
+              <option value="all">{isEnglish ? 'All varieties' : 'Все сорта'}</option>
               {varieties.filter((v) => v !== 'all').map((v) => (
                 <option key={v} value={v}>
                   {v}
@@ -184,7 +188,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                   onClick={() => handleSortToggle('name')}
                   className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
                 >
-                  <span>Участок</span>
+                  <span>{isEnglish ? 'Sector' : 'Участок'}</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
@@ -194,7 +198,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                   onClick={() => handleSortToggle('variety')}
                   className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
                 >
-                  <span>Сорт</span>
+                  <span>{isEnglish ? 'Variety' : 'Сорт'}</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
@@ -204,7 +208,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                   onClick={() => handleSortToggle('maturityPercent')}
                   className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
                 >
-                  <span>Степень зрелости</span>
+                  <span>{isEnglish ? 'Maturity Degree' : 'Степень зрелости'}</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
@@ -214,12 +218,12 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                   onClick={() => handleSortToggle('recommendedDate')}
                   className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
                 >
-                  <span>Рекомендуемая дата</span>
+                  <span>{isEnglish ? 'Recommended Date' : 'Рекомендуемая дата'}</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
               <th className="py-3 px-2 sm:px-3 text-right">
-                <span className="sr-only">Действия</span>
+                <span className="sr-only">{isEnglish ? 'Actions' : 'Действия'}</span>
               </th>
             </tr>
           </thead>
@@ -246,7 +250,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                         <span>{row.name}</span>
                         {isSelected && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                            Выбран
+                            {isEnglish ? 'Selected' : 'Выбран'}
                           </span>
                         )}
                       </div>
@@ -295,7 +299,9 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                   colSpan={5}
                   className="py-8 text-center text-xs text-slate-500 font-medium"
                 >
-                  Участки не найдены по запросу «{searchQuery}».
+                  {isEnglish
+                    ? `No sectors found matching "${searchQuery}".`
+                    : `Участки не найдены по запросу «${searchQuery}».`}
                 </td>
               </tr>
             )}
@@ -316,13 +322,13 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Детализация: {selectedRow.name} ({selectedRow.variety})</span>
+              <span>{isEnglish ? 'Details:' : 'Детализация:'} {selectedRow.name} ({selectedRow.variety})</span>
             </div>
             <button
               type="button"
               onClick={() => setSelectedRowId(null)}
               className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
-              aria-label="Свернуть детализацию"
+              aria-label={isEnglish ? 'Collapse details' : 'Свернуть детализацию'}
             >
               <X className="w-4 h-4" />
             </button>
@@ -330,23 +336,29 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200/60">
             <div>
-              <span className="text-slate-500 block">Текущая зрелость:</span>
+              <span className="text-slate-500 block">{isEnglish ? 'Current maturity:' : 'Текущая зрелость:'}</span>
               <span className="font-semibold text-slate-900 text-sm">
-                {selectedRow.maturityPercent}% ({getStatusLabel(selectedRow.maturityPercent)})
+                {selectedRow.maturityPercent}% ({isEnglish
+                  ? (selectedRow.maturityPercent >= 75
+                      ? 'Ready for harvest'
+                      : selectedRow.maturityPercent >= 55
+                      ? 'Ripening'
+                      : 'Early phase')
+                  : getStatusLabel(selectedRow.maturityPercent)})
               </span>
             </div>
             <div>
-              <span className="text-slate-500 block">Окно сбора:</span>
+              <span className="text-slate-500 block">{isEnglish ? 'Harvest window:' : 'Окно сбора:'}</span>
               <span className="font-semibold text-emerald-800 text-sm">
                 {selectedRow.recommendedDate}
               </span>
             </div>
             <div>
-              <span className="text-slate-500 block">Агро-рекомендация:</span>
+              <span className="text-slate-500 block">{isEnglish ? 'Agro-recommendation:' : 'Агро-рекомендация:'}</span>
               <span className="font-medium text-slate-800">
                 {selectedRow.maturityPercent >= 75
-                  ? 'Приоритетный сбор в сухую погоду'
-                  : 'Контрольный облет через 5 дней'}
+                  ? (isEnglish ? 'Priority harvest in dry weather' : 'Приоритетный сбор в сухую погоду')
+                  : (isEnglish ? 'Control drone flight in 5 days' : 'Контрольный облет через 5 дней')}
               </span>
             </div>
           </div>

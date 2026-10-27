@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { App } from '../../../App';
 
 describe('Settings Interactivity & Reactive App State', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    window.history.replaceState({}, '', '/');
+  });
+
   it('switches language between Russian and English across the entire app', () => {
     render(<App />);
 
@@ -142,5 +147,39 @@ describe('Settings Interactivity & Reactive App State', () => {
 
     fireEvent.change(dateFormatSelect, { target: { value: 'ГГГГ-ММ-ДД' } });
     expect(dateFormatSelect).toHaveValue('ГГГГ-ММ-ДД');
+  });
+
+  it('displays zero Russian text in English mode across all views', () => {
+    render(<App />);
+
+    // 1. Switch to English in Settings
+    fireEvent.click(screen.getByTestId('nav-item-settings'));
+    const langSelect = screen.getByTestId('select-language');
+    fireEvent.change(langSelect, { target: { value: 'English' } });
+
+    // Helper to extract Russian words
+    const findRussianWords = (element: HTMLElement) => {
+      const text = element.textContent || '';
+      const matches = text.match(/[а-яА-ЯёЁ]{2,}/g) || [];
+      return Array.from(new Set(matches));
+    };
+
+    // Check views
+    const views = [
+      { tab: 'nav-item-overview', testId: 'dashboard-view', name: 'Dashboard' },
+      { tab: 'nav-item-map', testId: 'garden-map-view', name: 'Garden Map' },
+      { tab: 'nav-item-data', testId: 'data-entry-view', name: 'Data Entry' },
+      { tab: 'nav-item-forecasts', testId: 'forecasts-view', name: 'Forecasts' },
+      { tab: 'nav-item-notifications', testId: 'notifications-view', name: 'Notifications' },
+      { tab: 'nav-item-support', testId: 'support-view', name: 'Support' },
+      { tab: 'nav-item-settings', testId: 'settings-view', name: 'Settings' },
+    ];
+
+    for (const view of views) {
+      fireEvent.click(screen.getByTestId(view.tab));
+      const el = screen.getByTestId(view.testId);
+      const russianWords = findRussianWords(el);
+      expect(russianWords, `Found Russian words on ${view.name}: ${russianWords.join(', ')}`).toEqual([]);
+    }
   });
 });

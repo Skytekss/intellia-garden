@@ -2,6 +2,8 @@ import React from 'react';
 import { ChevronRight, Clock } from 'lucide-react';
 import { ContactChannelItem } from './types';
 import { CONTACT_CHANNELS } from './supportData';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedContactChannels } from '../../context/localizedData';
 
 export interface ContactChannelsProps {
   channels?: ContactChannelItem[];
@@ -14,6 +16,8 @@ export const ContactChannels: React.FC<ContactChannelsProps> = ({
   onOpenChat,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
+  const items = channels !== CONTACT_CHANNELS ? channels : getLocalizedContactChannels(isEnglish);
   return (
     <div
       data-testid="contact-channels"
@@ -23,16 +27,16 @@ export const ContactChannels: React.FC<ContactChannelsProps> = ({
         {/* Header matching reference */}
         <div className="pb-4 border-b border-slate-100">
           <h2 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">
-            Связаться с нами
+            {isEnglish ? 'Contact Us' : 'Связаться с нами'}
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Выберите удобный способ связи
+            {isEnglish ? 'Choose a preferred channel' : 'Выберите удобный способ связи'}
           </p>
         </div>
 
         {/* Channels List */}
         <div className="space-y-3 mt-4">
-          {channels.map((channel) => {
+          {items.map((channel) => {
             const IconComponent = channel.icon;
             const isChat = channel.type === 'chat';
 
@@ -44,12 +48,12 @@ export const ContactChannels: React.FC<ContactChannelsProps> = ({
                   </div>
                   <div className="min-w-0 text-left">
                     <span className="text-xs text-slate-500 font-medium block">
-                      {channel.title === 'Email' ? 'Электронная почта' : channel.title}
+                      {channel.title === 'Email' ? (isEnglish ? 'Email' : 'Электронная почта') : channel.title}
                     </span>
                     {isChat ? (
                       <span className="text-xs sm:text-sm font-semibold text-emerald-700 flex items-center gap-1.5 mt-0.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Круглосуточно
+                        {isEnglish ? '24/7' : 'Круглосуточно'}
                       </span>
                     ) : (
                       <span className="text-xs sm:text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors mt-0.5 block truncate">
@@ -100,12 +104,14 @@ export const ContactChannels: React.FC<ContactChannelsProps> = ({
         </div>
         <div className="min-w-0">
           <span className="text-xs text-slate-500 block leading-tight">
-            Среднее время ответа
+            {isEnglish ? 'Average response time' : 'Среднее время ответа'}
           </span>
           <span className="text-xs sm:text-sm font-bold text-slate-800 block leading-tight mt-0.5">
-            до 2 часов
+            {isEnglish ? 'within 2 hours' : 'до 2 часов'}
           </span>
-          <span className="sr-only">Среднее время ответа — до 2 часов</span>
+          <span className="sr-only">
+            {isEnglish ? 'Average response time — within 2 hours' : 'Среднее время ответа — до 2 часов'}
+          </span>
         </div>
       </div>
     </div>

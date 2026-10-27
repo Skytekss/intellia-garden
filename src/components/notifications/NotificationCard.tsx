@@ -8,6 +8,7 @@ import {
   Droplets,
 } from 'lucide-react';
 import { NotificationItem, NavigationTab } from '../../types';
+import { useApp } from '../../context/AppContext';
 
 export interface NotificationCardProps {
   notification: NotificationItem;
@@ -22,9 +23,10 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onOpenDetails,
   className = '',
 }) => {
+  const { isEnglish } = useApp();
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (notification.actionText === 'Подробнее →') {
+    if (notification.actionText === 'Подробнее →' || notification.actionText === 'Details →') {
       if (onOpenDetails) {
         onOpenDetails(notification);
       } else if (onNavigate) {
@@ -159,7 +161,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                 {showDot && (
                   <span
                     data-testid={`mobile-dot-${notification.id}`}
-                    aria-label="Непрочитано"
+                    aria-label={isEnglish ? 'Unread' : 'Непрочитано'}
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${getDotClass()}`}
                   />
                 )}
@@ -188,7 +190,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             {showDot && (
               <span
                 data-testid={`notification-dot-${notification.id}`}
-                aria-label="Непрочитано"
+                aria-label={isEnglish ? 'Unread' : 'Непрочитано'}
                 className={`w-2.5 h-2.5 rounded-full shrink-0 ${getDotClass()}`}
               />
             )}

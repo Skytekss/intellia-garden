@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Droplets,
   Sprout,
@@ -10,8 +10,9 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { AgroRecord, AgroOperationType } from '../../types';
-import { initialAgroRecords } from '../../data/mockData';
 import { AddAgroRecordModal } from './AddAgroRecordModal';
+import { useApp } from '../../context/AppContext';
+import { getLocalizedAgroRecords } from '../../context/localizedData';
 
 interface AgroWidgetProps {
   records?: AgroRecord[];
@@ -24,10 +25,18 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
   onAddRecord,
   className = '',
 }) => {
-  const [records, setRecords] = useState<AgroRecord[]>(
-    initialPropRecords || initialAgroRecords
+  const { isEnglish, t } = useApp();
+
+  const [records, setRecords] = useState<AgroRecord[]>(() =>
+    initialPropRecords || getLocalizedAgroRecords(isEnglish) || []
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!initialPropRecords) {
+      setRecords(getLocalizedAgroRecords(isEnglish) || []);
+    }
+  }, [isEnglish, initialPropRecords]);
 
   const handleCreateRecord = (newRecordData: Omit<AgroRecord, 'id'>) => {
     const newRecord: AgroRecord = {
@@ -44,30 +53,35 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
   const getOperationIcon = (type: AgroOperationType) => {
     switch (type) {
       case 'Полив':
+      case 'Irrigation':
         return (
           <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0">
             <Droplets className="w-4 h-4" />
           </div>
         );
       case 'Удобрения':
+      case 'Fertilization':
         return (
           <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
             <Sprout className="w-4 h-4" />
           </div>
         );
       case 'Обработка':
+      case 'Treatment':
         return (
           <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
             <ShieldCheck className="w-4 h-4" />
           </div>
         );
       case 'Обрезка':
+      case 'Pruning':
         return (
           <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
             <Scissors className="w-4 h-4" />
           </div>
         );
       case 'Прореживание плодов':
+      case 'Fruit Thinning':
         return (
           <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
             <Layers className="w-4 h-4" />
@@ -92,9 +106,13 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-emerald-700" />
-            <h3 className="text-sm font-bold text-slate-800">Агротехнические данные</h3>
+            <h3 className="text-sm font-bold text-slate-800">
+              {t('data.agro.title') || 'Агротехнические данные'}
+            </h3>
           </div>
-          <span className="text-xs text-slate-400 font-medium">{records.length} записи</span>
+          <span className="text-xs text-slate-400 font-medium">
+            {records.length} {isEnglish ? 'records' : 'записи'}
+          </span>
         </div>
 
         {/* Record list */}
@@ -134,7 +152,7 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
           className="w-full py-2.5 border border-dashed border-emerald-300 text-emerald-800 hover:bg-emerald-50/50 hover:border-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4 text-emerald-700" />
-          <span>+ Добавить запись</span>
+          <span>{isEnglish ? '+ Add Record' : '+ Добавить запись'}</span>
         </button>
       </div>
 
