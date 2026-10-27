@@ -1,4 +1,4 @@
-import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile, AgroRecord, MeteoTelemetryData } from '../types';
+import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile, AgroRecord, MeteoTelemetryData, ForecastSectorRow } from '../types';
 
 export const mockFarmProfile: FarmProfile = {
   name: 'Ферма «Золотой Сад»',
@@ -198,3 +198,50 @@ export const droneModelsList: string[] = [
   'AgEagle eBee X',
   'WingtraOne GEN II',
 ];
+
+
+export const mockForecastRows: ForecastSectorRow[] = [
+  {
+    id: 'forecast-1',
+    name: 'Участок 1',
+    variety: 'Гала',
+    maturityPercent: 85,
+    statusColor: 'green',
+    recommendedDate: '10 – 15 сентября',
+  },
+  {
+    id: 'forecast-2',
+    name: 'Участок 2',
+    variety: 'Фуджи',
+    maturityPercent: 72,
+    statusColor: 'light-green',
+    recommendedDate: '15 – 22 сентября',
+  },
+  {
+    id: 'forecast-3',
+    name: 'Участок 3',
+    variety: 'Голден',
+    maturityPercent: 60,
+    statusColor: 'yellow',
+    recommendedDate: '20 – 28 сентября',
+  },
+  {
+    id: 'forecast-4',
+    name: 'Участок 4',
+    variety: 'Ред Делишес',
+    maturityPercent: 45,
+    statusColor: 'orange',
+    recommendedDate: '25 сентября – 5 октября',
+  },
+  {
+    id: 'forecast-5',
+    name: 'Участок 5',
+    variety: 'Гала',
+    maturityPercent: 78,
+    statusColor: 'green',
+    recommendedDate: '18 – 25 сентября',
+  },
+];
+
+export * from './mockSettings';
+export * from './mockNotifications';

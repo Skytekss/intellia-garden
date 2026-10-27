@@ -44,9 +44,13 @@ export interface BentoItem {
   iconColor: string;
 }
 
+export type NotificationCategory = 'important' | 'harvest' | 'weather' | 'system' | 'agritech' | 'ai';
+
+export type NotificationFilterTab = 'all' | 'important' | 'harvest' | 'weather' | 'diseases' | 'system';
+
 export interface NotificationItem {
   id: string;
-  category: 'important' | 'harvest' | 'weather' | 'system' | 'agritech' | 'ai';
+  category: NotificationCategory;
   badgeText: string;
   title: string;
   description: string;
@@ -54,6 +58,14 @@ export interface NotificationItem {
   isRead: boolean;
   actionText: string;
   actionTarget: NavigationTab;
+  filterCategories?: NotificationFilterTab[];
+  dotColor?: 'red' | 'green' | 'amber' | 'blue' | 'teal' | 'none';
+  iconType?: 'apple' | 'harvest' | 'weather' | 'system' | 'agritech' | 'ai';
+  details?: {
+    fullText?: string;
+    recommendation?: string;
+    metadata?: Record<string, string>;
+  };
 }
 
 export interface ForecastSectorRow {
@@ -113,4 +125,6 @@ export interface HyperspectralUploadState {
 }
 
 export type DataSubTab = 'spectral' | 'agro' | 'meteo';
+
+export * from './settings';
 

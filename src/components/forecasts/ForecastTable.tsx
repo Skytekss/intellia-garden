@@ -1,0 +1,374 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  ArrowUpDown,
+  Filter,
+  CheckCircle2,
+  Calendar,
+  ChevronRight,
+  X,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import { ForecastSectorRow } from '../../types';
+import { mockForecastRows } from '../../data/mockData';
+
+interface ForecastTableProps {
+  rows?: ForecastSectorRow[];
+  onSelectRow?: (row: ForecastSectorRow) => void;
+  className?: string;
+}
+
+type SortField = 'name' | 'variety' | 'maturityPercent' | 'recommendedDate';
+type SortOrder = 'asc' | 'desc';
+
+export const getStatusDotColor = (
+  color: ForecastSectorRow['statusColor'],
+  percent: number
+): string => {
+  switch (color) {
+    case 'green':
+      return '#10b981';
+    case 'light-green':
+      return '#84cc16';
+    case 'yellow':
+      return '#eab308';
+    case 'orange':
+      return '#f97316';
+    default:
+      if (percent >= 75) return '#10b981';
+      if (percent >= 65) return '#84cc16';
+      if (percent >= 50) return '#eab308';
+      return '#f97316';
+  }
+};
+
+export const getStatusLabel = (percent: number): string => {
+  if (percent >= 75) return 'Готов к сбору';
+  if (percent >= 65) return 'Активное созревание';
+  if (percent >= 50) return 'Умеренная зрелость';
+  return 'Ранняя фаза';
+};
+
+export const ForecastTable: React.FC<ForecastTableProps> = ({
+  rows = mockForecastRows,
+  onSelectRow,
+  className = '',
+}) => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [varietyFilter, setVarietyFilter] = useState<string>('all');
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+
+  // Available unique varieties
+  const varieties = useMemo(() => {
+    const list = Array.from(new Set(rows.map((r) => r.variety)));
+    return ['all', ...list];
+  }, [rows]);
+
+  // Filtering and Sorting
+  const filteredAndSortedRows = useMemo(() => {
+    let result = [...rows];
+
+    // Filter by search query (sector name or variety)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (row) =>
+          row.name.toLowerCase().includes(q) ||
+          row.variety.toLowerCase().includes(q) ||
+          row.recommendedDate.toLowerCase().includes(q)
+      );
+    }
+
+    // Filter by variety
+    if (varietyFilter !== 'all') {
+      result = result.filter((row) => row.variety === varietyFilter);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'maturityPercent') {
+        comparison = a.maturityPercent - b.maturityPercent;
+      } else if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name, 'ru');
+      } else if (sortField === 'variety') {
+        comparison = a.variety.localeCompare(b.variety, 'ru');
+      } else if (sortField === 'recommendedDate') {
+        comparison = a.recommendedDate.localeCompare(b.recommendedDate, 'ru');
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return result;
+  }, [rows, searchQuery, varietyFilter, sortField, sortOrder]);
+
+  const handleSortToggle = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const handleRowClick = (row: ForecastSectorRow) => {
+    setSelectedRowId((prev) => (prev === row.id ? null : row.id));
+    if (onSelectRow) {
+      onSelectRow(row);
+    }
+  };
+
+  const selectedRow = rows.find((r) => r.id === selectedRowId) || null;
+
+  return (
+    <div
+      data-testid="forecast-table-container"
+      className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-6 transition-all duration-200 w-full min-w-0 overflow-hidden ${className}`}
+    >
+      {/* Table Header with Title and Search/Controls */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-slate-100">
+        <div>
+          <h2
+            data-testid="forecast-table-title"
+            className="text-base sm:text-lg font-bold text-slate-800 tracking-tight"
+          >
+            Рекомендованные даты сбора
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Оперативный расчет зрелости по участкам на основе мультиспектрального анализа
+          </p>
+        </div>
+
+        {/* Controls: Search and Filter */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Search Input */}
+          <div className="relative min-w-[180px] sm:min-w-[220px] flex-1 sm:flex-initial">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              data-testid="forecast-table-search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Поиск по участку или сорту..."
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                aria-label="Очистить поиск"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Variety Filter Dropdown */}
+          <div className="relative inline-flex items-center">
+            <Filter className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+            <select
+              data-testid="forecast-table-variety-filter"
+              value={varietyFilter}
+              onChange={(e) => setVarietyFilter(e.target.value)}
+              className="pl-8 pr-7 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white cursor-pointer appearance-none transition-all"
+            >
+              <option value="all">Все сорта</option>
+              {varieties.filter((v) => v !== 'all').map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Responsive Table Container with Horizontal Scroll support on iPhone 375px */}
+      <div className="relative w-full max-w-full overflow-x-auto min-w-0 mt-3 sm:mt-4">
+        <table
+          data-testid="forecast-table"
+          className="w-full min-w-[540px] text-left border-collapse"
+        >
+          <thead>
+            <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="py-3 px-3 sm:px-4">
+                <button
+                  type="button"
+                  onClick={() => handleSortToggle('name')}
+                  className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
+                >
+                  <span>Участок</span>
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                </button>
+              </th>
+              <th className="py-3 px-3 sm:px-4">
+                <button
+                  type="button"
+                  onClick={() => handleSortToggle('variety')}
+                  className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
+                >
+                  <span>Сорт</span>
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                </button>
+              </th>
+              <th className="py-3 px-3 sm:px-4">
+                <button
+                  type="button"
+                  onClick={() => handleSortToggle('maturityPercent')}
+                  className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
+                >
+                  <span>Степень зрелости</span>
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                </button>
+              </th>
+              <th className="py-3 px-3 sm:px-4">
+                <button
+                  type="button"
+                  onClick={() => handleSortToggle('recommendedDate')}
+                  className="inline-flex items-center gap-1.5 hover:text-slate-700 cursor-pointer transition-colors"
+                >
+                  <span>Рекомендуемая дата</span>
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                </button>
+              </th>
+              <th className="py-3 px-2 sm:px-3 text-right">
+                <span className="sr-only">Действия</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredAndSortedRows.length > 0 ? (
+              filteredAndSortedRows.map((row) => {
+                const isSelected = selectedRowId === row.id;
+                const dotColor = getStatusDotColor(row.statusColor, row.maturityPercent);
+
+                return (
+                  <tr
+                    key={row.id}
+                    data-testid={`forecast-row-${row.id}`}
+                    onClick={() => handleRowClick(row)}
+                    className={`group cursor-pointer transition-colors duration-150 ${
+                      isSelected
+                        ? 'bg-emerald-50/70'
+                        : 'hover:bg-slate-50/80'
+                    }`}
+                  >
+                    {/* 1. Участок */}
+                    <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span>{row.name}</span>
+                        {isSelected && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            Выбран
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* 2. Сорт */}
+                    <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap">
+                      {row.variety}
+                    </td>
+
+                    {/* 3. Степень зрелости with colored dot */}
+                    <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-slate-800 whitespace-nowrap">
+                      <div className="inline-flex items-center gap-2">
+                        <span
+                          data-testid={`maturity-dot-${row.id}`}
+                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                          style={{ backgroundColor: dotColor }}
+                          aria-hidden="true"
+                        />
+                        <span>{row.maturityPercent}%</span>
+                      </div>
+                    </td>
+
+                    {/* 4. Рекомендуемая дата */}
+                    <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{row.recommendedDate}</span>
+                      </div>
+                    </td>
+
+                    {/* Arrow Action indicator */}
+                    <td className="py-3.5 px-2 sm:px-3 text-right whitespace-nowrap">
+                      <ChevronRight
+                        className={`w-4 h-4 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 transition-all ${
+                          isSelected ? 'rotate-90 text-emerald-700' : ''
+                        }`}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="py-8 text-center text-xs text-slate-500 font-medium"
+                >
+                  Участки не найдены по запросу «{searchQuery}».
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Expanded Row Detail Summary */}
+      {selectedRow && (
+        <motion.div
+          key={selectedRow.id}
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          data-testid="forecast-row-detail-summary"
+          className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/90 text-xs text-slate-700 space-y-2"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Детализация: {selectedRow.name} ({selectedRow.variety})</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedRowId(null)}
+              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+              aria-label="Свернуть детализацию"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200/60">
+            <div>
+              <span className="text-slate-500 block">Текущая зрелость:</span>
+              <span className="font-semibold text-slate-900 text-sm">
+                {selectedRow.maturityPercent}% ({getStatusLabel(selectedRow.maturityPercent)})
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Окно сбора:</span>
+              <span className="font-semibold text-emerald-800 text-sm">
+                {selectedRow.recommendedDate}
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Агро-рекомендация:</span>
+              <span className="font-medium text-slate-800">
+                {selectedRow.maturityPercent >= 75
+                  ? 'Приоритетный сбор в сухую погоду'
+                  : 'Контрольный облет через 5 дней'}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+};

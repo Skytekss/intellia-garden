@@ -3,4 +3,5 @@ dist
 .system_generated
 *.log
 screenshots/
+tsconfig.tsbuildinfo
 
