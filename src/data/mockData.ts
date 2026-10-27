@@ -1,4 +1,4 @@
-import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile } from '../types';
+import { GardenSector, BentoItem, WeatherTelemetry, FarmProfile, AgroRecord, MeteoTelemetryData } from '../types';
 
 export const mockFarmProfile: FarmProfile = {
   name: 'Ферма «Золотой Сад»',
@@ -155,4 +155,46 @@ export const mockSectors: GardenSector[] = [
       { date: '28.08', percent: 78 },
     ],
   },
+];
+
+
+export const initialAgroRecords: AgroRecord[] = [
+  {
+    id: 'agro-1',
+    type: 'Полив',
+    title: 'Полив',
+    date: '05.07.2025',
+    sector: 'Все участки',
+    notes: 'Капельное орошение 12 м³/га',
+  },
+  {
+    id: 'agro-2',
+    type: 'Удобрения',
+    title: 'Удобрения',
+    date: '15.06.2025',
+    sector: 'Участок 2, Участок 5',
+    notes: 'Внесение калийных комплексов',
+  },
+  {
+    id: 'agro-3',
+    type: 'Обработка',
+    title: 'Обработка',
+    date: '28.06.2025',
+    sector: 'Все участки',
+    notes: 'Профилактическая защита биофунгицидом',
+  },
+];
+
+export const initialMeteoData: MeteoTelemetryData = {
+  temperature: 22,
+  precipitationMm: 0,
+  humidityPercent: 65,
+  lastSyncTime: '12.08.2025 09:40',
+};
+
+export const droneModelsList: string[] = [
+  'DJI Mavic 3M',
+  'DJI Matrice 350 RTK + MS600',
+  'AgEagle eBee X',
+  'WingtraOne GEN II',
 ];

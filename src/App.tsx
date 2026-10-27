@@ -3,6 +3,7 @@ import { NavigationTab } from './types';
 import { AppShell } from './components/layout/AppShell';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { GardenMapView } from './components/map/GardenMapView';
+import { DataEntryView } from './components/data-entry/DataEntryView';
 import { PlaceholderView } from './components/placeholder/PlaceholderView';
 
 export const App: React.FC = () => {
@@ -23,6 +24,8 @@ export const App: React.FC = () => {
         <DashboardView onNavigate={setActiveTab} />
       ) : activeTab === 'map' ? (
         <GardenMapView onNavigate={setActiveTab} />
+      ) : activeTab === 'data' ? (
+        <DataEntryView onNavigate={setActiveTab} />
       ) : (
         <PlaceholderView
           tab={activeTab}

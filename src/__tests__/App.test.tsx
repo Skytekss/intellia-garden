@@ -32,6 +32,19 @@ describe('App Root Component', () => {
     expect(screen.getByTestId('hero-banner')).toBeInTheDocument();
   });
 
+  it('navigates to data entry view when clicking data tab in sidebar', () => {
+    render(<App />);
+
+    const dataNav = screen.getByTestId('nav-item-data');
+    fireEvent.click(dataNav);
+
+    // Live DataEntryView should now be visible
+    expect(screen.getByTestId('data-entry-view')).toBeInTheDocument();
+    expect(screen.getByTestId('hyperspectral-upload-card')).toBeInTheDocument();
+    expect(screen.getByTestId('agro-widget')).toBeInTheDocument();
+    expect(screen.getByTestId('meteo-widget')).toBeInTheDocument();
+  });
+
   it('navigates to support view when clicking support in sidebar', () => {
     render(<App />);
 
