@@ -300,6 +300,27 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                 </g>
               );
             })}
+
+            {/* Animated Drone Survey Indicator positioned at selected sector */}
+            {(() => {
+              const currentGeom = SECTOR_GEOMETRIES.find((g) => g.id === selectedSectorId) || SECTOR_GEOMETRIES[3];
+              return (
+                <g
+                  transform={'translate(' + (currentGeom.badge.x - 36) + ', ' + (currentGeom.badge.y - 24) + ')'}
+                  className="pointer-events-none transition-transform duration-500 ease-out"
+                >
+                  <circle cx="0" cy="0" r="16" fill="none" stroke="#10b981" strokeWidth="1.5" opacity="0.6" className="animate-ping" />
+                  <circle cx="0" cy="0" r="8" fill="rgba(5, 56, 43, 0.85)" stroke="#10b981" strokeWidth="1.2" />
+                  <path
+                    d="M -4 -4 L 4 4 M 4 -4 L -4 4"
+                    stroke="#ffffff"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="0" cy="0" r="2" fill="#34d399" />
+                </g>
+              );
+            })()}
           </svg>
         </div>
       </div>

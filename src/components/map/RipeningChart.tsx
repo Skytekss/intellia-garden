@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 
 export interface RipeningDataPoint {
@@ -165,21 +166,27 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
           );
         })}
 
-        {/* Gradient fill under curve */}
-        <path
+        {/* Gradient fill under curve with motion */}
+        <motion.path
           d={areaPath}
           fill="url(#ripeningFillGrad)"
-          className="transition-all duration-300 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="pointer-events-none"
         />
 
-        {/* Smooth ripening line */}
-        <path
+        {/* Smooth ripening line with motion pathLength */}
+        <motion.path
           d={linePath}
           fill="none"
           stroke="#059669"
           strokeWidth="2.75"
           strokeLinecap="round"
           strokeLinejoin="round"
+          initial={{ pathLength: 0, opacity: 0.4 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
           className="pointer-events-none"
         />
 
@@ -196,7 +203,7 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
           className="pointer-events-none transition-all duration-150"
         />
 
-        {/* Data points with interactive hit areas */}
+        {/* Data points with interactive hit areas and motion entrance */}
         {points.map((pt, idx) => {
           const isPointActive = idx === activeIndex;
 
@@ -230,15 +237,18 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
                 />
               )}
 
-              {/* Visible Point Circle */}
-              <circle
+              {/* Visible Point Circle with motion scale */}
+              <motion.circle
                 cx={pt.x}
                 cy={pt.y}
                 r={isPointActive ? '5' : '3.5'}
                 fill="#ffffff"
                 stroke="#059669"
                 strokeWidth={isPointActive ? '2.5' : '2'}
-                className="transition-all duration-150"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.25, delay: 0.1 + idx * 0.05 }}
+                className="transition-colors duration-150"
               />
             </g>
           );
@@ -246,10 +256,13 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
 
         {/* Floating Tooltip (Interactive on hover, or default badge when idle) */}
         {hoveredIndex !== null ? (
-          <g
+          <motion.g
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.15 }}
             transform={`translate(${tooltipX}, ${tooltipY})`}
             filter="url(#interactiveTooltipShadow)"
-            className="pointer-events-none transition-transform duration-150"
+            className="pointer-events-none"
           >
             <rect
               x="-56"
@@ -268,7 +281,7 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
             <text x="48" y="-5" textAnchor="end" fontSize="12" fontWeight="800" fill={stage.color} className="font-sans">
               {activePercent}%
             </text>
-          </g>
+          </motion.g>
         ) : (
           <g
             transform={`translate(${lastPoint.x - 22}, ${lastPoint.y - 30})`}
