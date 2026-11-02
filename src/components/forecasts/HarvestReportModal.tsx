@@ -186,7 +186,7 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
                   {isEnglish ? 'Chief Agronomist' : 'Главный агроном хозяйства'}:
                 </span>
                 <span className="font-bold text-slate-900 text-sm">
-                  {isEnglish ? 'Alexey S. (Intellia Agritech)' : 'Алексей С. / «ИНТЕЛЛИЯ»'}
+                  {isEnglish ? 'Elizaveta B. (Intellia Agritech)' : 'Елизавета Б. / «ИНТЕЛЛИЯ»'}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 sm:justify-end text-emerald-800 font-semibold text-[11px]">

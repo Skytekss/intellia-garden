@@ -216,20 +216,20 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 pl-1 border-l border-slate-200/80 cursor-pointer"
             title={
               isEn
-                ? 'User profile: Alexey Smirnov (Chief Agronomist)'
-                : 'Профиль пользователя: Алексей Смирнов (Главный агроном)'
+                ? 'User profile: Elizaveta B. (Chief Agronomist)'
+                : 'Профиль пользователя: Елизавета Б. (Главный агроном)'
             }
           >
             <div className="relative">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-800 to-teal-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                {isEn ? 'AS' : 'АС'}
+                {isEn ? 'EB' : 'ЕБ'}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>
 
             <div className="hidden xl:flex flex-col text-left">
               <span className="text-xs font-semibold text-slate-800 leading-tight">
-                {isEn ? 'Alexey S.' : 'Алексей С.'}
+                {isEn ? 'Elizaveta B.' : 'Елизавета Б.'}
               </span>
               <span className="text-xs text-slate-500 leading-tight">
                 {isEn ? 'Chief Agronomist' : 'Главный агроном'}
