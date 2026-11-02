@@ -67,22 +67,17 @@ export const SectorDetailPanel: React.FC<SectorDetailPanelProps> = ({
                 {sector.maturityPercent}%
               </span>
             </div>
-
-            <div className="flex items-center text-sm">
-              <span className="text-slate-500 w-36">
-                {isEnglish ? 'Harvest Window:' : 'Окно сбора:'}
-              </span>
-              <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md text-xs border border-emerald-200/70 inline-flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                {sector.harvestWindow}
-              </span>
-            </div>
           </div>
 
-          {/* Recommended Date Card */}
-          <div className="mt-4 p-3 bg-emerald-50/70 rounded-xl border border-emerald-100 flex items-center gap-2.5 text-xs text-emerald-900 font-medium">
-            <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{sector.recommendedDate}</span>
+          {/* Recommended Harvest Date Pill */}
+          <div className="mt-5">
+            <p className="text-xs text-slate-500 mb-1.5 font-medium">
+              {isEnglish ? 'Recommended harvest date:' : 'Рекомендуемая дата сбора:'}
+            </p>
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100 text-emerald-800 text-sm font-semibold w-full sm:w-auto">
+              <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{sector.recommendedDate}</span>
+            </div>
           </div>
 
           {/* Ripening Dynamics Section */}
