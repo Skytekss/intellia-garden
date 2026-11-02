@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'motion/react';
 import { NavigationTab } from './types';
 import { AppProvider } from './context/AppContext';
 import { AppShell } from './components/layout/AppShell';
@@ -104,26 +105,34 @@ export const AppContent: React.FC = () => {
 
   return (
     <AppShell activeTab={activeTab} onSelectTab={handleSelectTab}>
-      {activeTab === 'overview' ? (
-        <DashboardView onNavigate={handleSelectTab} />
-      ) : activeTab === 'map' ? (
-        <GardenMapView onNavigate={handleSelectTab} />
-      ) : activeTab === 'data' ? (
-        <DataEntryView onNavigate={handleSelectTab} />
-      ) : activeTab === 'forecasts' ? (
-        <ForecastsView onNavigate={handleSelectTab} />
-      ) : activeTab === 'notifications' ? (
-        <NotificationsView onNavigate={handleSelectTab} />
-      ) : activeTab === 'settings' ? (
-        <SettingsView onNavigate={handleSelectTab} />
-      ) : activeTab === 'support' ? (
-        <SupportView onNavigate={handleSelectTab} />
-      ) : (
-        <PlaceholderView
-          tab={activeTab}
-          onNavigateBack={() => handleSelectTab('overview')}
-        />
-      )}
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+        className="w-full min-w-0"
+      >
+        {activeTab === 'overview' ? (
+          <DashboardView onNavigate={handleSelectTab} />
+        ) : activeTab === 'map' ? (
+          <GardenMapView onNavigate={handleSelectTab} />
+        ) : activeTab === 'data' ? (
+          <DataEntryView onNavigate={handleSelectTab} />
+        ) : activeTab === 'forecasts' ? (
+          <ForecastsView onNavigate={handleSelectTab} />
+        ) : activeTab === 'notifications' ? (
+          <NotificationsView onNavigate={handleSelectTab} />
+        ) : activeTab === 'settings' ? (
+          <SettingsView onNavigate={handleSelectTab} />
+        ) : activeTab === 'support' ? (
+          <SupportView onNavigate={handleSelectTab} />
+        ) : (
+          <PlaceholderView
+            tab={activeTab}
+            onNavigateBack={() => handleSelectTab('overview')}
+          />
+        )}
+      </motion.div>
     </AppShell>
   );
 };

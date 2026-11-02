@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { NavigationTab, FarmProfile } from '../../types';
@@ -33,28 +34,40 @@ export const AppShell: React.FC<AppShellProps> = ({
         />
       </div>
 
-      {/* 2. Mobile Drawer & Backdrop */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
-            onClick={() => setIsMobileMenuOpen(false)}
-            data-testid="mobile-backdrop"
-          />
-
-          {/* Drawer Content */}
-          <div className="relative z-50 w-[280px] max-w-[85vw] h-full shadow-2xl animate-in slide-in-from-left duration-200">
-            <Sidebar
-              activeTab={activeTab}
-              onSelectTab={onSelectTab}
-              onCloseMobile={() => setIsMobileMenuOpen(false)}
-              showMobileClose={true}
-              className="w-full"
+      {/* 2. Mobile Drawer & Backdrop with Motion */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 flex">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+              onClick={() => setIsMobileMenuOpen(false)}
+              data-testid="mobile-backdrop"
             />
+
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+              className="relative z-50 w-[280px] max-w-[85vw] h-full shadow-2xl"
+            >
+              <Sidebar
+                activeTab={activeTab}
+                onSelectTab={onSelectTab}
+                onCloseMobile={() => setIsMobileMenuOpen(false)}
+                showMobileClose={true}
+                className="w-full"
+              />
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 3. Main Workspace Area */}
       <div className="flex-1 lg:pl-[260px] flex flex-col min-w-0 w-full pb-16 lg:pb-0 overflow-x-hidden">
@@ -114,7 +127,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           className="flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
         >
           <Menu className="w-4 h-4" />
-          <span>{isEn ? 'More' : 'Ещё'}</span>
+          <span>{isEn ? 'Menu' : 'Меню'}</span>
         </button>
       </nav>
     </div>

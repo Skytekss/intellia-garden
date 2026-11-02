@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   LayoutDashboard,
   Map,
@@ -103,18 +104,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           const label = isEnglish ? item.labelEn : item.labelRu;
 
           return (
-            <button
+            <motion.button
               key={item.id}
               type="button"
               data-testid={`nav-item-${item.id}`}
               onClick={() => handleNavClick(item.id)}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group text-left cursor-pointer ${
+              whileTap={{ scale: 0.98 }}
+              className={`relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 group text-left cursor-pointer ${
                 isActive
                   ? 'bg-[#047857] text-white shadow-[0_0_15px_rgba(4,120,87,0.4)] font-semibold'
                   : 'text-emerald-100/75 hover:text-white hover:bg-emerald-800/30'
               }`}
             >
-              <div className="flex items-center gap-3">
+              {isActive && (
+                <motion.div
+                  layoutId="activeNavPill"
+                  className="absolute inset-0 bg-[#047857] rounded-xl shadow-[0_0_15px_rgba(4,120,87,0.4)] pointer-events-none"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              )}
+              <div className="relative z-10 flex items-center gap-3">
                 <Icon
                   className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                     isActive ? 'text-white' : 'text-emerald-300/80'
@@ -125,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               {item.badge !== undefined && (
                 <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold leading-none ${
+                  className={`relative z-10 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none ${
                     isActive
                       ? 'bg-white text-emerald-800'
                       : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
@@ -134,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {item.badge}
                 </span>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </nav>
@@ -142,23 +151,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom section: Support & Weather */}
       <div className="p-3.5 pt-2 space-y-2.5 border-t border-emerald-900/40">
         {/* Support Button */}
-        <button
+        <motion.button
           type="button"
           data-testid="nav-item-support"
           onClick={() => handleNavClick('support')}
-          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group text-left cursor-pointer ${
+          whileTap={{ scale: 0.98 }}
+          className={`relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 group text-left cursor-pointer ${
             activeTab === 'support'
               ? 'bg-[#047857] text-white shadow-[0_0_15px_rgba(4,120,87,0.4)] font-semibold'
               : 'text-emerald-100/75 hover:text-white hover:bg-emerald-800/30'
           }`}
         >
-          <Headphones
-            className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-              activeTab === 'support' ? 'text-white' : 'text-emerald-300/80'
-            }`}
-          />
-          <span>{isEnglish ? 'Support' : 'Поддержка'}</span>
-        </button>
+          {activeTab === 'support' && (
+            <motion.div
+              layoutId="activeNavPill"
+              className="absolute inset-0 bg-[#047857] rounded-xl shadow-[0_0_15px_rgba(4,120,87,0.4)] pointer-events-none"
+              transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+            />
+          )}
+          <div className="relative z-10 flex items-center gap-3">
+            <Headphones
+              className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                activeTab === 'support' ? 'text-white' : 'text-emerald-300/80'
+              }`}
+            />
+            <span>{isEnglish ? 'Support' : 'Поддержка'}</span>
+          </div>
+        </motion.button>
 
         {/* Weather Widget */}
         <WeatherWidget />
