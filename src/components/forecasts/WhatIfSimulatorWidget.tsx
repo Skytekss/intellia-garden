@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   SlidersHorizontal,
   RotateCcw,
@@ -88,9 +89,9 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
           <span
             data-testid="simulation-status-badge"
-            className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${
               isSimulationActive
-                ? 'bg-amber-50 text-amber-800 border-amber-200 animate-in fade-in'
+                ? 'bg-amber-50 text-amber-800 border-amber-200'
                 : 'bg-slate-50 text-slate-600 border-slate-200'
             }`}
           >
@@ -104,16 +105,18 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
           </span>
 
           {isSimulationActive && (
-            <button
+            <motion.button
               type="button"
               data-testid="btn-reset-simulation"
               onClick={resetSimulation}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               title={t('forecasts.whatif.reset')}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{t('forecasts.whatif.reset')}</span>
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
@@ -152,29 +155,28 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
               data-testid="temp-anomaly-slider"
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
             />
-            <div className="flex justify-between text-[11px] text-slate-400 font-medium px-0.5">
-              <span>-3°C ({isEnglish ? 'Cold' : 'Холод'})</span>
+            <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+              <span>-3°C</span>
               <span>0°C ({isEnglish ? 'Norm' : 'Норма'})</span>
-              <span>+4°C ({isEnglish ? 'Heat' : 'Жара'})</span>
+              <span>+4°C</span>
             </div>
           </div>
 
-          {/* Quick presets */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] text-slate-400 font-medium mr-1">
-              {isEnglish ? 'Presets:' : 'Пресеты:'}
+          {/* Quick Presets */}
+          <div className="flex items-center gap-1.5 pt-1">
+            <span className="text-[11px] text-slate-400 mr-1">
+              {isEnglish ? 'Presets:' : 'Быстро:'}
             </span>
             {[
-              { label: '-2°C', val: -2 },
-              { label: '0°C', val: 0 },
-              { label: '+1.5°C', val: 1.5 },
-              { label: '+3°C', val: 3 },
+              { val: -2, label: '-2°C' },
+              { val: 0, label: '0°C' },
+              { val: +2, label: '+2°C' },
             ].map((p) => (
               <button
-                key={p.label}
+                key={p.val}
                 type="button"
                 onClick={() => setTempAnomaly(p.val)}
-                className={`px-2 py-0.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                className={`px-2 py-0.5 text-xs rounded-md font-semibold border transition-colors cursor-pointer ${
                   tempAnomaly === p.val
                     ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
                     : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
@@ -220,13 +222,14 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
               const Icon = item.icon;
               const isSelected = rainCondition === item.id;
               return (
-                <button
+                <motion.button
                   key={item.id}
                   type="button"
                   role="radio"
                   aria-checked={isSelected}
                   data-testid={item.testId}
                   onClick={() => setRainCondition(item.id)}
+                  whileTap={{ scale: 0.96 }}
                   className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-xs'
@@ -239,16 +242,20 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
                     }`}
                   />
                   <span className="truncate">{item.label}</span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
         </div>
       </div>
 
-      {/* Dynamic Simulation Result Banner */}
-      <div
+      {/* Dynamic Simulation Result Banner with smooth transition */}
+      <motion.div
         data-testid="simulation-summary-banner"
+        key={`${tempAnomaly}-${rainCondition}`}
+        initial={{ opacity: 0.8 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border text-xs ${
           isHighRisk
             ? 'bg-amber-50/80 border-amber-300 text-amber-900'
@@ -279,7 +286,7 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
             {deltaBadge.label}
           </span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
