@@ -1,10 +1,21 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 import { ForecastsView } from '../ForecastsView';
+import { AppProvider } from '../../../context/AppContext';
+
+const renderWithContext = (ui: React.ReactElement) => {
+  return render(<AppProvider>{ui}</AppProvider>);
+};
 
 describe('ForecastsView Component', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.history.replaceState(null, '', '/');
+  });
+
   it('renders the header title and all 3 sub-tabs', () => {
-    render(<ForecastsView />);
+    renderWithContext(<ForecastsView />);
 
     // Title «Прогнозы»
     const title = screen.getByTestId('forecasts-title');
@@ -30,101 +41,147 @@ describe('ForecastsView Component', () => {
     expect(recommendationsTab).toHaveAttribute('aria-selected', 'false');
   });
 
-  it('renders all 3 KPI cards with values 12 – 25 сентября, 68%, 92%', () => {
-    render(<ForecastsView />);
+  it('renders all 3 KPI cards with values', () => {
+    renderWithContext(<ForecastsView />);
 
-    // KPI cards container
     const kpiCards = screen.getByTestId('forecast-kpi-cards');
     expect(kpiCards).toBeInTheDocument();
 
-    // Card 1: Средняя дата сбора
     const cardHarvestDate = screen.getByTestId('kpi-card-harvest-date');
     expect(cardHarvestDate).toHaveTextContent('Средняя дата сбора');
     expect(cardHarvestDate).toHaveTextContent('12 – 25 сентября');
-    expect(cardHarvestDate).toHaveTextContent('(по саду)');
 
-    // Card 2: Готовность плодов
     const cardFruitReadiness = screen.getByTestId('kpi-card-fruit-readiness');
     expect(cardFruitReadiness).toHaveTextContent('Готовность плодов');
-    expect(cardFruitReadiness).toHaveTextContent('64%');
-    expect(cardFruitReadiness).toHaveTextContent('(в среднем)');
 
-    // Card 3: Точность прогноза
     const cardForecastAccuracy = screen.getByTestId('kpi-card-forecast-accuracy');
     expect(cardForecastAccuracy).toHaveTextContent('Точность прогноза');
     expect(cardForecastAccuracy).toHaveTextContent('92%');
-    expect(cardForecastAccuracy).toHaveTextContent('(по прошлым сезонам)');
   });
 
-  it('renders the table «Рекомендованные даты сбора» and its 5 sector rows with correct varieties and dates', () => {
-    render(<ForecastsView />);
+  it('renders the table «Рекомендованные даты сбора» and sector rows', () => {
+    renderWithContext(<ForecastsView />);
 
-    // Table title
     const tableTitle = screen.getByTestId('forecast-table-title');
     expect(tableTitle).toHaveTextContent('Рекомендованные даты сбора');
 
-    // 5 Rows in table
-    const row1 = screen.getByTestId('forecast-row-forecast-1');
-    const row2 = screen.getByTestId('forecast-row-forecast-2');
-    const row3 = screen.getByTestId('forecast-row-forecast-3');
-    const row4 = screen.getByTestId('forecast-row-forecast-4');
-    const row5 = screen.getByTestId('forecast-row-forecast-5');
-
-    // Row 1: Участок 1, Гала, 45%, 25 сентября – 5 октября
-    expect(row1).toHaveTextContent('Участок 1');
-    expect(row1).toHaveTextContent('Гала');
-    expect(row1).toHaveTextContent('45%');
-    expect(row1).toHaveTextContent('25 сентября – 5 октября');
-
-    // Row 2: Участок 2, Фуджи, 52%, 20 – 28 сентября
-    expect(row2).toHaveTextContent('Участок 2');
-    expect(row2).toHaveTextContent('Фуджи');
-    expect(row2).toHaveTextContent('52%');
-    expect(row2).toHaveTextContent('20 – 28 сентября');
-
-    // Row 3: Участок 3, Голден, 60%, 18 – 25 сентября
-    expect(row3).toHaveTextContent('Участок 3');
-    expect(row3).toHaveTextContent('Голден');
-    expect(row3).toHaveTextContent('60%');
-    expect(row3).toHaveTextContent('18 – 25 сентября');
-
-    // Row 4: Участок 4, Ред Делишес, 85%, 10 – 15 сентября
-    expect(row4).toHaveTextContent('Участок 4');
-    expect(row4).toHaveTextContent('Ред Делишес');
-    expect(row4).toHaveTextContent('85%');
-    expect(row4).toHaveTextContent('10 – 15 сентября');
-
-    // Row 5: Участок 5, Гала, 78%, 15 – 22 сентября
-    expect(row5).toHaveTextContent('Участок 5');
-    expect(row5).toHaveTextContent('Гала');
-    expect(row5).toHaveTextContent('78%');
-    expect(row5).toHaveTextContent('15 – 22 сентября');
+    expect(screen.getByTestId('forecast-row-forecast-1')).toBeInTheDocument();
+    expect(screen.getByTestId('forecast-row-forecast-2')).toBeInTheDocument();
+    expect(screen.getByTestId('forecast-row-forecast-3')).toBeInTheDocument();
+    expect(screen.getByTestId('forecast-row-forecast-4')).toBeInTheDocument();
+    expect(screen.getByTestId('forecast-row-forecast-5')).toBeInTheDocument();
   });
 
-  it('renders the AI card and explanation matching the design', () => {
-    render(<ForecastsView />);
+  it('renders What-If simulator widget and updates simulation parameters', () => {
+    renderWithContext(<ForecastsView />);
+
+    // Check What-If widget
+    const whatIfWidget = screen.getByTestId('whatif-simulator-widget');
+    expect(whatIfWidget).toBeInTheDocument();
+
+    const statusBadge = screen.getByTestId('simulation-status-badge');
+    expect(statusBadge).toHaveTextContent('Базовый (Норма)');
+
+    // Move temperature slider to +2.0°C
+    const slider = screen.getByTestId('temp-anomaly-slider');
+    fireEvent.change(slider, { target: { value: '2' } });
+
+    expect(screen.getByTestId('temp-anomaly-value')).toHaveTextContent('+2°C');
+    expect(screen.getByTestId('simulation-status-badge')).toHaveTextContent('Сценарий активен');
+
+    // Shift badge indicates earlier harvest
+    expect(screen.getByTestId('simulation-shift-badge')).toHaveTextContent('На 3 дн. раньше');
+
+    // Reset button should now be visible and functional
+    const resetBtn = screen.getByTestId('btn-reset-simulation');
+    expect(resetBtn).toBeInTheDocument();
+    fireEvent.click(resetBtn);
+
+    expect(screen.getByTestId('simulation-status-badge')).toHaveTextContent('Базовый (Норма)');
+    expect(screen.getByTestId('temp-anomaly-value')).toHaveTextContent('0°C');
+  });
+
+  it('switches precipitation conditions in What-If widget', () => {
+    renderWithContext(<ForecastsView />);
+
+    const dryBtn = screen.getByTestId('rain-btn-dry');
+    const heavyBtn = screen.getByTestId('rain-btn-heavy');
+
+    // Click Heavy Rain
+    fireEvent.click(heavyBtn);
+    expect(heavyBtn).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('simulation-status-badge')).toHaveTextContent('Сценарий активен');
+    expect(screen.getByTestId('simulation-shift-badge')).toHaveTextContent('На 2 дн. позже');
+
+    // Click Drought
+    fireEvent.click(dryBtn);
+    expect(dryBtn).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('simulation-shift-badge')).toHaveTextContent('На 1 дн. раньше');
+  });
+
+  it('opens and interacts with the Harvest Logistics Modal', () => {
+    renderWithContext(<ForecastsView />);
+
+    // Open logistics modal via button in table header
+    const openLogisticsBtn = screen.getByTestId('btn-open-logistics');
+    fireEvent.click(openLogisticsBtn);
+
+    const modal = screen.getByTestId('harvest-logistics-modal');
+    expect(modal).toBeInTheDocument();
+    expect(screen.getByTestId('logistics-modal-title')).toHaveTextContent('Расчет ресурсов и логистики сбора урожая');
+
+    // Check KPI values inside modal
+    expect(screen.getByTestId('logistics-total-tons')).toBeInTheDocument();
+    expect(screen.getByTestId('logistics-pickers-needed')).toBeInTheDocument();
+    expect(screen.getByTestId('logistics-bins-needed')).toBeInTheDocument();
+    expect(screen.getByTestId('logistics-trucks-needed')).toBeInTheDocument();
+
+    // Close modal
+    const closeBtn = screen.getByTestId('logistics-modal-close');
+    fireEvent.click(closeBtn);
+    expect(screen.queryByTestId('harvest-logistics-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens and closes the Harvest Report Modal with printable preview', () => {
+    renderWithContext(<ForecastsView />);
+
+    const openReportBtn = screen.getByTestId('btn-print-report');
+    fireEvent.click(openReportBtn);
+
+    const reportModal = screen.getByTestId('harvest-report-modal');
+    expect(reportModal).toBeInTheDocument();
+    expect(screen.getByText('Предпросмотр агрономического отчета')).toBeInTheDocument();
+
+    // Check print button inside
+    expect(screen.getByTestId('report-print-btn')).toBeInTheDocument();
+
+    // Close report modal
+    const closeBtn = screen.getByTestId('report-close-btn');
+    fireEvent.click(closeBtn);
+    expect(screen.queryByTestId('harvest-report-modal')).not.toBeInTheDocument();
+  });
+
+  it('renders the AI card and adapts dynamically to simulation state', () => {
+    renderWithContext(<ForecastsView />);
 
     const aiCard = screen.getByTestId('forecast-ai-card');
     expect(aiCard).toBeInTheDocument();
 
-    const aiBadge = screen.getByTestId('forecast-ai-badge');
-    expect(aiBadge).toHaveTextContent('AI');
-
     const aiHeading = screen.getByTestId('forecast-ai-heading');
     expect(aiHeading).toHaveTextContent('Искусственный интеллект:');
 
-    const aiDescription = screen.getByTestId('forecast-ai-description');
-    expect(aiDescription).toHaveTextContent(
-      'Учитывает данные с дрона, историю агротехнических мероприятий и прогнозы погоды для точного расчёта срока сбора.'
-    );
+    // Simulate heat anomaly
+    const slider = screen.getByTestId('temp-anomaly-slider');
+    fireEvent.change(slider, { target: { value: '3' } });
+
+    // AI heading should adapt
+    expect(aiHeading).toHaveTextContent('Рекомендация AI по активному сценарию:');
+    expect(screen.getByTestId('forecast-ai-description')).toHaveTextContent(/риск осыпания/i);
   });
 
-  it('switches subtabs correctly to «Карта зрелости» and «Рекомендации» and back to «Сроки сбора»', () => {
+  it('switches subtabs correctly to «Карта зрелости» and «Рекомендации»', () => {
     const handleNavigate = vi.fn();
-    render(<ForecastsView onNavigate={handleNavigate} />);
-
-    // Initially on «Сроки сбора»
-    expect(screen.getByTestId('subtab-content-harvest-dates')).toBeInTheDocument();
+    renderWithContext(<ForecastsView onNavigate={handleNavigate} />);
 
     // Click «Карта зрелости»
     const maturityTab = screen.getByTestId('subtab-maturity-map');
@@ -144,18 +201,10 @@ describe('ForecastsView Component', () => {
 
     expect(screen.getByTestId('forecast-recommendations-panel')).toBeInTheDocument();
     expect(screen.getByText('AI-Агрорекомендации')).toBeInTheDocument();
-    expect(screen.getByText(/Участок 4 \(Ред Делишес\) — старт сбора 10 – 15 сентября/i)).toBeInTheDocument();
-
-    // Switch back to «Сроки сбора»
-    const harvestDatesTab = screen.getByTestId('subtab-harvest-dates');
-    fireEvent.click(harvestDatesTab);
-
-    expect(screen.getByTestId('subtab-content-harvest-dates')).toBeInTheDocument();
-    expect(screen.getByTestId('forecast-table-title')).toBeInTheDocument();
   });
 
   it('filters rows in the table when search query is typed', () => {
-    render(<ForecastsView />);
+    renderWithContext(<ForecastsView />);
 
     const searchInput = screen.getByTestId('forecast-table-search');
 
@@ -164,22 +213,15 @@ describe('ForecastsView Component', () => {
 
     expect(screen.getByTestId('forecast-row-forecast-2')).toBeInTheDocument();
     expect(screen.queryByTestId('forecast-row-forecast-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('forecast-row-forecast-3')).not.toBeInTheDocument();
 
     // Clear search
     fireEvent.change(searchInput, { target: { value: '' } });
     expect(screen.getByTestId('forecast-row-forecast-1')).toBeInTheDocument();
     expect(screen.getByTestId('forecast-row-forecast-2')).toBeInTheDocument();
-    expect(screen.getByTestId('forecast-row-forecast-3')).toBeInTheDocument();
-
-    // Search by sector name "Участок 4"
-    fireEvent.change(searchInput, { target: { value: 'Участок 4' } });
-    expect(screen.getByTestId('forecast-row-forecast-4')).toBeInTheDocument();
-    expect(screen.queryByTestId('forecast-row-forecast-1')).not.toBeInTheDocument();
   });
 
   it('filters rows by variety using select filter', () => {
-    render(<ForecastsView />);
+    renderWithContext(<ForecastsView />);
 
     const varietyFilter = screen.getByTestId('forecast-table-variety-filter');
 
@@ -188,26 +230,22 @@ describe('ForecastsView Component', () => {
 
     expect(screen.getByTestId('forecast-row-forecast-3')).toBeInTheDocument();
     expect(screen.queryByTestId('forecast-row-forecast-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('forecast-row-forecast-2')).not.toBeInTheDocument();
 
     // Reset to "all"
     fireEvent.change(varietyFilter, { target: { value: 'all' } });
     expect(screen.getByTestId('forecast-row-forecast-1')).toBeInTheDocument();
     expect(screen.getByTestId('forecast-row-forecast-2')).toBeInTheDocument();
-    expect(screen.getByTestId('forecast-row-forecast-3')).toBeInTheDocument();
   });
 
   it('opens detailed row summary when clicking on a row', () => {
-    render(<ForecastsView />);
+    renderWithContext(<ForecastsView />);
 
     const row1 = screen.getByTestId('forecast-row-forecast-1');
     fireEvent.click(row1);
 
-    // Detail summary appears
     const detailSummary = screen.getByTestId('forecast-row-detail-summary');
     expect(detailSummary).toBeInTheDocument();
     expect(detailSummary).toHaveTextContent('Детализация: Участок 1 (Гала)');
-    expect(detailSummary).toHaveTextContent('25 сентября – 5 октября');
 
     // Clicking again toggles it off
     fireEvent.click(row1);

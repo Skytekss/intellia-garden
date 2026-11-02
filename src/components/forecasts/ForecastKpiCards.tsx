@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, Apple, BarChart3 } from 'lucide-react';
-import { averageFruitReadiness } from '../../data/mockData';
 import { useApp } from '../../context/AppContext';
+import { calculateDeltaDays, shiftDateString } from '../../utils/harvestSimulation';
 
 export interface ForecastKpiData {
   averageHarvestDate: string;
@@ -21,13 +21,42 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
   data,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
+  const { isEnglish, t, sectors, tempAnomaly, rainCondition, isSimulationActive } = useApp();
+
+  const deltaDays = calculateDeltaDays(tempAnomaly, rainCondition);
+
+  // Compute baseline readiness from sectors
+  const baselineReadiness = sectors.length > 0
+    ? Math.round(sectors.reduce((sum, s) => sum + s.maturityPercent, 0) / sectors.length)
+    : 68;
+
+  const simulatedReadinessDelta = Math.round(
+    tempAnomaly * 2 + (rainCondition === 'dry' ? 2 : rainCondition === 'heavy' ? -1 : 0)
+  );
+  const effectiveReadiness = Math.max(15, Math.min(100, baselineReadiness + (isSimulationActive ? simulatedReadinessDelta : 0)));
+
+  const baselineHarvestDate = isEnglish ? 'Sep 12 – Sep 25' : '12 – 25 сентября';
+  const effectiveHarvestDate = isSimulationActive
+    ? shiftDateString(baselineHarvestDate, deltaDays, isEnglish)
+    : baselineHarvestDate;
 
   const defaultKpiData: ForecastKpiData = {
-    averageHarvestDate: isEnglish ? 'Sep 12 – 25' : '12 – 25 сентября',
-    averageHarvestDateSubtext: isEnglish ? '(orchard average)' : '(по саду)',
-    fruitReadinessPercent: averageFruitReadiness,
-    fruitReadinessSubtext: isEnglish ? '(in average)' : '(в среднем)',
+    averageHarvestDate: effectiveHarvestDate,
+    averageHarvestDateSubtext: isSimulationActive
+      ? isEnglish
+        ? `Shift: ${deltaDays < 0 ? `${deltaDays} d.` : `+${deltaDays} d.`}`
+        : `Сдвиг: ${deltaDays < 0 ? `${deltaDays} дн.` : `+${deltaDays} дн.`}`
+      : isEnglish
+      ? '(orchard average)'
+      : '(по саду)',
+    fruitReadinessPercent: effectiveReadiness,
+    fruitReadinessSubtext: isSimulationActive
+      ? isEnglish
+        ? '(scenario model)'
+        : '(по модели)'
+      : isEnglish
+      ? '(in average)'
+      : '(в среднем)',
     forecastAccuracyPercent: 92,
     forecastAccuracySubtext: isEnglish ? '(past seasons)' : '(по прошлым сезонам)',
   };
@@ -42,9 +71,9 @@ export const ForecastKpiCards: React.FC<ForecastKpiCardsProps> = ({
       value: metrics.averageHarvestDate,
       subtext: metrics.averageHarvestDateSubtext,
       icon: Calendar,
-      iconBg: 'bg-emerald-100',
-      iconColor: 'text-emerald-700',
-      borderColor: 'hover:border-emerald-200',
+      iconBg: isSimulationActive ? 'bg-amber-100' : 'bg-emerald-100',
+      iconColor: isSimulationActive ? 'text-amber-800' : 'text-emerald-700',
+      borderColor: isSimulationActive ? 'border-amber-300' : 'hover:border-emerald-200',
     },
     {
       id: 'fruit-readiness',

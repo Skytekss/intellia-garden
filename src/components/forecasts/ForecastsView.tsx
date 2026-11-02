@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { NavigationTab, ForecastSectorRow } from '../../types';
 import { ForecastKpiCards } from './ForecastKpiCards';
@@ -6,8 +6,10 @@ import { ForecastTable } from './ForecastTable';
 import { ForecastAiCard } from './ForecastAiCard';
 import { ForecastMaturityPreview } from './ForecastMaturityPreview';
 import { ForecastRecommendations } from './ForecastRecommendations';
+import { WhatIfSimulatorWidget } from './WhatIfSimulatorWidget';
 import { useApp } from '../../context/AppContext';
 import { getLocalizedForecastRows } from '../../context/localizedData';
+import { simulateHarvestForecast } from '../../utils/harvestSimulation';
 
 export type ForecastSubTab = 'maturity-map' | 'harvest-dates' | 'recommendations';
 
@@ -24,8 +26,16 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   forecastRows,
   className = '',
 }) => {
-  const { isEnglish, t, sectors } = useApp();
+  const { isEnglish, t, sectors, tempAnomaly, rainCondition } = useApp();
   const effectiveRows = forecastRows || getLocalizedForecastRows(isEnglish, sectors);
+
+  const simulatedRows = useMemo(() => {
+    return simulateHarvestForecast(
+      effectiveRows,
+      { tempAnomaly, rainCondition },
+      isEnglish
+    );
+  }, [effectiveRows, tempAnomaly, rainCondition, isEnglish]);
 
   const [activeSubTab, setActiveSubTab] = useState<ForecastSubTab>(() => {
     if (typeof window !== 'undefined') {
@@ -120,8 +130,11 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
           {/* 3 KPI Cards */}
           <ForecastKpiCards />
 
-          {/* Interactive Table «Рекомендованные даты сбора» */}
-          <ForecastTable rows={effectiveRows} />
+          {/* Interactive What-If Scenario Simulator */}
+          <WhatIfSimulatorWidget />
+
+          {/* Interactive Table with real simulated rows */}
+          <ForecastTable rows={simulatedRows} />
 
           {/* Bottom AI Card */}
           <ForecastAiCard />

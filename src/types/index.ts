@@ -77,6 +77,42 @@ export interface ForecastSectorRow {
   recommendedDate: string;
 }
 
+// Sprint 2: What-If Harvest Simulation & Logistics Types
+export type RainCondition = 'dry' | 'optimal' | 'heavy';
+
+export interface WhatIfSimulationParams {
+  tempAnomaly: number; // e.g. -3°C to +4°C, 0 is normal
+  rainCondition: RainCondition;
+}
+
+export interface SimulatedSectorForecast extends ForecastSectorRow {
+  originalDate: string;
+  simulatedDate: string;
+  deltaDays: number; // negative = earlier harvest, positive = later harvest
+  simulatedMaturityPercent: number;
+  riskNotice?: string;
+  riskNoticeEn?: string;
+}
+
+export interface HarvestLogisticsParams {
+  harvestWindowDays: number; // default ~14-21 days
+  pickerDailyNormKg: number; // default ~700-800 kg/day per picker
+  binCapacityKg?: number; // default 400 kg
+  truckCapacityTons?: number; // default 20 tons
+}
+
+export interface HarvestLogisticsSummary {
+  totalAreaHa: number;
+  totalTonsExpected: number;
+  avgYieldTonsPerHa: number;
+  harvestWindowDays: number;
+  pickerDailyNormKg: number;
+  pickersRequired: number;
+  binsRequired: number;
+  refrigeratedTrucksRequired: number;
+  dailyTonsToHarvest: number;
+}
+
 export interface FarmProfile {
   name: string;
   areaHa: number;

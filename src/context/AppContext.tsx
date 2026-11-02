@@ -10,6 +10,7 @@ import {
   AgroRecord,
   NotificationItem,
   SurveyHistoryEntry,
+  RainCondition,
 } from '../types';
 import {
   initialGeneralSettings,
@@ -75,6 +76,14 @@ export interface AppContextType {
   surveyHistory: SurveyHistoryEntry[];
   activeSurveyDate: string;
   setActiveSurveyDate: (date: string) => void;
+
+  // What-If Harvest Simulation (Sprint 2)
+  tempAnomaly: number;
+  setTempAnomaly: (delta: number) => void;
+  rainCondition: RainCondition;
+  setRainCondition: (condition: RainCondition) => void;
+  resetSimulation: () => void;
+  isSimulationActive: boolean;
 
   // Sensors & Notifications & Data Management
   sensors: HardwareSensor[];
@@ -212,6 +221,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [dataManagementSettings, setDataManagementSettingsState] = useState<DataManagementSettings>(() =>
     safeGetStorage<DataManagementSettings>(STORAGE_KEYS.dataManagement, initialDataManagementSettings)
   );
+
+  // What-If Harvest Simulation (Sprint 2)
+  const [tempAnomaly, setTempAnomaly] = useState<number>(0);
+  const [rainCondition, setRainCondition] = useState<RainCondition>('optimal');
+
+  const resetSimulation = useCallback(() => {
+    setTempAnomaly(0);
+    setRainCondition('optimal');
+  }, []);
+
+  const isSimulationActive = tempAnomaly !== 0 || rainCondition !== 'optimal';
 
   const updateGeneralSettings = useCallback((updated: Partial<GeneralSettings>) => {
     setGeneralSettingsState((prev) => {
@@ -583,6 +603,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       surveyHistory: currentFarm.surveyHistory,
       activeSurveyDate,
       setActiveSurveyDate,
+      tempAnomaly,
+      setTempAnomaly,
+      rainCondition,
+      setRainCondition,
+      resetSimulation,
+      isSimulationActive,
       sensors,
       updateSensors,
       notificationSettings,
@@ -628,6 +654,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addNotification,
       activeSurveyDate,
       setActiveSurveyDate,
+      tempAnomaly,
+      setTempAnomaly,
+      rainCondition,
+      setRainCondition,
+      resetSimulation,
+      isSimulationActive,
       sensors,
       updateSensors,
       notificationSettings,
@@ -686,6 +718,12 @@ export const useApp = (): AppContextType => {
       surveyHistory: defaultFarm.surveyHistory,
       activeSurveyDate: defaultFarm.lastSurveyDate,
       setActiveSurveyDate: () => {},
+      tempAnomaly: 0,
+      setTempAnomaly: () => {},
+      rainCondition: 'optimal',
+      setRainCondition: () => {},
+      resetSimulation: () => {},
+      isSimulationActive: false,
       sensors: initialSensors,
       updateSensors: () => {},
       notificationSettings: initialNotificationSettings,

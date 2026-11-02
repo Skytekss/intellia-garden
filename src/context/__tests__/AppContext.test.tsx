@@ -106,4 +106,29 @@ describe('AppContext - Living State & Multi-Farm SSOT', () => {
     expect(result.current.unreadNotificationsCount).toBe(0);
     expect(result.current.notifications.every((n) => n.isRead)).toBe(true);
   });
+
+  it('manages What-If harvest simulation parameters and resets correctly', () => {
+    const { result } = renderHook(() => useApp(), { wrapper });
+
+    expect(result.current.tempAnomaly).toBe(0);
+    expect(result.current.rainCondition).toBe('optimal');
+    expect(result.current.isSimulationActive).toBe(false);
+
+    act(() => {
+      result.current.setTempAnomaly(2.5);
+      result.current.setRainCondition('dry');
+    });
+
+    expect(result.current.tempAnomaly).toBe(2.5);
+    expect(result.current.rainCondition).toBe('dry');
+    expect(result.current.isSimulationActive).toBe(true);
+
+    act(() => {
+      result.current.resetSimulation();
+    });
+
+    expect(result.current.tempAnomaly).toBe(0);
+    expect(result.current.rainCondition).toBe('optimal');
+    expect(result.current.isSimulationActive).toBe(false);
+  });
 });

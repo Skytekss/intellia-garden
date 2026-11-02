@@ -7,14 +7,20 @@ import {
   Calendar,
   ChevronRight,
   X,
+  Truck,
+  Download,
+  Printer,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ForecastSectorRow } from '../../types';
+import { ForecastSectorRow, SimulatedSectorForecast } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { mockForecastRows, getMaturityColor, getMaturityMetadata } from '../../data/mockData';
+import { downloadForecastCsv } from '../../utils/exportUtils';
+import { HarvestLogisticsModal } from './HarvestLogisticsModal';
+import { HarvestReportModal } from './HarvestReportModal';
 
 interface ForecastTableProps {
-  rows?: ForecastSectorRow[];
+  rows?: Array<ForecastSectorRow | SimulatedSectorForecast>;
   onSelectRow?: (row: ForecastSectorRow) => void;
   className?: string;
 }
@@ -22,14 +28,14 @@ interface ForecastTableProps {
 type SortField = 'name' | 'variety' | 'maturityPercent' | 'recommendedDate';
 type SortOrder = 'asc' | 'desc';
 
-export const getStatusDotColor = (
+const getStatusDotColor = (
   _color: ForecastSectorRow['statusColor'],
   percent: number
 ): string => {
   return getMaturityColor(percent);
 };
 
-export const getStatusLabel = (percent: number): string => {
+const getStatusLabel = (percent: number): string => {
   return getMaturityMetadata(percent).label;
 };
 
@@ -38,12 +44,16 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
   onSelectRow,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
+  const { isEnglish, t, sectors, farmProfile } = useApp();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [varietyFilter, setVarietyFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+
+  // Modals
+  const [isLogisticsModalOpen, setIsLogisticsModalOpen] = useState<boolean>(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
 
   // Available unique varieties
   const varieties = useMemo(() => {
@@ -62,6 +72,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
         (row) =>
           row.name.toLowerCase().includes(q) ||
           row.variety.toLowerCase().includes(q) ||
+          (row as SimulatedSectorForecast).simulatedDate?.toLowerCase().includes(q) ||
           row.recommendedDate.toLowerCase().includes(q)
       );
     }
@@ -74,14 +85,19 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
     // Sort
     result.sort((a, b) => {
       let comparison = 0;
+      const aPercent = (a as SimulatedSectorForecast).simulatedMaturityPercent ?? a.maturityPercent;
+      const bPercent = (b as SimulatedSectorForecast).simulatedMaturityPercent ?? b.maturityPercent;
+
       if (sortField === 'maturityPercent') {
-        comparison = a.maturityPercent - b.maturityPercent;
+        comparison = aPercent - bPercent;
       } else if (sortField === 'name') {
         comparison = a.name.localeCompare(b.name, 'ru');
       } else if (sortField === 'variety') {
         comparison = a.variety.localeCompare(b.variety, 'ru');
       } else if (sortField === 'recommendedDate') {
-        comparison = a.recommendedDate.localeCompare(b.recommendedDate, 'ru');
+        const aDate = (a as SimulatedSectorForecast).simulatedDate || a.recommendedDate;
+        const bDate = (b as SimulatedSectorForecast).simulatedDate || b.recommendedDate;
+        comparison = aDate.localeCompare(bDate, 'ru');
       }
 
       return sortOrder === 'asc' ? comparison : -comparison;
@@ -99,7 +115,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
     }
   };
 
-  const handleRowClick = (row: ForecastSectorRow) => {
+  const handleRowClick = (row: ForecastSectorRow | SimulatedSectorForecast) => {
     setSelectedRowId((prev) => (prev === row.id ? null : row.id));
     if (onSelectRow) {
       onSelectRow(row);
@@ -108,12 +124,32 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
 
   const selectedRow = rows.find((r) => r.id === selectedRowId) || null;
 
+  // Normalized simulated rows for CSV / Report export
+  const normalizedSimulatedRows: SimulatedSectorForecast[] = useMemo(() => {
+    return rows.map((r) => {
+      const sim = r as SimulatedSectorForecast;
+      return {
+        ...r,
+        originalDate: sim.originalDate || r.recommendedDate,
+        simulatedDate: sim.simulatedDate || r.recommendedDate,
+        deltaDays: sim.deltaDays ?? 0,
+        simulatedMaturityPercent: sim.simulatedMaturityPercent ?? r.maturityPercent,
+        riskNotice: sim.riskNotice || (isEnglish ? 'Optimal harvest' : 'Оптимальный сбор'),
+        riskNoticeEn: sim.riskNoticeEn || (isEnglish ? 'Optimal harvest' : 'Оптимальный сбор'),
+      };
+    });
+  }, [rows, isEnglish]);
+
+  const handleExportCsv = () => {
+    downloadForecastCsv(normalizedSimulatedRows, farmProfile, isEnglish);
+  };
+
   return (
     <div
       data-testid="forecast-table-container"
       className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-6 transition-all duration-200 w-full min-w-0 overflow-hidden ${className}`}
     >
-      {/* Table Header with Title and Search/Controls */}
+      {/* Table Header with Title, Actions & Controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-slate-100">
         <div>
           <h2
@@ -129,17 +165,53 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
           </p>
         </div>
 
-        {/* Controls: Search and Filter */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {/* Actions & Filters */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+          {/* Action: Logistics Calculator */}
+          <button
+            type="button"
+            data-testid="btn-open-logistics"
+            onClick={() => setIsLogisticsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            title={t('forecasts.logistics.btn')}
+          >
+            <Truck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <span className="hidden sm:inline">{t('forecasts.logistics.btn')}</span>
+          </button>
+
+          {/* Action: Export CSV */}
+          <button
+            type="button"
+            data-testid="btn-export-csv"
+            onClick={handleExportCsv}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            title={t('forecasts.export.btn')}
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+            <span className="hidden sm:inline">{t('forecasts.export.btn')}</span>
+          </button>
+
+          {/* Action: Print Report */}
+          <button
+            type="button"
+            data-testid="btn-print-report"
+            onClick={() => setIsReportModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            title={t('forecasts.print.btn')}
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+            <span className="hidden sm:inline">{t('forecasts.print.btn')}</span>
+          </button>
+
           {/* Search Input */}
-          <div className="relative min-w-[180px] sm:min-w-[220px] flex-1 sm:flex-initial">
+          <div className="relative min-w-[150px] sm:min-w-[180px] flex-1 sm:flex-initial">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               data-testid="forecast-table-search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isEnglish ? 'Search by sector or variety...' : 'Поиск по участку или сорту...'}
+              placeholder={isEnglish ? 'Search...' : 'Поиск...'}
               className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
             />
             {searchQuery && (
@@ -174,7 +246,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
         </div>
       </div>
 
-      {/* Responsive Table Container with Horizontal Scroll support on iPhone 375px */}
+      {/* Responsive Table Container */}
       <div className="relative w-full max-w-full overflow-x-auto min-w-0 mt-3 sm:mt-4">
         <table
           data-testid="forecast-table"
@@ -231,7 +303,11 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
             {filteredAndSortedRows.length > 0 ? (
               filteredAndSortedRows.map((row) => {
                 const isSelected = selectedRowId === row.id;
-                const dotColor = getStatusDotColor(row.statusColor, row.maturityPercent);
+                const simRow = row as SimulatedSectorForecast;
+                const displayMaturity = simRow.simulatedMaturityPercent ?? row.maturityPercent;
+                const displayDate = simRow.simulatedDate || row.recommendedDate;
+                const deltaDays = simRow.deltaDays ?? 0;
+                const dotColor = getStatusDotColor(row.statusColor, displayMaturity);
 
                 return (
                   <tr
@@ -261,7 +337,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                       {row.variety}
                     </td>
 
-                    {/* 3. Степень зрелости with colored dot */}
+                    {/* 3. Степень зрелости */}
                     <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-slate-800 whitespace-nowrap">
                       <div className="inline-flex items-center gap-2">
                         <span
@@ -270,15 +346,33 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                           style={{ backgroundColor: dotColor }}
                           aria-hidden="true"
                         />
-                        <span>{row.maturityPercent}%</span>
+                        <span>{displayMaturity}%</span>
+                        {simRow.simulatedMaturityPercent !== undefined &&
+                          simRow.simulatedMaturityPercent !== row.maturityPercent && (
+                            <span className="text-[11px] text-slate-400 font-normal">
+                              ({row.maturityPercent}%)
+                            </span>
+                          )}
                       </div>
                     </td>
 
-                    {/* 4. Рекомендуемая дата */}
+                    {/* 4. Рекомендуемая дата со сдвигом */}
                     <td className="py-3.5 px-3 sm:px-4 text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap">
                       <div className="inline-flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{row.recommendedDate}</span>
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold text-slate-800">{displayDate}</span>
+                        {deltaDays !== 0 && (
+                          <span
+                            data-testid={`row-delta-${row.id}`}
+                            className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold ${
+                              deltaDays < 0
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}
+                          >
+                            {deltaDays < 0 ? `${deltaDays} дн.` : `+${deltaDays} дн.`}
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -338,32 +432,54 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
             <div>
               <span className="text-slate-500 block">{isEnglish ? 'Current maturity:' : 'Текущая зрелость:'}</span>
               <span className="font-semibold text-slate-900 text-sm">
-                {selectedRow.maturityPercent}% ({isEnglish
-                  ? (selectedRow.maturityPercent >= 75
-                      ? 'Ready for harvest'
-                      : selectedRow.maturityPercent >= 55
-                      ? 'Ripening'
-                      : 'Early phase')
-                  : getStatusLabel(selectedRow.maturityPercent)})
+                {(selectedRow as SimulatedSectorForecast).simulatedMaturityPercent ?? selectedRow.maturityPercent}% ({
+                  isEnglish
+                    ? (((selectedRow as SimulatedSectorForecast).simulatedMaturityPercent ?? selectedRow.maturityPercent) >= 75
+                        ? 'Ready for harvest'
+                        : ((selectedRow as SimulatedSectorForecast).simulatedMaturityPercent ?? selectedRow.maturityPercent) >= 55
+                        ? 'Ripening'
+                        : 'Early phase')
+                    : getStatusLabel((selectedRow as SimulatedSectorForecast).simulatedMaturityPercent ?? selectedRow.maturityPercent)
+                })
               </span>
             </div>
             <div>
               <span className="text-slate-500 block">{isEnglish ? 'Harvest window:' : 'Окно сбора:'}</span>
               <span className="font-semibold text-emerald-800 text-sm">
-                {selectedRow.recommendedDate}
+                {(selectedRow as SimulatedSectorForecast).simulatedDate || selectedRow.recommendedDate}
               </span>
+              {(selectedRow as SimulatedSectorForecast).deltaDays ? (
+                <span className="text-[11px] text-slate-500 block">
+                  {isEnglish ? 'Baseline:' : 'Базовое:'} {(selectedRow as SimulatedSectorForecast).originalDate}
+                </span>
+              ) : null}
             </div>
             <div>
               <span className="text-slate-500 block">{isEnglish ? 'Agro-recommendation:' : 'Агро-рекомендация:'}</span>
               <span className="font-medium text-slate-800">
-                {selectedRow.maturityPercent >= 75
-                  ? (isEnglish ? 'Priority harvest in dry weather' : 'Приоритетный сбор в сухую погоду')
-                  : (isEnglish ? 'Control drone flight in 5 days' : 'Контрольный облет через 5 дней')}
+                {(selectedRow as SimulatedSectorForecast).riskNotice ||
+                  (((selectedRow as SimulatedSectorForecast).simulatedMaturityPercent ?? selectedRow.maturityPercent) >= 75
+                    ? (isEnglish ? 'Priority harvest in dry weather' : 'Приоритетный сбор в сухую погоду')
+                    : (isEnglish ? 'Control drone flight in 5 days' : 'Контрольный облет через 5 дней'))}
               </span>
             </div>
           </div>
         </motion.div>
       )}
+
+      {/* Logistics Modal */}
+      <HarvestLogisticsModal
+        isOpen={isLogisticsModalOpen}
+        onClose={() => setIsLogisticsModalOpen(false)}
+        sectors={sectors}
+      />
+
+      {/* Print Report Modal */}
+      <HarvestReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        rows={normalizedSimulatedRows}
+      />
     </div>
   );
 };
