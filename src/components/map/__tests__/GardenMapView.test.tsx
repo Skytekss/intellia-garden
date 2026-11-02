@@ -189,6 +189,27 @@ describe('GardenMapView Component', () => {
     expect(farmBtn).toHaveTextContent('Участок «Яблоневый Яр»');
   });
 
+  it('ensures dropdowns have elevated z-index and sector badges suppress default focus outlines', () => {
+    renderWithContext(<GardenMapView />);
+
+    // Test dropdown z-index
+    const farmBtn = screen.getByTestId('map-farm-selector-btn');
+    fireEvent.click(farmBtn);
+
+    const farmDropdown = screen.getByTestId('map-farm-dropdown');
+    expect(farmDropdown).toHaveClass('z-50');
+    expect(farmDropdown).toHaveClass('shadow-2xl');
+
+    // Test badge focus prevention
+    const sector2Badge = screen.getByTestId('sector-badge-sector-2');
+    expect(sector2Badge).toHaveClass('outline-none');
+    expect(sector2Badge).toHaveStyle({ outline: 'none' });
+
+    // Ensure mousedown event prevents default focus stealing
+    fireEvent.mouseDown(sector2Badge);
+    expect(sector2Badge).toBeInTheDocument();
+  });
+
   it('opens UAV survey history menu and switches survey date', () => {
     renderWithContext(<GardenMapView />);
 

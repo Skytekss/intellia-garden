@@ -62,11 +62,11 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
   return (
     <div className="space-y-4 sm:space-y-5" data-testid="garden-map-view">
       {/* Top Bar: Farm Selector, Date & Maturity Legend */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white/70 backdrop-blur-xs p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+      <div className="relative z-30 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white/80 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
         {/* Left: Farm selector & Survey Date */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Farm selector dropdown button */}
-          <div className="relative inline-flex items-center" ref={farmMenuRef}>
+          <div className="relative inline-flex items-center z-40" ref={farmMenuRef}>
             <button
               type="button"
               data-testid="map-farm-selector-btn"
@@ -87,7 +87,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
             {isFarmMenuOpen && (
               <div
                 data-testid="map-farm-dropdown"
-                className="absolute left-0 top-full mt-1.5 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150"
+                className="absolute left-0 top-full mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
               >
                 <div className="px-3.5 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   {isEnglish ? 'Select Farm' : 'Выбор хозяйства'}
@@ -119,7 +119,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
           </div>
 
           {/* Survey Date Pill & Retrospective Dropdown */}
-          <div className="relative inline-flex items-center" ref={surveyMenuRef}>
+          <div className="relative inline-flex items-center z-40" ref={surveyMenuRef}>
             <button
               type="button"
               data-testid="map-survey-date-btn"
@@ -141,7 +141,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
             {isSurveyModalOpen && (
               <div
                 data-testid="map-survey-history-menu"
-                className="absolute left-0 top-full mt-1.5 w-72 sm:w-80 bg-white rounded-2xl border border-slate-200 shadow-xl p-3 z-30 animate-in fade-in zoom-in-95 duration-150 space-y-2"
+                className="absolute left-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-2"
               >
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
@@ -209,7 +209,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
       </div>
 
       {/* Main Grid: Garden Map (Left) & Sector Detail Panel (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* Left Column: Interactive Map */}
         <div className="lg:col-span-8 min-w-0 w-full">
           <GardenMap

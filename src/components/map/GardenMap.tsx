@@ -176,6 +176,11 @@ export const GardenMap: React.FC<GardenMapProps> = ({
               <filter id="badgeShadowMap" x="-20%" y="-20%" width="140%" height="140%">
                 <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.25" />
               </filter>
+
+              {/* Selected Badge glowing shadow */}
+              <filter id="badgeShadowSelected" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#047857" floodOpacity="0.35" />
+              </filter>
             </defs>
 
             {/* Sector Polygons */}
@@ -232,9 +237,14 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                 <g
                   key={`badge-${geom.id}`}
                   transform={`translate(${geom.badge.x}, ${geom.badge.y})`}
-                  className="pointer-events-auto cursor-pointer transition-transform duration-150"
-                  filter="url(#badgeShadowMap)"
+                  className="pointer-events-auto cursor-pointer transition-transform duration-150 outline-none focus:outline-none focus-visible:outline-none"
+                  style={{ outline: 'none' }}
+                  filter={isSelected ? 'url(#badgeShadowSelected)' : 'url(#badgeShadowMap)'}
                   onClick={() => onSelectSector(geom.id)}
+                  onMouseDown={(e) => {
+                    // Prevent default to stop browser from setting SVG DOM focus outline on mouse click
+                    e.preventDefault();
+                  }}
                   onMouseEnter={() => setHoveredSectorId(geom.id)}
                   onMouseLeave={() => setHoveredSectorId(null)}
                   role="button"
@@ -242,6 +252,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                   aria-label={`Выбрать ${geom.name}, готовность ${percent}%`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
                       onSelectSector(geom.id);
                     }
                   }}
@@ -256,8 +267,9 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                     rx="8"
                     fill="#ffffff"
                     stroke={isSelected ? '#047857' : isHovered ? '#10b981' : '#e2e8f0'}
-                    strokeWidth={isSelected ? '2.5' : '1'}
+                    strokeWidth={isSelected ? '2' : '1'}
                     className="transition-colors"
+                    style={{ outline: 'none' }}
                   />
 
                   {/* Title: Участок N */}

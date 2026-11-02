@@ -37,3 +37,13 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(5, 56, 43, 0.3);
 }
+
+/* Suppress default browser focus outline on interactive SVG badges on click */
+svg g:focus,
+svg g:focus-visible,
+svg rect:focus,
+svg rect:focus-visible,
+svg polygon:focus,
+svg polygon:focus-visible {
+  outline: none !important;
+}
