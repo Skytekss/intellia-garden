@@ -10,10 +10,11 @@ export interface WeatherWidgetProps {
 }
 
 export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
-  weather = mockWeather,
+  weather: propWeather,
   className = '',
 }) => {
-  const { formatTemperature, formatWindSpeed, isEnglish } = useApp();
+  const { formatTemperature, formatWindSpeed, isEnglish, currentFarm } = useApp();
+  const weather = propWeather || currentFarm?.weather || mockWeather;
 
   const conditionText = isEnglish
     ? 'Clear, no rain'

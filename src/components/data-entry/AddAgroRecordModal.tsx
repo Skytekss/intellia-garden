@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, MapPin, FileText, CheckCircle2, ClipboardList } from 'lucide-react';
 import { AgroOperationType, AgroRecord } from '../../types';
 import { useApp } from '../../context/AppContext';
+import { VARIETY_TRANSLATIONS, SECTOR_NAMES } from '../../context/localizedData';
 
 interface AddAgroRecordModalProps {
   isOpen: boolean;
@@ -26,45 +27,41 @@ const OPERATION_TYPES_EN: AgroOperationType[] = [
   'Fruit Thinning',
 ];
 
-const SECTORS_RU = [
-  'Все участки',
-  'Участок 1 (Гала)',
-  'Участок 2 (Фуджи)',
-  'Участок 3 (Голден)',
-  'Участок 4 (Ред Делишес)',
-  'Участок 5 (Гала)',
-];
-
-const SECTORS_EN = [
-  'All Sectors',
-  'Sector 1 (Gala)',
-  'Sector 2 (Fuji)',
-  'Sector 3 (Golden Delicious)',
-  'Sector 4 (Red Delicious)',
-  'Sector 5 (Gala)',
-];
-
 export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
 }) => {
-  const { isEnglish } = useApp();
+  const app = useApp();
+  const { isEnglish, sectors } = app;
 
   const operationTypes = isEnglish ? OPERATION_TYPES_EN : OPERATION_TYPES_RU;
-  const sectorsList = isEnglish ? SECTORS_EN : SECTORS_RU;
+
+  const dynamicSectors = useMemo(() => {
+    const allLabel = isEnglish ? 'All Sectors' : 'Все участки';
+    const sectorItems = sectors.map((s) => {
+      const variety = isEnglish ? (VARIETY_TRANSLATIONS[s.variety] || s.variety) : s.variety;
+      const sectorName = isEnglish ? (SECTOR_NAMES[s.id]?.en || s.name) : (SECTOR_NAMES[s.id]?.ru || s.name);
+      return {
+        id: s.id,
+        label: `${sectorName} (${variety})`,
+        name: sectorName,
+      };
+    });
+    return [{ id: 'all', label: allLabel, name: allLabel }, ...sectorItems];
+  }, [sectors, isEnglish]);
 
   const [type, setType] = useState<AgroOperationType>(operationTypes[0]);
   const [date, setDate] = useState('2025-08-12');
-  const [sector, setSector] = useState(sectorsList[0]);
+  const [sector, setSector] = useState(dynamicSectors[0]?.label || (isEnglish ? 'All Sectors' : 'Все участки'));
   const [notes, setNotes] = useState('');
   const [title, setTitle] = useState(operationTypes[0]);
 
   useEffect(() => {
     setType(operationTypes[0]);
     setTitle(operationTypes[0]);
-    setSector(sectorsList[0]);
-  }, [isEnglish]);
+    setSector(dynamicSectors[0]?.label || (isEnglish ? 'All Sectors' : 'Все участки'));
+  }, [isEnglish, dynamicSectors]);
 
   useEffect(() => {
     setTitle(type);
@@ -95,11 +92,15 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
       }
     }
 
+    const chosenSector = dynamicSectors.find((s) => s.label === sector || s.name === sector);
+    const targetSectorId = chosenSector && chosenSector.id !== 'all' ? chosenSector.id : undefined;
+
     onSubmit({
       type,
       title: title || type,
       date: formattedDate,
       sector: sector !== (isEnglish ? 'All Sectors' : 'Все участки') ? sector : undefined,
+      sectorId: targetSectorId,
       notes: notes || undefined,
     });
 
@@ -244,9 +245,9 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                     onChange={(e) => setSector(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 cursor-pointer"
                   >
-                    {sectorsList.map((sec) => (
-                      <option key={sec} value={sec}>
-                        {sec}
+                    {dynamicSectors.map((sec) => (
+                      <option key={sec.id} value={sec.label}>
+                        {sec.label}
                       </option>
                     ))}
                   </select>
@@ -259,41 +260,41 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
                   htmlFor="operation-notes-input"
                   className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"
                 >
-                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                  {isEnglish ? 'Notes & Consumables' : 'Примечания и расходные материалы'}
+                  <FileText className="w-3.5 h-3.5 text-slate-500" />
+                  {isEnglish ? 'Notes & Dosage' : 'Примечания и дозировка'}
                 </label>
                 <textarea
                   id="operation-notes-input"
                   data-testid="operation-notes-input"
-                  rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={
                     isEnglish
-                      ? 'Specify dosage, product, or microclimate context...'
-                      : 'Укажите препарат, дозировку или условия проведения...'
+                      ? 'e.g. 15 m3/ha, drippers checked'
+                      : 'Например, норма расхода 12 м³/га, давление 2.2 атм'
                   }
-                  className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 resize-none"
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 resize-none"
                 />
               </div>
 
-              {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
                 <button
                   type="button"
                   data-testid="cancel-agro-modal"
                   onClick={onClose}
-                  className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-medium text-slate-600 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   {isEnglish ? 'Cancel' : 'Отмена'}
                 </button>
                 <button
                   type="submit"
                   data-testid="submit-agro-record"
-                  className="px-5 py-2.5 bg-[#07503b] hover:bg-[#096047] active:scale-[0.98] text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#07503b] hover:bg-[#096047] text-white flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{isEnglish ? 'Add Record' : 'Добавить запись'}</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>{isEnglish ? 'Save Record' : 'Сохранить запись'}</span>
                 </button>
               </div>
             </form>
@@ -303,5 +304,3 @@ export const AddAgroRecordModal: React.FC<AddAgroRecordModalProps> = ({
     </AnimatePresence>
   );
 };
-
-export default AddAgroRecordModal;

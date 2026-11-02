@@ -110,7 +110,10 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <div className="min-w-0">
-            <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight truncate flex items-center gap-2">
+            <h1
+              data-testid="page-title"
+              className="text-base sm:text-xl font-bold text-slate-900 tracking-tight truncate flex items-center gap-2"
+            >
               <span className="truncate">{displayTitle}</span>
               {activeTab === 'overview' && (
                 <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200/60 shrink-0">
@@ -130,12 +133,20 @@ export const Header: React.FC<HeaderProps> = ({
           {onNavigate && (
             <button
               type="button"
+              data-testid="header-notifications-button"
               onClick={() => onNavigate('notifications')}
               className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-colors cursor-pointer"
               aria-label={isEn ? 'Notifications' : 'Уведомления'}
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-[#f4f7f6]" />
+              {app.unreadNotificationsCount > 0 && (
+                <span
+                  data-testid="header-notifications-badge"
+                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-emerald-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-[#f4f7f6] shadow-xs"
+                >
+                  {app.unreadNotificationsCount > 9 ? '9+' : app.unreadNotificationsCount}
+                </span>
+              )}
             </button>
           )}
 

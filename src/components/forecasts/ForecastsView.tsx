@@ -24,8 +24,8 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   forecastRows,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
-  const effectiveRows = forecastRows || getLocalizedForecastRows(isEnglish);
+  const { isEnglish, t, sectors } = useApp();
+  const effectiveRows = forecastRows || getLocalizedForecastRows(isEnglish, sectors);
 
   const [activeSubTab, setActiveSubTab] = useState<ForecastSubTab>(() => {
     if (typeof window !== 'undefined') {

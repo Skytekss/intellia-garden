@@ -12,6 +12,7 @@ import {
   mockForecastRows,
   mockRecommendations,
   ForecastRecommendationItem,
+  getMaturityMetadata,
 } from '../data/mockData';
 import { initialSensors } from '../data/mockSettings';
 import { mockNotifications } from '../data/mockNotifications';
@@ -25,6 +26,16 @@ export const VARIETY_TRANSLATIONS: Record<string, string> = {
   'Голден': 'Golden Delicious',
   'Ред Делишес': 'Red Delicious',
   'Хани Крисп': 'Honeycrisp',
+  'Антоновка': 'Antonovka',
+  'Семиренко': 'Semirenko',
+  'Богатырь': 'Bogatyr',
+  'Мелба': 'Melba',
+  'Спартак': 'Spartak',
+  'Бребурн': 'Braeburn',
+  'Пинк Леди': 'Pink Lady',
+  'Гренни Смит': 'Granny Smith',
+  'Гала Маст': 'Gala Must',
+  'Лигол': 'Ligol',
 };
 
 // Sector Names dictionary
@@ -46,10 +57,17 @@ export const DATE_RANGES: Record<string, string> = {
   '18 - 25 сентября': 'Sep 18 - 25',
   '1 – 10 октября': 'Oct 1 – 10',
   '1 - 10 октября': 'Oct 1 - 10',
+  '01 – 10 октября': 'Oct 1 – 10',
   '10 – 15 сентября': 'Sep 10 – 15',
   '10 - 15 сентября': 'Sep 10 - 15',
   '15 – 22 сентября': 'Sep 15 – 22',
   '15 - 22 сентября': 'Sep 15 - 22',
+  '22 – 30 сентября': 'Sep 22 – 30',
+  '05 – 12 сентября': 'Sep 5 – 12',
+  '25 сентября – 05 октября': 'Sep 25 – Oct 5',
+  '15 – 25 октября': 'Oct 15 – 25',
+  '10 – 18 сентября': 'Sep 10 – 18',
+  '18 – 26 сентября': 'Sep 18 – 26',
 };
 
 export const localizeDateRange = (dateStr: string): string => {
@@ -81,10 +99,11 @@ export const getLocalizedFarmProfile = (farm: FarmProfile, isEnglish: boolean): 
   };
 };
 
-export const getLocalizedSectors = (isEnglish: boolean): GardenSector[] => {
-  if (!isEnglish) return mockSectors;
+export const getLocalizedSectors = (isEnglish: boolean, customSectors?: GardenSector[]): GardenSector[] => {
+  const baseSectors = customSectors || mockSectors;
+  if (!isEnglish) return baseSectors;
 
-  return mockSectors.map((sector) => ({
+  return baseSectors.map((sector) => ({
     ...sector,
     name: SECTOR_NAMES[sector.id]?.en || sector.name.replace('Участок', 'Sector'),
     variety: VARIETY_TRANSLATIONS[sector.variety] || sector.variety,
@@ -92,10 +111,24 @@ export const getLocalizedSectors = (isEnglish: boolean): GardenSector[] => {
   }));
 };
 
-export const getLocalizedForecastRows = (isEnglish: boolean): ForecastSectorRow[] => {
-  if (!isEnglish) return mockForecastRows;
+export const getLocalizedForecastRows = (isEnglish: boolean, customSectors?: GardenSector[]): ForecastSectorRow[] => {
+  const baseRows = customSectors
+    ? customSectors.map((sector) => {
+        const meta = getMaturityMetadata(sector.maturityPercent);
+        return {
+          id: sector.id.replace('sector-', 'forecast-'),
+          name: sector.name,
+          variety: sector.variety,
+          maturityPercent: sector.maturityPercent,
+          statusColor: meta.statusColorName,
+          recommendedDate: sector.recommendedDate,
+        };
+      })
+    : mockForecastRows;
 
-  return mockForecastRows.map((row) => ({
+  if (!isEnglish) return baseRows;
+
+  return baseRows.map((row) => ({
     ...row,
     name: SECTOR_NAMES[row.id]?.en || row.name.replace('Участок', 'Sector'),
     variety: VARIETY_TRANSLATIONS[row.variety] || row.variety,
@@ -103,8 +136,9 @@ export const getLocalizedForecastRows = (isEnglish: boolean): ForecastSectorRow[
   }));
 };
 
-export const getLocalizedAgroRecords = (isEnglish: boolean): AgroRecord[] => {
-  if (!isEnglish) return initialAgroRecords;
+export const getLocalizedAgroRecords = (isEnglish: boolean, customRecords?: AgroRecord[]): AgroRecord[] => {
+  const baseRecords = customRecords || initialAgroRecords;
+  if (!isEnglish) return baseRecords;
 
   const OPERATION_TYPES_EN: Record<string, string> = {
     'Полив': 'Irrigation',
@@ -149,8 +183,12 @@ export const getLocalizedAgroRecords = (isEnglish: boolean): AgroRecord[] => {
   }));
 };
 
-export const getLocalizedNotifications = (isEnglish: boolean): NotificationItem[] => {
-  if (!isEnglish) return mockNotifications;
+export const getLocalizedNotifications = (
+  isEnglish: boolean,
+  customNotifications?: NotificationItem[]
+): NotificationItem[] => {
+  const baseNotifications = customNotifications || mockNotifications;
+  if (!isEnglish) return baseNotifications;
 
   const NOTIFICATIONS_EN: Record<
     string,
@@ -262,7 +300,7 @@ export const getLocalizedNotifications = (isEnglish: boolean): NotificationItem[
     },
   };
 
-  return mockNotifications.map((notif) => {
+  return baseNotifications.map((notif) => {
     const en = NOTIFICATIONS_EN[notif.id];
     if (!en) return notif;
     return {

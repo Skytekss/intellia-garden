@@ -25,28 +25,28 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
   onAddRecord,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
+  const { isEnglish, t, agroRecords, addAgroRecord } = useApp();
 
-  const [records, setRecords] = useState<AgroRecord[]>(() =>
-    initialPropRecords || getLocalizedAgroRecords(isEnglish) || []
-  );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [records, setRecords] = useState<AgroRecord[]>(() =>
+    initialPropRecords || agroRecords || []
+  );
 
   useEffect(() => {
-    if (!initialPropRecords) {
-      setRecords(getLocalizedAgroRecords(isEnglish) || []);
+    if (initialPropRecords) {
+      setRecords(initialPropRecords);
+    } else if (agroRecords && agroRecords.length > 0) {
+      setRecords(agroRecords);
     }
-  }, [isEnglish, initialPropRecords]);
+  }, [initialPropRecords, agroRecords]);
+
+  const effectiveRecords = getLocalizedAgroRecords(isEnglish, records);
 
   const handleCreateRecord = (newRecordData: Omit<AgroRecord, 'id'>) => {
-    const newRecord: AgroRecord = {
-      ...newRecordData,
-      id: `agro-${Date.now()}`,
-    };
-    const updated = [newRecord, ...records];
-    setRecords(updated);
+    const created = addAgroRecord(newRecordData);
+    setRecords((prev) => [created, ...prev]);
     if (onAddRecord) {
-      onAddRecord(newRecord);
+      onAddRecord(created);
     }
   };
 
@@ -111,13 +111,13 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
             </h3>
           </div>
           <span className="text-xs text-slate-400 font-medium">
-            {records.length} {isEnglish ? 'records' : 'записи'}
+            {effectiveRecords.length} {isEnglish ? 'records' : 'записи'}
           </span>
         </div>
 
         {/* Record list */}
         <div data-testid="agro-records-list" className="space-y-2.5">
-          {records.map((record) => (
+          {effectiveRecords.map((record) => (
             <div
               key={record.id}
               data-testid={`agro-record-item-${record.id}`}

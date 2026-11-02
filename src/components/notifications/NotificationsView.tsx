@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle2, BellOff, RotateCcw } from 'lucide-react';
 import { NavigationTab, NotificationItem, NotificationFilterTab } from '../../types';
-import { mockNotifications } from '../../data/mockNotifications';
 import { useApp } from '../../context/AppContext';
 import { getLocalizedNotifications } from '../../context/localizedData';
 import { NotificationCard } from './NotificationCard';
@@ -16,21 +15,31 @@ export interface NotificationsViewProps {
 
 export const NotificationsView: React.FC<NotificationsViewProps> = ({
   onNavigate,
-  initialNotifications = mockNotifications,
+  initialNotifications,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() =>
-    initialNotifications !== mockNotifications
-      ? initialNotifications
-      : getLocalizedNotifications(isEnglish)
+  const {
+    isEnglish,
+    t,
+    notifications: contextNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+  } = useApp();
+
+  const [rawNotifications, setRawNotifications] = useState<NotificationItem[]>(() =>
+    initialNotifications || contextNotifications
   );
 
-  React.useEffect(() => {
-    if (initialNotifications === mockNotifications) {
-      setNotifications(getLocalizedNotifications(isEnglish));
+  useEffect(() => {
+    if (initialNotifications) {
+      setRawNotifications(initialNotifications);
+    } else if (contextNotifications) {
+      setRawNotifications(contextNotifications);
     }
-  }, [isEnglish, initialNotifications]);
+  }, [initialNotifications, contextNotifications]);
+
+  const notifications = getLocalizedNotifications(isEnglish, rawNotifications);
+
   const [activeFilter, setActiveFilter] = useState<NotificationFilterTab>('all');
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,17 +62,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
 
   // Mark all as read
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((n) => ({
-        ...n,
-        isRead: true,
-      }))
-    );
+    markAllNotificationsRead();
+    setRawNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
   // Open details modal
   const handleOpenDetails = (notification: NotificationItem) => {
-    setNotifications((prev) =>
+    markNotificationRead(notification.id);
+    setRawNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
     );
     setSelectedNotification(notification);

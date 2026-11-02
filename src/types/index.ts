@@ -84,6 +84,31 @@ export interface FarmProfile {
   lastSurveyDate?: string;
 }
 
+export type FarmId = 'golden-orchard' | 'apple-ravine' | 'don-orchards' | string;
+
+export interface SurveyHistoryEntry {
+  date: string;
+  label: string;
+  droneModel: string;
+  resolutionCmPx: number;
+  ndviAvg: number;
+  weatherNote: string;
+}
+
+export interface FarmData {
+  id: string;
+  name: string;
+  nameEn: string;
+  region: string;
+  regionEn: string;
+  areaHa: number;
+  lastSurveyDate: string;
+  surveyHistory: SurveyHistoryEntry[];
+  sectors: GardenSector[];
+  agroRecords: AgroRecord[];
+  weather: WeatherTelemetry;
+}
+
 // Data Entry Screen Types
 export type SpectralChannel = 'RGB' | 'NIR' | 'Red Edge' | 'SWIR';
 
@@ -108,6 +133,7 @@ export interface AgroRecord {
   title: string;
   date: string;
   sector?: string;
+  sectorId?: string;
   notes?: string;
 }
 
@@ -128,4 +154,3 @@ export interface HyperspectralUploadState {
 export type DataSubTab = 'spectral' | 'agro' | 'meteo';
 
 export * from './settings';
-

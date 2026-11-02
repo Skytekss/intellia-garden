@@ -1,10 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import React from 'react';
 import { GardenMapView } from '../GardenMapView';
+import { AppProvider } from '../../../context/AppContext';
+
+const renderWithContext = (ui: React.ReactElement) => {
+  return render(<AppProvider>{ui}</AppProvider>);
+};
 
 describe('GardenMapView Component', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.history.replaceState(null, '', '/');
+  });
+
   it('renders farm title, survey date, and maturity legend', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     // Farm & Survey Date
     expect(screen.getByText('Ферма «Золотой Сад»')).toBeInTheDocument();
@@ -19,7 +30,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('renders all 5 garden sectors on the map', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     expect(screen.getByTestId('sector-badge-sector-1')).toBeInTheDocument();
     expect(screen.getByTestId('sector-badge-sector-2')).toBeInTheDocument();
@@ -36,7 +47,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('defaults to Sector 4 in the detail panel', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     const panel = screen.getByTestId('sector-detail-panel');
     expect(within(panel).getByText('Участок 4')).toBeInTheDocument();
@@ -47,7 +58,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('updates detail panel when clicking a different sector badge or polygon', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     // Click on Sector 1 badge
     const sector1Badge = screen.getByTestId('sector-badge-sector-1');
@@ -70,7 +81,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('supports zoom in, zoom out, and reset centering in the toolbar', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     const zoomControls = screen.getByTestId('map-zoom-controls');
     const zoomInBtn = screen.getByTestId('btn-zoom-in');
@@ -96,7 +107,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('toggles map mode and layers in the toolbar', () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     const modeBtn = screen.getByTestId('btn-toggle-mode');
     const layersBtn = screen.getByTestId('btn-toggle-layers');
@@ -117,7 +128,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('opens and closes the agro-analytics modal when clicking "Подробнее"', async () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     // Modal should not be in DOM initially
     expect(screen.queryByTestId('sector-detail-modal')).not.toBeInTheDocument();
@@ -149,7 +160,7 @@ describe('GardenMapView Component', () => {
   });
 
   it('closes the modal on Escape key press', async () => {
-    render(<GardenMapView />);
+    renderWithContext(<GardenMapView />);
 
     const detailsBtn = screen.getByTestId('sector-details-btn');
     fireEvent.click(detailsBtn);
@@ -161,5 +172,36 @@ describe('GardenMapView Component', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('sector-detail-modal')).not.toBeInTheDocument();
     });
+  });
+
+  it('opens farm selector dropdown and switches active farm', () => {
+    renderWithContext(<GardenMapView />);
+
+    const farmBtn = screen.getByTestId('map-farm-selector-btn');
+    expect(farmBtn).toHaveTextContent('Ферма «Золотой Сад»');
+
+    fireEvent.click(farmBtn);
+    expect(screen.getByTestId('map-farm-dropdown')).toBeInTheDocument();
+
+    const secondFarmOption = screen.getByText('Участок «Яблоневый Яр»');
+    fireEvent.click(secondFarmOption);
+
+    expect(farmBtn).toHaveTextContent('Участок «Яблоневый Яр»');
+  });
+
+  it('opens UAV survey history menu and switches survey date', () => {
+    renderWithContext(<GardenMapView />);
+
+    const dateBtn = screen.getByTestId('map-survey-date-btn');
+    fireEvent.click(dateBtn);
+
+    const historyMenu = screen.getByTestId('map-survey-history-menu');
+    expect(historyMenu).toBeInTheDocument();
+    expect(screen.getByText('История съемок БПЛА')).toBeInTheDocument();
+
+    const flight2 = screen.getByText('Облет БПЛА №3');
+    fireEvent.click(flight2);
+
+    expect(dateBtn).toHaveTextContent('05.08.2025');
   });
 });
