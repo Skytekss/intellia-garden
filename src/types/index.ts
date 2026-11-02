@@ -204,28 +204,4 @@ export interface StreifIndexResult {
   maxStorageMonths: number;
 }
 
-export interface SpectralComparisonPreset {
-  id: string;
-  label: string;
-  labelEn: string;
-  description: string;
-  descriptionEn: string;
-  rgbImage: string;
-  spectralImage: string;
-  spectralMetricLabel: string;
-  spectralMetricValue: string;
-  chlorophyllRatio: number;
-}
-
-export interface DroneAIDetectionResult {
-  fruitsDetectedCount: number;
-  avgDiameterMm: number;
-  calibreGrade: string;
-  calibreGradeEn: string;
-  avgNdvi: number;
-  chlorophyllIndex: number;
-  defectsSummary: string;
-  defectsSummaryEn: string;
-}
-
 export * from './settings';

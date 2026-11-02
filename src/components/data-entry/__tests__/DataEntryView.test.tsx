@@ -18,9 +18,6 @@ describe('DataEntryView Component', () => {
     expect(screen.getByTestId('subtab-agro')).toHaveTextContent('Агротехнические данные');
     expect(screen.getByTestId('subtab-meteo')).toHaveTextContent('Метеоданные');
 
-    // Spectral Split Comparator
-    expect(screen.getByTestId('spectral-split-comparator')).toBeInTheDocument();
-
     // Hyperspectral Upload Card & Drop Zone
     expect(screen.getByTestId('hyperspectral-upload-card')).toBeInTheDocument();
     expect(screen.getByTestId('drop-zone')).toBeInTheDocument();
@@ -241,7 +238,7 @@ describe('DataEntryView Component', () => {
 
     // Initial state: spectral
     expect(screen.getByTestId('subtab-spectral-content')).toBeInTheDocument();
-    expect(screen.getByTestId('spectral-split-comparator')).toBeInTheDocument();
+    expect(screen.getByTestId('hyperspectral-upload-card')).toBeInTheDocument();
 
     // Switch to Agro subtab
     fireEvent.click(agroTab);

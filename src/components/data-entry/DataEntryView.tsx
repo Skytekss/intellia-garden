@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { NavigationTab, DataSubTab, HyperspectralUploadState, AgroRecord } from '../../types';
 import { HyperspectralUploadCard } from './HyperspectralUploadCard';
-import { SpectralSplitComparator } from './SpectralSplitComparator';
 import { StreifIndexCalculator } from './StreifIndexCalculator';
 import { AgroWidget } from './AgroWidget';
 import { MeteoWidget } from './MeteoWidget';
@@ -136,7 +135,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             {t('data.subtitle') ||
-              'Спектральный компаратор, экспресс-калькулятор индекса Стрейфа, БПЛА-детекция и агрожурнал'}
+              'Загрузка снимков БПЛА, ведение агротехнических операций и телеметрия сада'}
           </p>
         </div>
       </div>
@@ -196,10 +195,6 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start min-w-0"
         >
           <div className="lg:col-span-8 min-w-0 space-y-6">
-            {/* Spectral Split Slider (RGB vs NDVI) */}
-            <SpectralSplitComparator />
-
-            {/* Hyperspectral Upload & AI Detection Card */}
             <HyperspectralUploadCard
               onSave={handleSaveHyperspectral}
               onNavigateNext={handleContinue}
