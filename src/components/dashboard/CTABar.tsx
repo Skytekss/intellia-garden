@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Leaf, ArrowRight, MapPin } from 'lucide-react';
 import { NavigationTab } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -16,16 +17,19 @@ export const CTABar: React.FC<CTABarProps> = ({
 
   return (
     <div className={`w-full ${className}`}>
-      <button
+      <motion.button
         type="button"
         data-testid="cta-go-to-map"
         onClick={() => onNavigate('map')}
-        className="w-full bg-[#07503b] hover:bg-[#096047] active:scale-[0.995] text-white rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-lg shadow-emerald-950/15 transition-all duration-200 cursor-pointer group text-left"
+        whileHover={{ scale: 1.008, y: -2 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ duration: 0.2 }}
+        className="w-full bg-[#07503b] hover:bg-[#096047] text-white rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-lg shadow-emerald-950/15 transition-colors duration-200 cursor-pointer group text-left"
         aria-label={isEnglish ? 'Go to Garden Map' : 'Перейти к карте сада'}
       >
         {/* Left Side: Leaf icon & Titles */}
         <div className="flex items-center gap-3.5 sm:gap-4">
-          <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-emerald-300 group-hover:scale-105 group-hover:bg-white/15 transition-all">
+          <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-emerald-300 group-hover:scale-110 group-hover:bg-white/15 transition-transform duration-200">
             <Leaf className="w-6 h-6" />
           </div>
 
@@ -50,10 +54,10 @@ export const CTABar: React.FC<CTABarProps> = ({
         </div>
 
         {/* Right Side: Arrow button circle */}
-        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-emerald-900 group-hover:translate-x-1 transition-all duration-200 shrink-0 ml-3">
-          <ArrowRight className="w-5 h-5" />
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white shrink-0 group-hover:bg-white group-hover:text-emerald-900 group-hover:translate-x-1 transition-all duration-200 shadow-xs">
+          <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
         </div>
-      </button>
+      </motion.button>
     </div>
   );
 };

@@ -17,6 +17,28 @@ export interface BentoCardsProps {
   className?: string;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.35,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  },
+};
+
 export const BentoCards: React.FC<BentoCardsProps> = ({
   items = mockBentoItems,
   onSelectCard,
@@ -70,8 +92,11 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       data-testid="bento-grid"
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
       className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 ${className}`}
     >
       {items.map((item) => {
@@ -82,22 +107,23 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
           <motion.div
             key={item.id}
             data-testid={`bento-card-${item.id}`}
-            whileHover={{ y: -4 }}
-            transition={{ duration: 0.2 }}
+            variants={cardVariants}
+            whileHover={{ y: -5, transition: { duration: 0.2 } }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCard?.(item.id)}
             className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow duration-300 flex flex-col justify-between cursor-pointer group text-left relative overflow-hidden"
           >
             {/* Top Row: Circular Icon Badge & Category indicator */}
             <div className="flex items-start justify-between gap-3">
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${item.iconBg}`}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-transform duration-200 group-hover:scale-105 ${item.iconBg}`}
               >
-                <IconComponent className="w-6 h-6" style={{ color: item.iconColor }} />
+                <IconComponent className="w-6 h-6 transition-transform duration-200 group-hover:rotate-3" style={{ color: item.iconColor }} />
               </div>
 
               <span className="text-xs font-semibold text-slate-400 group-hover:text-emerald-700 transition-colors flex items-center gap-1">
                 {isEnglish ? 'Details' : 'Подробнее'}
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
 
@@ -113,7 +139,10 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
 
             {/* Bottom Row: Metrics & Status tag */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-700">{detail.metric}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="font-semibold text-slate-700">{detail.metric}</span>
+              </div>
               <span className="text-slate-400 group-hover:text-emerald-700 transition-colors font-medium">
                 {detail.badge}
               </span>
@@ -121,6 +150,6 @@ export const BentoCards: React.FC<BentoCardsProps> = ({
           </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 };
