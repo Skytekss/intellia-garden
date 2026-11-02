@@ -1,10 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { DataEntryView } from '../DataEntryView';
+import { AppProvider } from '../../../context/AppContext';
+
+const renderWithContext = (ui: React.ReactElement) => {
+  return render(<AppProvider>{ui}</AppProvider>);
+};
 
 describe('DataEntryView Component', () => {
   it('renders all key elements, headers, subtabs, upload zone, sample card, and widgets', () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     // Header & Sub-tabs
     expect(screen.getByRole('heading', { level: 2, name: /Ввод/ })).toBeInTheDocument();
@@ -12,11 +18,14 @@ describe('DataEntryView Component', () => {
     expect(screen.getByTestId('subtab-agro')).toHaveTextContent('Агротехнические данные');
     expect(screen.getByTestId('subtab-meteo')).toHaveTextContent('Метеоданные');
 
+    // Spectral Split Comparator
+    expect(screen.getByTestId('spectral-split-comparator')).toBeInTheDocument();
+
     // Hyperspectral Upload Card & Drop Zone
     expect(screen.getByTestId('hyperspectral-upload-card')).toBeInTheDocument();
     expect(screen.getByTestId('drop-zone')).toBeInTheDocument();
     expect(screen.getByText('Загрузите снимки')).toBeInTheDocument();
-    expect(screen.getByText('Перетащите файлы сюда или выберите с компьютера')).toBeInTheDocument();
+    expect(screen.getByText(/Перетащите файлы/)).toBeInTheDocument();
     expect(screen.getByTestId('select-files-button')).toHaveTextContent('Выбрать файлы');
 
     // Spectral Sample Card
@@ -67,7 +76,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('allows file selection via input file and shows uploaded files list with remove capability', () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     const fileInput = screen.getByTestId('file-upload-input');
     const mockFile1 = new File(['fake drone spectral data 1'], 'ortho_band_rgb.tif', {
@@ -97,7 +106,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('toggles spectral channel checkboxes when clicked', () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     const rgbCheckbox = screen.getByTestId('channel-checkbox-RGB') as HTMLInputElement;
     expect(rgbCheckbox.checked).toBe(true);
@@ -117,7 +126,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('allows selecting different drone models and survey dates', () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     const droneSelect = screen.getByTestId('drone-model-select') as HTMLSelectElement;
     fireEvent.change(droneSelect, { target: { value: 'AgEagle eBee X' } });
@@ -129,7 +138,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('opens modal, fills form, and adds a new agro record to the list with toast feedback', async () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     // Click "+ Добавить запись"
     const addRecordBtn = screen.getByTestId('add-agro-record-button');
@@ -150,7 +159,7 @@ describe('DataEntryView Component', () => {
     fireEvent.change(dateInput, { target: { value: '2025-08-14' } });
 
     const sectorSelect = screen.getByTestId('operation-sector-select');
-    fireEvent.change(sectorSelect, { target: { value: 'Участок 1 (Гала)' } });
+    fireEvent.change(sectorSelect, { target: { value: 'Участок 1' } });
 
     const notesInput = screen.getByTestId('operation-notes-input');
     fireEvent.change(notesInput, { target: { value: 'Осветление кроны для инсоляции плодов' } });
@@ -175,7 +184,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('cancels modal without adding a record when clicking cancel or close button', async () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     // Open modal
     fireEvent.click(screen.getByTestId('add-agro-record-button'));
@@ -198,7 +207,7 @@ describe('DataEntryView Component', () => {
   });
 
   it('triggers import action and shows success notification when clicking import meteo data', () => {
-    render(<DataEntryView />);
+    renderWithContext(<DataEntryView />);
 
     const importBtn = screen.getByTestId('import-meteo-button');
     fireEvent.click(importBtn);
@@ -211,7 +220,7 @@ describe('DataEntryView Component', () => {
 
   it('calls onNavigate callback and shows toast when clicking "Сохранить и Продолжить →"', () => {
     const handleNavigate = vi.fn();
-    render(<DataEntryView onNavigate={handleNavigate} />);
+    renderWithContext(<DataEntryView onNavigate={handleNavigate} />);
 
     const continueBtn = screen.getByTestId('save-and-continue-button');
     fireEvent.click(continueBtn);
@@ -223,20 +232,32 @@ describe('DataEntryView Component', () => {
     expect(screen.getByTestId('toast-notification')).toBeInTheDocument();
   });
 
-  it('allows switching subtabs between spectral, agro, and meteo', () => {
-    render(<DataEntryView />);
+  it('allows switching subtabs between spectral, agro, and meteo and shows corresponding views', () => {
+    renderWithContext(<DataEntryView />);
 
     const spectralTab = screen.getByTestId('subtab-spectral');
     const agroTab = screen.getByTestId('subtab-agro');
     const meteoTab = screen.getByTestId('subtab-meteo');
 
+    // Initial state: spectral
+    expect(screen.getByTestId('subtab-spectral-content')).toBeInTheDocument();
+    expect(screen.getByTestId('spectral-split-comparator')).toBeInTheDocument();
+
+    // Switch to Agro subtab
     fireEvent.click(agroTab);
     expect(agroTab).toHaveClass('border-emerald-700');
+    expect(screen.getByTestId('subtab-agro-content')).toBeInTheDocument();
+    expect(screen.getByTestId('streif-index-calculator')).toBeInTheDocument();
 
+    // Switch to Meteo subtab
     fireEvent.click(meteoTab);
     expect(meteoTab).toHaveClass('border-emerald-700');
+    expect(screen.getByTestId('subtab-meteo-content')).toBeInTheDocument();
+    expect(screen.getByTestId('meteo-advanced-station')).toBeInTheDocument();
 
+    // Switch back to Spectral
     fireEvent.click(spectralTab);
     expect(spectralTab).toHaveClass('border-emerald-700');
+    expect(screen.getByTestId('subtab-spectral-content')).toBeInTheDocument();
   });
 });

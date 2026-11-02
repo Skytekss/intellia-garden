@@ -74,6 +74,7 @@ export interface AppContextType {
 
   // Survey History
   surveyHistory: SurveyHistoryEntry[];
+  addSurveyEntry: (entry: SurveyHistoryEntry) => void;
   activeSurveyDate: string;
   setActiveSurveyDate: (date: string) => void;
 
@@ -208,6 +209,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // Active survey date
+  // Survey History for current farm
+  const [surveyHistory, setSurveyHistoryState] = useState<SurveyHistoryEntry[]>(() => {
+    return safeGetStorage<SurveyHistoryEntry[]>(`intellia_survey_history_${currentFarmId}`, currentFarm.surveyHistory);
+  });
+
   const [activeSurveyDate, setActiveSurveyDateState] = useState<string>(currentFarm.lastSurveyDate);
 
   const [sensors, setSensorsState] = useState<HardwareSensor[]>(() =>
@@ -270,6 +276,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Load agro records for selected farm
     const storedRecords = safeGetStorage<AgroRecord[]>(`intellia_agro_records_${targetFarm.id}`, targetFarm.agroRecords);
     setAgroRecordsState(storedRecords);
+
+    // Load survey history for selected farm
+    const storedSurveyHistory = safeGetStorage<SurveyHistoryEntry[]>(`intellia_survey_history_${targetFarm.id}`, targetFarm.surveyHistory);
+    setSurveyHistoryState(storedSurveyHistory);
 
     setActiveSurveyDateState(targetFarm.lastSurveyDate);
   }, []);
@@ -425,6 +435,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safeSetStorage(`intellia_agro_records_${currentFarmId}`, next);
       return next;
     });
+  }, [currentFarmId]);
+
+  const addSurveyEntry = useCallback((entry: SurveyHistoryEntry) => {
+    setSurveyHistoryState((prev) => {
+      const next = [entry, ...prev];
+      safeSetStorage(`intellia_survey_history_${currentFarmId}`, next);
+      return next;
+    });
+    setActiveSurveyDateState(entry.date);
   }, [currentFarmId]);
 
   const setActiveSurveyDate = useCallback((date: string) => {
@@ -600,7 +619,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       markAllNotificationsRead,
       deleteNotification,
       addNotification,
-      surveyHistory: currentFarm.surveyHistory,
+      surveyHistory,
+      addSurveyEntry,
+
       activeSurveyDate,
       setActiveSurveyDate,
       tempAnomaly,
@@ -652,6 +673,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       markAllNotificationsRead,
       deleteNotification,
       addNotification,
+      surveyHistory,
+      addSurveyEntry,
+
       activeSurveyDate,
       setActiveSurveyDate,
       tempAnomaly,
@@ -716,6 +740,7 @@ export const useApp = (): AppContextType => {
       deleteNotification: () => {},
       addNotification: () => {},
       surveyHistory: defaultFarm.surveyHistory,
+      addSurveyEntry: () => {},
       activeSurveyDate: defaultFarm.lastSurveyDate,
       setActiveSurveyDate: () => {},
       tempAnomaly: 0,

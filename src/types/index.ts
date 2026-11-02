@@ -189,4 +189,43 @@ export interface HyperspectralUploadState {
 
 export type DataSubTab = 'spectral' | 'agro' | 'meteo';
 
+// Sprint 3: Spectral Lab & Streif Index Types
+export type StreifStorageCategory = 'ulo-long' | 'medium-retail' | 'immediate-processing';
+
+export interface StreifIndexResult {
+  index: number;
+  category: StreifStorageCategory;
+  categoryLabel: string;
+  categoryLabelEn: string;
+  color: string;
+  badgeClass: string;
+  recommendation: string;
+  recommendationEn: string;
+  maxStorageMonths: number;
+}
+
+export interface SpectralComparisonPreset {
+  id: string;
+  label: string;
+  labelEn: string;
+  description: string;
+  descriptionEn: string;
+  rgbImage: string;
+  spectralImage: string;
+  spectralMetricLabel: string;
+  spectralMetricValue: string;
+  chlorophyllRatio: number;
+}
+
+export interface DroneAIDetectionResult {
+  fruitsDetectedCount: number;
+  avgDiameterMm: number;
+  calibreGrade: string;
+  calibreGradeEn: string;
+  avgNdvi: number;
+  chlorophyllIndex: number;
+  defectsSummary: string;
+  defectsSummaryEn: string;
+}
+
 export * from './settings';

@@ -75,6 +75,13 @@ export const TRANSLATIONS: Record<'ru' | 'en', Record<string, string>> = {
     'data.meteo.title': 'Метеостанция',
     'data.meteo.sync': 'Синхронизировать данные',
 
+    // Sprint 3: Spectral Lab & Streif Index
+    'data.streif.title': 'Лабораторный калькулятор индекса Стрейфа (SI)',
+    'data.streif.subtitle': 'Определение технологической зрелости и сроков хранения в камерах с РГС',
+    'data.split.title': 'Двухканальный компаратор ортофото',
+    'data.split.subtitle': 'Интерактивное сопоставление видимого диапазона RGB и спектрального слоя NDVI',
+    'data.drone.aiTitle': 'Результаты нейросетевого анализа снимка',
+
     // Forecasts
     'forecasts.title': 'Прогнозы',
     'forecasts.subtitle': 'AI-моделирование созревания и окна сбора урожая',
@@ -300,6 +307,13 @@ export const TRANSLATIONS: Record<'ru' | 'en', Record<string, string>> = {
     'data.agro.add': 'Add Record',
     'data.meteo.title': 'Weather Station',
     'data.meteo.sync': 'Sync Meteo Data',
+
+    // Sprint 3: Spectral Lab & Streif Index
+    'data.streif.title': 'Streif Ripening Index (SI) Lab Calculator',
+    'data.streif.subtitle': 'Determining technological maturity and storage potential in ULO atmospheres',
+    'data.split.title': 'Dual-Channel Orthomosaic Comparator',
+    'data.split.subtitle': 'Interactive split comparison between visible RGB and thermal/NDVI layer',
+    'data.drone.aiTitle': 'AI Orthomosaic Detection Results',
 
     // Forecasts
     'forecasts.title': 'Forecasts',

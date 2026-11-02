@@ -6,9 +6,15 @@ import {
   CloudSun,
   CheckCircle2,
   X,
+  Gauge,
+  Sun,
+  Radio,
+  Flame,
 } from 'lucide-react';
 import { NavigationTab, DataSubTab, HyperspectralUploadState, AgroRecord } from '../../types';
 import { HyperspectralUploadCard } from './HyperspectralUploadCard';
+import { SpectralSplitComparator } from './SpectralSplitComparator';
+import { StreifIndexCalculator } from './StreifIndexCalculator';
 import { AgroWidget } from './AgroWidget';
 import { MeteoWidget } from './MeteoWidget';
 import { useApp } from '../../context/AppContext';
@@ -25,7 +31,28 @@ interface ToastState {
 
 export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
   const { isEnglish, t } = useApp();
-  const [activeSubTab, setActiveSubTab] = useState<DataSubTab>('spectral');
+  const [activeSubTab, setActiveSubTabState] = useState<DataSubTab>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sub = params.get('subtab') as DataSubTab;
+      if (sub === 'spectral' || sub === 'agro' || sub === 'meteo') return sub;
+    } catch {
+      // fallback
+    }
+    return 'spectral';
+  });
+
+  const setActiveSubTab = (tab: DataSubTab) => {
+    setActiveSubTabState(tab);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('subtab', tab);
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // fallback in tests
+    }
+  };
+
   const [toast, setToast] = useState<ToastState | null>(null);
 
   const showToast = (message: string, type: 'success' | 'info' = 'success') => {
@@ -109,7 +136,7 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             {t('data.subtitle') ||
-              'Загрузка снимков БПЛА, ведение агротехнических операций и телеметрия сада'}
+              'Спектральный компаратор, экспресс-калькулятор индекса Стрейфа, БПЛА-детекция и агрожурнал'}
           </p>
         </div>
       </div>
@@ -162,22 +189,163 @@ export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
         </button>
       </div>
 
-      {/* Main Grid: Left col-span-8, Right col-span-4 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start min-w-0">
-        {/* Left Column: Hyperspectral Upload Card (8 cols) */}
-        <div className="lg:col-span-8 min-w-0 space-y-6">
-          <HyperspectralUploadCard
-            onSave={handleSaveHyperspectral}
-            onNavigateNext={handleContinue}
-          />
-        </div>
+      {/* Subtab 1: Spectral (Split Comparator + AI Drone Analyzer + Widgets) */}
+      {activeSubTab === 'spectral' && (
+        <div
+          data-testid="subtab-spectral-content"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start min-w-0"
+        >
+          <div className="lg:col-span-8 min-w-0 space-y-6">
+            {/* Spectral Split Slider (RGB vs NDVI) */}
+            <SpectralSplitComparator />
 
-        {/* Right Column: Agro & Meteo Widgets (4 cols) */}
-        <div className="lg:col-span-4 min-w-0 space-y-6">
-          <AgroWidget onAddRecord={handleAddAgroRecord} />
-          <MeteoWidget onImport={handleImportMeteo} />
+            {/* Hyperspectral Upload & AI Detection Card */}
+            <HyperspectralUploadCard
+              onSave={handleSaveHyperspectral}
+              onNavigateNext={handleContinue}
+            />
+          </div>
+
+          <div className="lg:col-span-4 min-w-0 space-y-6">
+            <AgroWidget onAddRecord={handleAddAgroRecord} />
+            <MeteoWidget onImport={handleImportMeteo} />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Subtab 2: Agro Data (Streif Ripening Index Calculator + Journal) */}
+      {activeSubTab === 'agro' && (
+        <div
+          data-testid="subtab-agro-content"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start min-w-0"
+        >
+          <div className="lg:col-span-8 min-w-0 space-y-6">
+            {/* Express Streif Ripening Index Lab Calculator */}
+            <StreifIndexCalculator
+              onApplied={(sectorName, si) =>
+                showToast(
+                  isEnglish
+                    ? `Streif Index (SI = ${si}) applied to ${sectorName}!`
+                    : `Замер индекса Стрейфа (SI = ${si}) внесен для сектора «${sectorName}»!`
+                )
+              }
+            />
+
+            {/* Quick reference guide for Streif & CTIFL norms */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-3">
+              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-emerald-700" />
+                <span>
+                  {isEnglish
+                    ? 'Streif Index Methodology & Optimal Picking Windows'
+                    : 'Методика расчета индекса Стрейфа и критерии оптимума сбора'}
+                </span>
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {isEnglish
+                  ? 'The Streif Index (SI = F / (R * S)) provides the gold standard for timing the harvest of long-storing apple cultivars. Values between 0.07 and 0.09 indicate prime picking readiness for Ultra-Low Oxygen (ULO/CA) cold rooms with up to 7–9 months storage capability.'
+                  : 'Индекс Стрейфа (SI = F / (R * S)) является международным стандартом определения оптимального окна уборки яблок для длительного хранения. Значение 0.07–0.09 соответствует высшей лежкоспособности плодов в камерах с РГС (ULO) до 7–9 месяцев.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 min-w-0 space-y-6">
+            <AgroWidget onAddRecord={handleAddAgroRecord} />
+          </div>
+        </div>
+      )}
+
+      {/* Subtab 3: Meteo Telemetry (Sensors, GDD, Station Sync) */}
+      {activeSubTab === 'meteo' && (
+        <div
+          data-testid="subtab-meteo-content"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start min-w-0"
+        >
+          <div className="lg:col-span-8 min-w-0 space-y-6">
+            {/* Advanced Meteo Station Telemetry Card */}
+            <div
+              data-testid="meteo-advanced-station"
+              className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
+                    <CloudSun className="w-5 h-5 text-emerald-700" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                      {isEnglish
+                        ? 'Davis Vantage Pro2 Agro-Weather Station'
+                        : 'Автоматическая агрометеостанция Davis Vantage Pro2'}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {isEnglish
+                        ? 'Telemetry telemetry loop: 5 min update • LoRaWAN 868 MHz'
+                        : 'Интервал телеметрии: 5 мин • Канал связи LoRaWAN 868 МГц'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Online
+                  </span>
+                </div>
+              </div>
+
+              {/* Meteo Telemetry Bento */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <Flame className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{isEnglish ? 'Accumulated GDD' : 'Сумма тепл. GDD'}</span>
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 mt-1">1,280 °C</div>
+                  <div className="text-xs text-emerald-700 font-semibold mt-0.5">
+                    {isEnglish ? 'Base T = 10°C' : 'Базовая T₀ = 10°C'}
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{isEnglish ? 'Solar Radiation' : 'Инсоляция'}</span>
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 mt-1">840 Вт/м²</div>
+                  <div className="text-xs text-slate-500 font-medium mt-0.5">
+                    {isEnglish ? 'Peak irradiance' : 'Максимальная'}
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <Gauge className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{isEnglish ? 'Pressure' : 'Давление'}</span>
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 mt-1">1,014 гПа</div>
+                  <div className="text-xs text-slate-500 font-medium mt-0.5">760 мм рт. ст.</div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <Radio className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{isEnglish ? 'Sensor Probes' : 'Почв. зонды'}</span>
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 mt-1">4 / 4</div>
+                  <div className="text-xs text-emerald-700 font-semibold mt-0.5">
+                    {isEnglish ? '100% active' : 'Все активны'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 min-w-0 space-y-6">
+            <MeteoWidget onImport={handleImportMeteo} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
