@@ -10,6 +10,7 @@ import {
   Truck,
   Download,
   Printer,
+  TrendingUp,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ForecastSectorRow, SimulatedSectorForecast, NavigationTab } from '../../types';
@@ -18,6 +19,7 @@ import { mockForecastRows, getMaturityColor, getMaturityMetadata } from '../../d
 import { downloadForecastCsv } from '../../utils/exportUtils';
 import { HarvestLogisticsModal } from './HarvestLogisticsModal';
 import { HarvestReportModal } from './HarvestReportModal';
+import { HarvestEconomicsModal } from './HarvestEconomicsModal';
 
 interface ForecastTableProps {
   rows?: Array<ForecastSectorRow | SimulatedSectorForecast>;
@@ -56,6 +58,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
   // Modals
   const [isLogisticsModalOpen, setIsLogisticsModalOpen] = useState<boolean>(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+  const [isEconomicsModalOpen, setIsEconomicsModalOpen] = useState<boolean>(false);
 
   // Available unique varieties
   const varieties = useMemo(() => {
@@ -179,6 +182,20 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
           >
             <Truck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
             <span className="hidden sm:inline">{t('forecasts.logistics.btn')}</span>
+          </button>
+
+          {/* Action: Profitability & Margin Timing Calculator */}
+          <button
+            type="button"
+            data-testid="btn-open-economics"
+            onClick={() => setIsEconomicsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            title={isEnglish ? 'Profit Margin Optimizer' : 'Калькулятор маржинальности'}
+          >
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <span className="hidden sm:inline">
+              {isEnglish ? 'Profit Margin' : 'Маржинальность'}
+            </span>
           </button>
 
           {/* Action: Export CSV */}
@@ -486,6 +503,13 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
       <HarvestLogisticsModal
         isOpen={isLogisticsModalOpen}
         onClose={() => setIsLogisticsModalOpen(false)}
+        sectors={sectors}
+      />
+
+      {/* Economics / Margin Optimizer Modal */}
+      <HarvestEconomicsModal
+        isOpen={isEconomicsModalOpen}
+        onClose={() => setIsEconomicsModalOpen(false)}
         sectors={sectors}
       />
 
