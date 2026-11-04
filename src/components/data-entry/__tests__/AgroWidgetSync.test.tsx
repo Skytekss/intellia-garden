@@ -89,4 +89,36 @@ describe('AgroWidget Living Sync - Biometrics & Notifications Impact', () => {
     const updatedBrix = Number(screen.getByTestId('observer-sector1-brix').textContent);
     expect(updatedBrix).toBeGreaterThan(initialBrix);
   });
+
+  it('supports expanding record details and interactive deletion with confirmation', async () => {
+    render(
+      <AppProvider>
+        <BiometricsObserver />
+      </AppProvider>
+    );
+
+    // Initial records list
+    const recordsList = screen.getByTestId('agro-records-list');
+    expect(recordsList).toBeInTheDocument();
+
+    // Click on the first record item to expand details
+    const toggleBtn = screen.getByTestId('toggle-record-agro-1');
+    fireEvent.click(toggleBtn);
+
+    // Verify details panel is visible
+    expect(screen.getByTestId('agro-record-details-agro-1')).toBeInTheDocument();
+    const deleteBtn = screen.getByTestId('delete-record-btn-agro-1');
+    expect(deleteBtn).toBeInTheDocument();
+
+    // Click delete -> shows confirmation
+    fireEvent.click(deleteBtn);
+    expect(screen.getByTestId('confirm-delete-btn-agro-1')).toBeInTheDocument();
+    expect(screen.getByTestId('cancel-delete-btn-agro-1')).toBeInTheDocument();
+
+    // Confirm delete
+    fireEvent.click(screen.getByTestId('confirm-delete-btn-agro-1'));
+
+    // Record agro-1 should be removed
+    expect(screen.queryByTestId('agro-record-item-agro-1')).not.toBeInTheDocument();
+  });
 });

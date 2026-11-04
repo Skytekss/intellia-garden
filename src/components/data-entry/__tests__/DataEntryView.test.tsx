@@ -257,4 +257,16 @@ describe('DataEntryView Component', () => {
     expect(spectralTab).toHaveClass('border-emerald-700');
     expect(screen.getByTestId('subtab-spectral-content')).toBeInTheDocument();
   });
+
+  it('respects URL query parameter subtab for deep linking', () => {
+    // Set query string to ?subtab=agro
+    window.history.replaceState(null, '', '/?subtab=agro');
+    renderWithContext(<DataEntryView />);
+
+    expect(screen.getByTestId('subtab-agro-content')).toBeInTheDocument();
+    expect(screen.getByTestId('streif-index-calculator')).toBeInTheDocument();
+
+    // Reset URL
+    window.history.replaceState(null, '', '/');
+  });
 });

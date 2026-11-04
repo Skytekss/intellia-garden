@@ -30,16 +30,28 @@ interface ToastState {
 
 export const DataEntryView: React.FC<DataEntryViewProps> = ({ onNavigate }) => {
   const { isEnglish, t } = useApp();
-  const [activeSubTab, setActiveSubTabState] = useState<DataSubTab>(() => {
+
+  const resolveSubTabFromUrl = (): DataSubTab => {
     try {
       const params = new URLSearchParams(window.location.search);
-      const sub = params.get('subtab') as DataSubTab;
+      const sub = params.get('subtab');
       if (sub === 'spectral' || sub === 'agro' || sub === 'meteo') return sub;
+      if (sub === 'calculator' || sub === 'streif') return 'agro';
     } catch {
       // fallback
     }
     return 'spectral';
-  });
+  };
+
+  const [activeSubTab, setActiveSubTabState] = useState<DataSubTab>(resolveSubTabFromUrl);
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setActiveSubTabState(resolveSubTabFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const setActiveSubTab = (tab: DataSubTab) => {
     setActiveSubTabState(tab);

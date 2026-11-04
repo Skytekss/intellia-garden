@@ -8,6 +8,11 @@ import {
   Plus,
   Sparkles,
   ClipboardList,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  AlertCircle,
+  FileText,
 } from 'lucide-react';
 import { AgroRecord, AgroOperationType } from '../../types';
 import { AddAgroRecordModal } from './AddAgroRecordModal';
@@ -25,12 +30,14 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
   onAddRecord,
   className = '',
 }) => {
-  const { isEnglish, t, agroRecords, addAgroRecord } = useApp();
+  const { isEnglish, t, agroRecords, addAgroRecord, deleteAgroRecord, addNotification } = useApp();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [records, setRecords] = useState<AgroRecord[]>(() =>
     initialPropRecords || agroRecords || []
   );
+  const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialPropRecords) {
@@ -48,6 +55,29 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
     if (onAddRecord) {
       onAddRecord(created);
     }
+  };
+
+  const handleDeleteRecord = (record: AgroRecord) => {
+    deleteAgroRecord(record.id);
+    setRecords((prev) => prev.filter((r) => r.id !== record.id));
+    setConfirmDeleteId(null);
+    if (expandedRecordId === record.id) {
+      setExpandedRecordId(null);
+    }
+
+    addNotification({
+      category: 'system',
+      badgeText: isEnglish ? 'Journal' : 'Агрожурнал',
+      title: isEnglish ? 'Record removed' : 'Запись удалена',
+      description: isEnglish
+        ? `Operation "${record.title || record.type}" deleted from orchard logs.`
+        : `Операция «${record.title || record.type}» удалена из журнала агротехники.`,
+      actionText: isEnglish ? 'View Data' : 'К данным',
+      actionTarget: 'data',
+      isRead: false,
+      dotColor: 'teal',
+      iconType: 'agritech',
+    });
   };
 
   const getOperationIcon = (type: AgroOperationType) => {
@@ -117,29 +147,117 @@ export const AgroWidget: React.FC<AgroWidgetProps> = ({
 
         {/* Record list */}
         <div data-testid="agro-records-list" className="space-y-2.5">
-          {effectiveRecords.map((record) => (
-            <div
-              key={record.id}
-              data-testid={`agro-record-item-${record.id}`}
-              className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                {getOperationIcon(record.type)}
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-slate-800 truncate">
-                    {record.title || record.type}
-                  </p>
-                  {record.sector && (
-                    <p className="text-xs text-slate-400 truncate">{record.sector}</p>
-                  )}
-                </div>
-              </div>
+          {effectiveRecords.map((record) => {
+            const isExpanded = expandedRecordId === record.id;
+            const isConfirming = confirmDeleteId === record.id;
 
-              <div className="text-right flex-shrink-0 ml-3">
-                <span className="text-xs font-medium text-slate-500">{record.date}</span>
+            return (
+              <div
+                key={record.id}
+                data-testid={`agro-record-item-${record.id}`}
+                className="rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors overflow-hidden"
+              >
+                {/* Main Row */}
+                <div
+                  data-testid={`toggle-record-${record.id}`}
+                  className="flex items-center justify-between p-2.5 cursor-pointer"
+                  onClick={() => setExpandedRecordId(isExpanded ? null : record.id)}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {getOperationIcon(record.type)}
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 truncate">
+                        {record.title || record.type}
+                      </p>
+                      {record.sector && (
+                        <p className="text-xs text-slate-400 truncate">{record.sector}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                    <span className="text-xs font-medium text-slate-500">{record.date}</span>
+                    <button
+                      type="button"
+                      aria-label={isExpanded ? 'Collapse record' : 'Expand record'}
+                      className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded Details Panel */}
+                {isExpanded && (
+                  <div
+                    data-testid={`agro-record-details-${record.id}`}
+                    className="px-3 pb-3 pt-1 border-t border-slate-200/50 bg-white/70 space-y-2 text-xs"
+                  >
+                    <div className="flex items-start gap-1.5 text-slate-600">
+                      <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                      <p className="leading-relaxed">
+                        {record.notes ||
+                          (isEnglish
+                            ? 'Agrotechnical treatment executed under standard agronomical protocol.'
+                            : 'Агротехническая обработка проведена согласно регламенту.')}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <span className="text-slate-400 text-xs">
+                        ID: {record.id}
+                      </span>
+
+                      {!isConfirming ? (
+                        <button
+                          type="button"
+                          data-testid={`delete-record-btn-${record.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDeleteId(record.id);
+                          }}
+                          className="inline-flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{isEnglish ? 'Delete' : 'Удалить'}</span>
+                        </button>
+                      ) : (
+                        <div
+                          className="flex items-center gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className="text-rose-600 font-medium text-xs flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            {isEnglish ? 'Sure?' : 'Точно?'}
+                          </span>
+                          <button
+                            type="button"
+                            data-testid={`confirm-delete-btn-${record.id}`}
+                            onClick={() => handleDeleteRecord(record)}
+                            className="px-2 py-0.5 rounded-md bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
+                          >
+                            {isEnglish ? 'Yes' : 'Да'}
+                          </button>
+                          <button
+                            type="button"
+                            data-testid={`cancel-delete-btn-${record.id}`}
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-2 py-0.5 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-xs transition-colors cursor-pointer"
+                          >
+                            {isEnglish ? 'Cancel' : 'Отмена'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
