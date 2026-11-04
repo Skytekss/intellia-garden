@@ -125,6 +125,34 @@ export const GardenMap: React.FC<GardenMapProps> = ({
     setIsDragging(false);
   };
 
+  // Touch Drag / Pan handlers for mobile & tablet
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoom <= 1 || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+  };
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isDragging || zoom <= 1 || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const newX = touch.clientX - dragStart.x;
+      const newY = touch.clientY - dragStart.y;
+
+      const maxPan = 160 * (zoom - 1);
+      setPan({
+        x: Math.max(-maxPan, Math.min(maxPan, newX)),
+        y: Math.max(-maxPan, Math.min(maxPan, newY)),
+      });
+    },
+    [isDragging, zoom, dragStart]
+  );
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   const sectorMap = new Map(sectors.map((s) => [s.id, s]));
 
   return (
@@ -136,6 +164,9 @@ export const GardenMap: React.FC<GardenMapProps> = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       {/* Zoomable / Pannable Map Layer */}
       <div
@@ -145,6 +176,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
         }}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         <div className="relative w-full h-full min-w-0">
           {/* Base Raster Image */}
@@ -327,35 +359,36 @@ export const GardenMap: React.FC<GardenMapProps> = ({
 
       {/* --- 1. NEW TOP FLOATING TOOLBAR: Clear layer mode & contours toggle --- */}
       <div
-        className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 flex flex-wrap items-center gap-2 pointer-events-auto"
+        className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 z-20 flex items-center gap-1.5 sm:gap-2 pointer-events-auto"
         data-testid="map-toolbar"
       >
         {/* Layer Mode Segmented Controller */}
-        <div className="flex items-center p-1 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90">
+        <div className="flex items-center p-0.5 sm:p-1 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/90">
           <button
             type="button"
             onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
             data-testid="btn-toggle-mode"
             title={isEnglish ? 'Toggle mode: NDVI Spectrum / RGB Orthophoto' : 'Переключить режим: NDVI Спектр / Ортофото RGB'}
             aria-label={isEnglish ? 'Toggle spectral mode' : 'Переключить спектральный режим'}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-[#07503b] text-white shadow-xs"
+            className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-[#07503b] text-white shadow-xs"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>
+            <span className="sm:hidden">
               {isEnglish
-                ? mapMode === 'ndvi'
-                  ? 'NDVI Spectrum'
-                  : 'RGB Orthophoto'
-                : mapMode === 'ndvi'
-                ? 'NDVI Спектр'
-                : 'Ортофото RGB'}
+                ? (mapMode === 'ndvi' ? 'NDVI' : 'RGB')
+                : (mapMode === 'ndvi' ? 'NDVI' : 'RGB')}
+            </span>
+            <span className="hidden sm:inline">
+              {isEnglish
+                ? (mapMode === 'ndvi' ? 'NDVI Spectrum' : 'RGB Orthophoto')
+                : (mapMode === 'ndvi' ? 'NDVI Спектр' : 'Ортофото RGB')}
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setMapMode((prev) => (prev === 'ndvi' ? 'rgb' : 'ndvi'))}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100/70 transition-colors cursor-pointer"
+            className="hidden sm:block px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100/70 transition-colors cursor-pointer"
           >
             {isEnglish
               ? mapMode === 'ndvi'
@@ -381,7 +414,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
               ? 'Скрыть контуры секторов'
               : 'Показать границы секторов'
           }
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md shadow-md border text-xs font-semibold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/95 backdrop-blur-md shadow-md border text-xs font-semibold transition-all cursor-pointer ${
             showLayers
               ? 'border-emerald-500/60 text-emerald-900 bg-emerald-50/90 shadow-xs'
               : 'border-slate-200/90 text-slate-600 hover:bg-slate-100/80'
@@ -392,10 +425,13 @@ export const GardenMap: React.FC<GardenMapProps> = ({
           ) : (
             <EyeOff className="w-3.5 h-3.5 text-slate-400" />
           )}
-          <span>
+          <span className="hidden sm:inline">
             {isEnglish
               ? `Contours: ${showLayers ? 'On' : 'Hidden'}`
               : `Контуры: ${showLayers ? 'Вкл' : 'Скрыты'}`}
+          </span>
+          <span className="sm:hidden">
+            {showLayers ? (isEnglish ? 'On' : 'Вкл') : (isEnglish ? 'Off' : 'Скрыты')}
           </span>
         </button>
       </div>

@@ -50,10 +50,10 @@ export const SpectralSampleCard: React.FC<SpectralSampleCardProps> = ({ classNam
           </span>
 
           <div className="flex items-stretch gap-2 h-28 sm:h-32">
-            {/* Gradient vertical bar from 1.0 (emerald/cyan) to 0.0 (red) */}
+            {/* Gradient vertical bar from 1.0 (emerald) to 0.0 (red) */}
             <div
               data-testid="maturity-gradient-bar"
-              className="w-3 rounded-full bg-gradient-to-b from-[#dc2626] via-[#ea580c] via-[#d97706] via-[#059669] to-[#0284c7] shadow-inner"
+              className="w-3 rounded-full bg-gradient-to-b from-[#059669] via-[#84cc16] via-[#f59e0b] to-[#ef4444] shadow-inner"
               title={isEnglish ? 'Fruit ripening scale from 1.0 to 0.0' : 'Шкала зрелости плодов от 1.0 до 0.0'}
             />
 

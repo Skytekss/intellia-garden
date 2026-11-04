@@ -12,7 +12,7 @@ interface GardenMapViewProps {
   onNavigate?: (tab: NavigationTab) => void;
 }
 
-export const GardenMapView: React.FC<GardenMapViewProps> = () => {
+export const GardenMapView: React.FC<GardenMapViewProps> = ({ onNavigate }) => {
   const app = useApp();
   const { isEnglish, t, farmProfile } = app;
   const sectors = getLocalizedSectors(isEnglish, app.sectors);
@@ -148,7 +148,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
                     <Plane className="w-3.5 h-3.5 text-emerald-600" />
                     <span>{isEnglish ? 'UAV Survey History' : 'История съемок БПЛА'}</span>
                   </div>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-xs text-slate-400">
                     {app.surveyHistory.length} {isEnglish ? 'flights' : 'облета'}
                   </span>
                 </div>
@@ -171,9 +171,9 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-bold">{flight.label}</span>
-                          <span className="text-slate-500 font-mono text-[11px]">{flight.date}</span>
+                          <span className="text-slate-500 font-mono text-xs">{flight.date}</span>
                         </div>
-                        <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500">
+                        <div className="flex items-center justify-between mt-1 text-xs text-slate-500">
                           <span>{flight.droneModel} • {flight.resolutionCmPx} см/пкс</span>
                           <span className="text-emerald-700 font-bold">NDVI {flight.ndviAvg}</span>
                         </div>
@@ -195,7 +195,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
           <div className="flex flex-col items-center">
             {/* Spectral Gradient Bar */}
             <div 
-              className="w-28 sm:w-36 h-2.5 rounded-full bg-gradient-to-r from-[#0284c7] via-[#10b981] via-[#eab308] via-[#ea580c] to-[#ef4444] shadow-xs"
+              className="w-28 sm:w-36 h-2.5 rounded-full bg-gradient-to-r from-[#ef4444] via-[#f59e0b] via-[#84cc16] to-[#10b981] shadow-xs"
               role="img"
               aria-label={isEnglish ? 'Fruit ripening scale from low to high' : 'Шкала зрелости плодов от низкой к высокой'}
             />
@@ -225,6 +225,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
           <SectorDetailPanel
             sector={selectedSector}
             onOpenDetails={handleOpenDetails}
+            onNavigate={onNavigate}
             className="h-full"
           />
         </div>
@@ -235,6 +236,7 @@ export const GardenMapView: React.FC<GardenMapViewProps> = () => {
         sector={activeModalSector}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onNavigate={onNavigate}
       />
     </div>
   );

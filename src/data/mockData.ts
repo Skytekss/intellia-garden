@@ -174,50 +174,16 @@ export interface MaturityMeta {
 }
 
 export const getMaturityColor = (percent: number): string => {
-  if (percent >= 80) return '#dc2626'; // Red (ready)
-  if (percent >= 70) return '#ea580c'; // Orange (active ripening)
-  if (percent >= 58) return '#d97706'; // Amber / Yellow (moderate)
-  if (percent >= 50) return '#059669'; // Green (early phase)
-  return '#0284c7'; // Blue (<50%)
+  if (percent >= 75) return '#059669'; // Emerald green (optimal ready >=75%)
+  if (percent >= 60) return '#84cc16'; // Lime / yellow-green (medium ripening 60-74%)
+  if (percent >= 45) return '#f59e0b'; // Amber / warm orange (early ripening 45-59%)
+  return '#ef4444'; // Red (early / immature <45%)
 };
 
 export const getMaturityMetadata = (percent: number): MaturityMeta => {
-  if (percent >= 80) {
+  if (percent >= 75) {
     return {
       label: 'Готов к сбору',
-      badgeBg: 'bg-red-50',
-      badgeText: 'text-red-700',
-      badgeBorder: 'border-red-200',
-      progressBarBg: 'bg-red-500',
-      hexColor: '#dc2626',
-      statusColorName: 'red',
-    };
-  }
-  if (percent >= 70) {
-    return {
-      label: 'Активное созревание',
-      badgeBg: 'bg-orange-50',
-      badgeText: 'text-orange-700',
-      badgeBorder: 'border-orange-200',
-      progressBarBg: 'bg-orange-500',
-      hexColor: '#ea580c',
-      statusColorName: 'orange',
-    };
-  }
-  if (percent >= 58) {
-    return {
-      label: 'Умеренная зрелость',
-      badgeBg: 'bg-amber-50',
-      badgeText: 'text-amber-700',
-      badgeBorder: 'border-amber-200',
-      progressBarBg: 'bg-amber-500',
-      hexColor: '#d97706',
-      statusColorName: 'yellow',
-    };
-  }
-  if (percent >= 50) {
-    return {
-      label: 'Раннее созревание',
       badgeBg: 'bg-emerald-50',
       badgeText: 'text-emerald-700',
       badgeBorder: 'border-emerald-200',
@@ -226,14 +192,36 @@ export const getMaturityMetadata = (percent: number): MaturityMeta => {
       statusColorName: 'green',
     };
   }
+  if (percent >= 60) {
+    return {
+      label: 'Средняя зрелость',
+      badgeBg: 'bg-lime-50',
+      badgeText: 'text-lime-700',
+      badgeBorder: 'border-lime-200',
+      progressBarBg: 'bg-lime-500',
+      hexColor: '#84cc16',
+      statusColorName: 'yellow',
+    };
+  }
+  if (percent >= 45) {
+    return {
+      label: 'Начало созревания',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
+      progressBarBg: 'bg-amber-500',
+      hexColor: '#f59e0b',
+      statusColorName: 'orange',
+    };
+  }
   return {
-    label: 'Начальная фаза',
-    badgeBg: 'bg-sky-50',
-    badgeText: 'text-sky-700',
-    badgeBorder: 'border-sky-200',
-    progressBarBg: 'bg-sky-500',
-    hexColor: '#0284c7',
-    statusColorName: 'blue',
+    label: 'Ранняя зрелость',
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    badgeBorder: 'border-rose-200',
+    progressBarBg: 'bg-rose-500',
+    hexColor: '#ef4444',
+    statusColorName: 'red',
   };
 };
 

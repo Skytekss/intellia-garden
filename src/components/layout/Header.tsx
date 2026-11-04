@@ -142,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
               {app.unreadNotificationsCount > 0 && (
                 <span
                   data-testid="header-notifications-badge"
-                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-emerald-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-[#f4f7f6] shadow-xs"
+                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-emerald-600 text-white text-xs font-bold rounded-full flex items-center justify-center ring-2 ring-[#f4f7f6] shadow-xs"
                 >
                   {app.unreadNotificationsCount > 9 ? '9+' : app.unreadNotificationsCount}
                 </span>
@@ -191,6 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => {
                         setSelectedFarm(farm);
                         setIsDropdownOpen(false);
+                        app.setCurrentFarmId(farm);
                         app.updateFarmProfile({
                           ...effectiveFarm,
                           name: farm,

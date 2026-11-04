@@ -155,7 +155,7 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
               data-testid="temp-anomaly-slider"
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
             />
-            <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+            <div className="flex justify-between text-xs text-slate-400 font-medium">
               <span>-3°C</span>
               <span>0°C ({isEnglish ? 'Norm' : 'Норма'})</span>
               <span>+4°C</span>
@@ -164,7 +164,7 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
 
           {/* Quick Presets */}
           <div className="flex items-center gap-1.5 pt-1">
-            <span className="text-[11px] text-slate-400 mr-1">
+            <span className="text-xs text-slate-400 mr-1">
               {isEnglish ? 'Presets:' : 'Быстро:'}
             </span>
             {[
@@ -252,11 +252,10 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
       {/* Dynamic Simulation Result Banner with smooth transition */}
       <motion.div
         data-testid="simulation-summary-banner"
-        key={`${tempAnomaly}-${rainCondition}`}
         initial={{ opacity: 0.8 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
-        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border text-xs ${
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border text-xs transition-colors duration-200 ${
           isHighRisk
             ? 'bg-amber-50/80 border-amber-300 text-amber-900'
             : isSimulationActive
@@ -276,7 +275,7 @@ export const WhatIfSimulatorWidget: React.FC<WhatIfSimulatorWidgetProps> = ({ cl
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-          <span className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
+          <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
             {isEnglish ? 'Shift:' : 'Сдвиг:'}
           </span>
           <span

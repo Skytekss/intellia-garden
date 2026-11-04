@@ -1,19 +1,21 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Calendar, ArrowRight } from 'lucide-react';
-import { GardenSector } from '../../types';
+import { Calendar, ArrowRight, TrendingUp, Database } from 'lucide-react';
+import { GardenSector, NavigationTab } from '../../types';
 import { RipeningChart } from './RipeningChart';
 import { useApp } from '../../context/AppContext';
 
 interface SectorDetailPanelProps {
   sector: GardenSector;
   onOpenDetails: (sector: GardenSector) => void;
+  onNavigate?: (tab: NavigationTab) => void;
   className?: string;
 }
 
 export const SectorDetailPanel: React.FC<SectorDetailPanelProps> = ({
   sector,
   onOpenDetails,
+  onNavigate,
   className = '',
 }) => {
   const { isEnglish, formatArea } = useApp();
@@ -95,7 +97,7 @@ export const SectorDetailPanel: React.FC<SectorDetailPanelProps> = ({
         </div>
 
         {/* Action CTA Button */}
-        <div className="mt-6 pt-2">
+        <div className="mt-6 pt-2 space-y-2">
           <motion.button
             type="button"
             onClick={() => onOpenDetails(sector)}
@@ -107,6 +109,29 @@ export const SectorDetailPanel: React.FC<SectorDetailPanelProps> = ({
             <span>{isEnglish ? 'View details' : 'Подробнее'}</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </motion.button>
+
+          {onNavigate && (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => onNavigate('data')}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                data-testid="sector-quick-data-btn"
+              >
+                <Database className="w-3.5 h-3.5 text-slate-500" />
+                <span>{isEnglish ? 'Agro Data' : 'Внести замеры'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('forecasts')}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                data-testid="sector-quick-forecast-btn"
+              >
+                <TrendingUp className="w-3.5 h-3.5 text-slate-500" />
+                <span>{isEnglish ? 'Forecast' : 'Прогноз сбора'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

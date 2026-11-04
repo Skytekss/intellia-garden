@@ -155,8 +155,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Screen Title (Accessible H1 for screen readers and automated tests) */}
       <h1 className="sr-only">{app.isEnglish ? 'Settings' : 'Настройки'}</h1>
 
-      {/* Two-column layout grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-start">
+      {/* Two-column layout grid: 2 cols on Tablet (md: >=768px) and Desktop */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 items-start">
         {/* Left Column: General & Sensors */}
         <div className="space-y-4 sm:space-y-5 min-w-0">
           <GeneralSettingsCard

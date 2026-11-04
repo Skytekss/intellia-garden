@@ -11,21 +11,43 @@ import {
   TrendingUp, 
   FileText 
 } from 'lucide-react';
-import { GardenSector } from '../../types';
+import { GardenSector, NavigationTab } from '../../types';
 import { useApp } from '../../context/AppContext';
 
 interface SectorDetailModalProps {
   sector: GardenSector | null;
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (tab: NavigationTab) => void;
 }
 
 export const SectorDetailModal: React.FC<SectorDetailModalProps> = ({
   sector,
   isOpen,
   onClose,
+  onNavigate,
 }) => {
-  const { isEnglish, formatArea, formatTemperature, formatPrecipitation } = useApp();
+  const { isEnglish, formatArea, formatTemperature, formatPrecipitation, currentFarm, activeSurveyDate, addNotification } = useApp();
+  const [isExported, setIsExported] = React.useState<boolean>(false);
+
+  const handleExport = () => {
+    if (!sector) return;
+    addNotification({
+      category: 'system',
+      badgeText: isEnglish ? 'Report Export' : 'Экспорт отчета',
+      title: isEnglish ? `Passport for ${sector.name} exported` : `Паспорт участка «${sector.name}» выгружен`,
+      description: isEnglish
+        ? `Agronomic metrics and spectrometry for ${sector.name} (${sector.variety}) exported.`
+        : `Агрономические показатели и спектрометрия участка «${sector.name}» (${sector.variety}) успешно сформированы.`,
+      actionText: isEnglish ? 'View Data' : 'К данным',
+      actionTarget: 'data',
+      isRead: false,
+      dotColor: 'teal',
+      iconType: 'agritech',
+    });
+    setIsExported(true);
+    setTimeout(() => setIsExported(false), 3000);
+  };
 
   // Close on Escape key press
   useEffect(() => {
@@ -118,7 +140,7 @@ export const SectorDetailModal: React.FC<SectorDetailModalProps> = ({
                     </h2>
                     <p className="text-xs text-emerald-200/80 mt-0.5">
                       {isEnglish ? 'Area:' : 'Площадь:'} {formatArea(sector.area)} •{' '}
-                      {isEnglish ? 'Spectrometry dated 12.08.2025' : 'Спектрометрия от 12.08.2025'}
+                      {isEnglish ? `Spectrometry dated ${activeSurveyDate || currentFarm.lastSurveyDate || '12.08.2025'}` : `Спектрометрия от ${activeSurveyDate || currentFarm.lastSurveyDate || '12.08.2025'}`}
                     </p>
                   </div>
                 </div>
@@ -278,35 +300,47 @@ export const SectorDetailModal: React.FC<SectorDetailModalProps> = ({
                 </span>
                 <span>
                   {isEnglish ? 'Temperature:' : 'Температура:'}{' '}
-                  <strong className="text-slate-800">{formatTemperature(18)}</strong>
+                  <strong className="text-slate-800">{formatTemperature(currentFarm.weather.temperature)}</strong>
                 </span>
                 <span>
-                  {isEnglish ? 'Air Humidity:' : 'Влажность воздуха:'}{' '}
-                  <strong className="text-slate-800">65%</strong>
+                  {isEnglish ? 'Soil Moisture:' : 'Влажность почвы:'}{' '}
+                  <strong className="text-slate-800">{sector.soilMoisturePercent}%</strong>
                 </span>
                 <span>
                   {isEnglish ? 'Precipitation:' : 'Осадки:'}{' '}
-                  <strong className="text-slate-800">{formatPrecipitation(0)}</strong>
+                  <strong className="text-slate-800">{formatPrecipitation(currentFarm.weather.precipitationMm)}</strong>
                 </span>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="bg-slate-50 p-4 sm:p-5 border-t border-slate-100 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 transition-colors"
-                onClick={() =>
-                  alert(
-                    isEnglish
-                      ? 'Sector agronomic report generated successfully.'
-                      : 'Отчет по сектору успешно сформирован.'
-                  )
-                }
-              >
-                <FileText className="w-4 h-4 text-slate-500" />
-                {isEnglish ? 'Export Report' : 'Экспорт отчета'}
-              </button>
+            <div className="bg-slate-50 p-4 sm:p-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 transition-colors cursor-pointer"
+                  onClick={handleExport}
+                >
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  {isExported
+                    ? (isEnglish ? 'Report Exported!' : 'Отчет выгружен!')
+                    : (isEnglish ? 'Export Report' : 'Экспорт отчета')}
+                </button>
+
+                {onNavigate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onNavigate('forecasts');
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-emerald-800 hover:bg-emerald-100/60 transition-colors cursor-pointer"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    {isEnglish ? 'Forecasts' : 'К прогнозам'}
+                  </button>
+                )}
+              </div>
 
               <button
                 type="button"

@@ -81,11 +81,11 @@ export const FaqAccordion: React.FC<FaqAccordionProps> = ({
                 </span>
 
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-slate-400 group-hover:text-emerald-700 transition-all shrink-0 ${
-                    isExpanded ? 'rotate-90 text-emerald-700' : ''
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-slate-400 group-hover:text-emerald-700 transition-colors shrink-0 ${
+                    isExpanded ? 'text-emerald-700 bg-emerald-50' : ''
                   }`}
                 >
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} />
                 </div>
               </button>
 

@@ -35,7 +35,7 @@ describe('NotificationsView Component', () => {
 
     const systemTab = screen.getByTestId('filter-tab-system');
     expect(systemTab).toHaveTextContent('Система');
-    expect(within(systemTab).getByTestId('filter-count-system')).toHaveTextContent('0');
+    expect(within(systemTab).getByTestId('filter-count-system')).toHaveTextContent('1');
 
     // Also check accessibility aria-labels
     expect(screen.getByRole('button', { name: /Все \(5\)/i })).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe('NotificationsView Component', () => {
     expect(screen.getByRole('button', { name: /Урожай \(2\)/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Погода \(1\)/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Болезни \(0\)/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Система \(0\)/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Система \(1\)/i })).toBeInTheDocument();
   });
 
   it('renders all 6 notification cards with their texts, badges, and timestamps', () => {

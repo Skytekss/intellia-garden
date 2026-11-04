@@ -23,7 +23,7 @@ export const MeteoWidget: React.FC<MeteoWidgetProps> = ({
   onImport,
   className = '',
 }) => {
-  const { isEnglish, formatTemperature, formatPrecipitation, t } = useApp();
+  const { isEnglish, isImperial, formatTemperature, formatPrecipitation, t } = useApp();
   const [data, setData] = useState<MeteoTelemetryData>(propData || initialMeteoData);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncedRecently, setSyncedRecently] = useState(false);
@@ -84,7 +84,7 @@ export const MeteoWidget: React.FC<MeteoWidgetProps> = ({
               </span>
             </div>
             <span className="text-xs font-bold text-slate-800">
-              {isEnglish ? formatTemperature(data.temperature) : `${data.temperature} °C`}
+              {isImperial ? formatTemperature(data.temperature) : `${data.temperature} °C`}
             </span>
           </div>
 
@@ -99,7 +99,7 @@ export const MeteoWidget: React.FC<MeteoWidgetProps> = ({
               </span>
             </div>
             <span className="text-xs font-bold text-slate-800">
-              {isEnglish ? formatPrecipitation(data.precipitationMm) : `${data.precipitationMm} мм`}
+              {isImperial ? formatPrecipitation(data.precipitationMm) : `${data.precipitationMm} ${isEnglish ? 'mm' : 'мм'}`}
             </span>
           </div>
 

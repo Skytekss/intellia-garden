@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { id: 'map', labelRu: 'Карта сада', labelEn: 'Garden Map', icon: Map },
   { id: 'data', labelRu: 'Данные', labelEn: 'Agro Data', icon: Database },
   { id: 'forecasts', labelRu: 'Прогнозы', labelEn: 'Forecasts', icon: TrendingUp },
-  { id: 'notifications', labelRu: 'Уведомления', labelEn: 'Notifications', icon: Bell, badge: 3 },
+  { id: 'notifications', labelRu: 'Уведомления', labelEn: 'Notifications', icon: Bell },
   { id: 'settings', labelRu: 'Настройки', labelEn: 'Settings', icon: Settings },
 ];
 
@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   showMobileClose = false,
 }) => {
-  const { isEnglish } = useApp();
+  const { isEnglish, unreadNotificationsCount } = useApp();
 
   const handleNavClick = (tabId: NavigationTab) => {
     onSelectTab(tabId);
@@ -102,6 +102,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           const label = isEnglish ? item.labelEn : item.labelRu;
+          const badgeValue = item.id === 'notifications'
+            ? (unreadNotificationsCount > 0 ? (unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount) : undefined)
+            : item.badge;
 
           return (
             <motion.button
@@ -132,15 +135,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>{label}</span>
               </div>
 
-              {item.badge !== undefined && (
+              {badgeValue !== undefined && (
                 <span
+                  data-testid="sidebar-notifications-badge"
                   className={`relative z-10 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none ${
                     isActive
                       ? 'bg-white text-emerald-800'
                       : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
                   }`}
                 >
-                  {item.badge}
+                  {badgeValue}
                 </span>
               )}
             </motion.button>

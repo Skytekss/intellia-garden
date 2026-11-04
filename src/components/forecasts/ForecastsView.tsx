@@ -134,7 +134,7 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
           <WhatIfSimulatorWidget />
 
           {/* Interactive Table with real simulated rows */}
-          <ForecastTable rows={simulatedRows} />
+          <ForecastTable rows={simulatedRows} onNavigate={onNavigate} />
 
           {/* Bottom AI Card */}
           <ForecastAiCard />

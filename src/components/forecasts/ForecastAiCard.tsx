@@ -72,7 +72,7 @@ export const ForecastAiCard: React.FC<ForecastAiCardProps> = ({
               : 'Искусственный интеллект:'}
           </h3>
           {isSimulationActive && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
               <Sparkles className="w-3 h-3 text-amber-600" />
               {isEnglish ? 'Simulated' : 'Модель'}
             </span>

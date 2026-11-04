@@ -93,7 +93,7 @@ export const mockNotifications: NotificationItem[] = [
     iconType: 'system',
     actionText: 'Посмотреть результат →',
     actionTarget: 'data',
-    filterCategories: [],
+    filterCategories: ['system'],
     details: {
       fullText:
         'Гиперспектральный снимок сада от 12.08.2025 успешно откалиброван и сшит нейросетевым модулем. Обновлены пространственные слои индексов NDVI, NDRE и сахаристости плодов.',

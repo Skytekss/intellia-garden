@@ -23,10 +23,11 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onOpenDetails,
   className = '',
 }) => {
-  const { isEnglish } = useApp();
+  const { isEnglish, markNotificationRead } = useApp();
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (notification.actionText === 'Подробнее →' || notification.actionText === 'Details →') {
+    markNotificationRead(notification.id);
+    if (notification.actionText.includes('Подробнее') || notification.actionText.includes('Details')) {
       if (onOpenDetails) {
         onOpenDetails(notification);
       } else if (onNavigate) {

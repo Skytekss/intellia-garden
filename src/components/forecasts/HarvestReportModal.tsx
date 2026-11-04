@@ -143,22 +143,22 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="font-bold text-slate-900">{row.simulatedMaturityPercent}%</span>
                       {row.simulatedMaturityPercent !== row.maturityPercent && (
-                        <span className="text-[11px] text-slate-400 ml-1">
-                          (баз. {row.maturityPercent}%)
+                        <span className="text-xs text-slate-400 ml-1">
+                          ({isEnglish ? 'base' : 'баз.'} {row.maturityPercent}%)
                         </span>
                       )}
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="font-semibold text-emerald-900">{row.simulatedDate}</span>
                       {row.deltaDays !== 0 && (
-                        <span className={`text-[11px] ml-1.5 font-bold ${
+                        <span className={`text-xs ml-1.5 font-bold ${
                           row.deltaDays < 0 ? 'text-emerald-700' : 'text-blue-700'
                         }`}>
-                          ({row.deltaDays < 0 ? `${row.deltaDays}` : `+${row.deltaDays}`} дн.)
+                          ({row.deltaDays < 0 ? `${row.deltaDays}` : `+${row.deltaDays}`} {isEnglish ? 'd.' : 'дн.'})
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-slate-600 text-[11px] max-w-xs leading-relaxed">
+                    <td className="py-3 px-3 text-slate-600 text-xs max-w-xs leading-relaxed">
                       {row.riskNotice || (isEnglish ? 'Optimal harvest' : 'Оптимальный сбор')}
                     </td>
                   </tr>
@@ -173,7 +173,7 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
               <div className="font-bold text-slate-900 mb-1">
                 {isEnglish ? 'Verification & Compliance' : 'Верификация данных'}
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 {isEnglish
                   ? 'Multispectral analysis verified against Streif Index and refractometer ground truth samples.'
                   : 'Мультиспектральные индексы откалиброваны по индексу Стрейфа и полевым замерам сахаристости.'}
@@ -182,14 +182,14 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
 
             <div className="flex flex-col justify-end space-y-3 sm:text-right">
               <div>
-                <span className="text-slate-400 text-[11px] block">
+                <span className="text-slate-400 text-xs block">
                   {isEnglish ? 'Chief Agronomist' : 'Главный агроном хозяйства'}:
                 </span>
                 <span className="font-bold text-slate-900 text-sm">
                   {isEnglish ? 'Elizaveta B. (Intellia Agritech)' : 'Елизавета Б. / «ИНТЕЛЛИЯ»'}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 sm:justify-end text-emerald-800 font-semibold text-[11px]">
+              <div className="flex items-center gap-1.5 sm:justify-end text-emerald-800 font-semibold text-xs">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{isEnglish ? 'Digitally Signed & Validated' : 'Цифровая подпись подтверждена'}</span>
               </div>

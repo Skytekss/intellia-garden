@@ -12,7 +12,7 @@ import {
   Printer,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ForecastSectorRow, SimulatedSectorForecast } from '../../types';
+import { ForecastSectorRow, SimulatedSectorForecast, NavigationTab } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { mockForecastRows, getMaturityColor, getMaturityMetadata } from '../../data/mockData';
 import { downloadForecastCsv } from '../../utils/exportUtils';
@@ -22,6 +22,7 @@ import { HarvestReportModal } from './HarvestReportModal';
 interface ForecastTableProps {
   rows?: Array<ForecastSectorRow | SimulatedSectorForecast>;
   onSelectRow?: (row: ForecastSectorRow) => void;
+  onNavigate?: (tab: NavigationTab) => void;
   className?: string;
 }
 
@@ -42,6 +43,7 @@ const getStatusLabel = (percent: number): string => {
 export const ForecastTable: React.FC<ForecastTableProps> = ({
   rows = mockForecastRows,
   onSelectRow,
+  onNavigate,
   className = '',
 }) => {
   const { isEnglish, t, sectors, farmProfile } = useApp();
@@ -349,7 +351,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                         <span>{displayMaturity}%</span>
                         {simRow.simulatedMaturityPercent !== undefined &&
                           simRow.simulatedMaturityPercent !== row.maturityPercent && (
-                            <span className="text-[11px] text-slate-400 font-normal">
+                            <span className="text-xs text-slate-400 font-normal">
                               ({row.maturityPercent}%)
                             </span>
                           )}
@@ -364,13 +366,13 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                         {deltaDays !== 0 && (
                           <span
                             data-testid={`row-delta-${row.id}`}
-                            className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold ${
+                            className={`px-1.5 py-0.5 rounded-md text-xs font-bold ${
                               deltaDays < 0
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-blue-100 text-blue-800'
                             }`}
                           >
-                            {deltaDays < 0 ? `${deltaDays} дн.` : `+${deltaDays} дн.`}
+                            {deltaDays < 0 ? `${deltaDays} ${isEnglish ? 'd.' : 'дн.'}` : `+${deltaDays} ${isEnglish ? 'd.' : 'дн.'}`}
                           </span>
                         )}
                       </div>
@@ -449,7 +451,7 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
                 {(selectedRow as SimulatedSectorForecast).simulatedDate || selectedRow.recommendedDate}
               </span>
               {(selectedRow as SimulatedSectorForecast).deltaDays ? (
-                <span className="text-[11px] text-slate-500 block">
+                <span className="text-xs text-slate-500 block">
                   {isEnglish ? 'Baseline:' : 'Базовое:'} {(selectedRow as SimulatedSectorForecast).originalDate}
                 </span>
               ) : null}
@@ -464,6 +466,19 @@ export const ForecastTable: React.FC<ForecastTableProps> = ({
               </span>
             </div>
           </div>
+
+          {onNavigate && (
+            <div className="pt-2 border-t border-slate-200/60 flex justify-end">
+              <button
+                type="button"
+                onClick={() => onNavigate('map')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#07503b] hover:bg-[#096047] text-white font-semibold text-xs transition-colors cursor-pointer shadow-xs"
+                data-testid="forecast-open-map-btn"
+              >
+                <span>{isEnglish ? 'Open on Garden Map →' : 'Посмотреть на карте сада →'}</span>
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
 

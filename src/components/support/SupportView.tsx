@@ -15,6 +15,7 @@ export interface SupportViewProps {
 }
 
 export const SupportView: React.FC<SupportViewProps> = ({
+  onNavigate,
   className = '',
 }) => {
   const { isEnglish, t } = useApp();
@@ -37,10 +38,10 @@ export const SupportView: React.FC<SupportViewProps> = ({
       setFeedbackCategory(defaultCategory);
       setIsFeedbackOpen(true);
     } else if (categoryId === 'guides') {
-      setFeedbackCategory(defaultCategory);
+      setFeedbackCategory(isEnglish ? 'User Guides & Manuals' : 'Инструкции и регламенты работы');
       setIsFeedbackOpen(true);
     } else if (categoryId === 'videos') {
-      setFeedbackCategory(defaultCategory);
+      setFeedbackCategory(isEnglish ? 'Video Tutorials & Walkthroughs' : 'Видеоуроки и обзоры');
       setIsFeedbackOpen(true);
     }
   };
@@ -69,6 +70,34 @@ export const SupportView: React.FC<SupportViewProps> = ({
             ? 'We are always by your side to help you care for your orchard'
             : 'Мы всегда рядом, чтобы помочь вам заботиться о вашем саде'}
         </p>
+        {onNavigate && (
+          <div className="flex flex-wrap items-center gap-2 pt-2.5">
+            <span className="text-xs text-slate-400">{isEnglish ? 'Quick links:' : 'Быстрый переход:'}</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('map')}
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+            >
+              {isEnglish ? 'Garden Map' : 'Карта сада'}
+            </button>
+            <span className="text-slate-300">•</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('data')}
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+            >
+              {isEnglish ? 'Agro Data' : 'Данные'}
+            </button>
+            <span className="text-slate-300">•</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('settings')}
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+            >
+              {isEnglish ? 'Settings' : 'Настройки'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 2. Top Row: 4 Category Cards */}

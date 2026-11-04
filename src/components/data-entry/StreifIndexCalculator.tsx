@@ -171,7 +171,7 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
             data-testid="slider-firmness"
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
           />
-          <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+          <div className="flex justify-between text-xs text-slate-400 font-medium">
             <span>4.0 ({isEnglish ? 'Soft' : 'Мягкое'})</span>
             <span>10.0 ({isEnglish ? 'Crisp' : 'Твердое'})</span>
           </div>
@@ -201,7 +201,7 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
             data-testid="slider-brix"
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
           />
-          <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+          <div className="flex justify-between text-xs text-slate-400 font-medium">
             <span>9.0 ({isEnglish ? 'Low' : 'Низкая'})</span>
             <span>17.0 ({isEnglish ? 'High' : 'Сладкое'})</span>
           </div>
@@ -231,7 +231,7 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
             data-testid="slider-starch"
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
           />
-          <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+          <div className="flex justify-between text-xs text-slate-400 font-medium">
             <span>1 (100% {isEnglish ? 'Starch' : 'Крахмал'})</span>
             <span>10 ({isEnglish ? 'Full Sugars' : 'Осахарено'})</span>
           </div>
@@ -247,12 +247,12 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
 
         {/* Color zone bar */}
         <div className="relative h-3 w-full rounded-full overflow-hidden flex bg-slate-200">
-          {/* Zone 1: < 0.06 (40% width) */}
-          <div className="h-full w-[40%] bg-gradient-to-r from-amber-400 to-amber-500" title="< 0.06 (Срочная реализация)" />
-          {/* Zone 2: 0.06 - 0.09 (20% width) */}
-          <div className="h-full w-[20%] bg-gradient-to-r from-emerald-500 to-teal-500" title="0.06 - 0.09 (Торговые сети)" />
-          {/* Zone 3: >= 0.09 (40% width) */}
-          <div className="h-full w-[40%] bg-gradient-to-r from-teal-600 to-emerald-800" title=">= 0.09 (Длительное ULO/DCA)" />
+          {/* Zone 1: < 0.06 (40% width) - Срочная реализация (Красный/Розовый) */}
+          <div className="h-full w-[40%] bg-gradient-to-r from-rose-500 to-rose-600" title="< 0.06 (Срочная реализация)" />
+          {/* Zone 2: 0.06 - 0.09 (20% width) - Торговые сети (Янтарный) */}
+          <div className="h-full w-[20%] bg-gradient-to-r from-amber-400 to-amber-500" title="0.06 - 0.09 (Торговые сети)" />
+          {/* Zone 3: >= 0.09 (40% width) - Длительное ULO/DCA (Изумрудный) */}
+          <div className="h-full w-[40%] bg-gradient-to-r from-emerald-500 to-emerald-700" title=">= 0.09 (Длительное ULO/DCA)" />
         </div>
 
         {/* Dynamic Indicator Pointer */}
@@ -265,7 +265,7 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
         </div>
 
         {/* Zone Labels */}
-        <div className="flex justify-between text-[11px] text-slate-400 font-medium pt-0.5">
+        <div className="flex justify-between text-xs text-slate-400 font-medium pt-0.5">
           <span>&lt; 0.06 ({isEnglish ? 'Fast sale' : 'Прямая реализация'})</span>
           <span className="text-center">0.06 – 0.09 ({isEnglish ? 'Retail (3-5 mo)' : 'Сети 3-5 мес.'})</span>
           <span className="text-right">&ge; 0.09 ({isEnglish ? 'ULO/DCA (9-11 mo)' : 'Камеры ULO/DCA'})</span>
@@ -276,7 +276,7 @@ export const StreifIndexCalculator: React.FC<StreifIndexCalculatorProps> = ({
       <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Formula Breakdown */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="text-xs text-slate-600 font-mono">
               <span className="text-slate-400">SI = F / (R × S) = </span>
               <span>{firmness.toFixed(1)} / ({brix.toFixed(1)} × {starch.toFixed(1)}) = </span>
