@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Printer, Download, FileText, CheckCircle2 } from 'lucide-react';
 import { SimulatedSectorForecast } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -17,7 +17,15 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
 }) => {
   const { isEnglish, farmProfile, tempAnomaly, rainCondition, isSimulationActive } = useApp();
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handlePrint = () => {
     window.print();
@@ -33,17 +41,28 @@ export const HarvestReportModal: React.FC<HarvestReportModalProps> = ({
     year: 'numeric',
   });
 
+  if (!isOpen) return null;
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-modal-title"
       data-testid="harvest-report-modal"
-      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-3xl w-full p-4 sm:p-7 space-y-6 my-auto max-h-[90vh] overflow-y-auto">
-        {/* Top Action Bar (hidden on print) */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 print:hidden">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs cursor-pointer print:hidden animate-in fade-in duration-200"
+      />
+
+      {/* Modal Container */}
+      <div
+        className="relative bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-3xl w-full p-4 sm:p-7 space-y-6 my-auto max-h-[90vh] overflow-y-auto z-10 animate-in zoom-in-95 fade-in duration-200"
+      >
+            {/* Top Action Bar (hidden on print) */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 print:hidden">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-emerald-700" />
             <span className="text-sm font-bold text-slate-900">

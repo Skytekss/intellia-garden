@@ -91,8 +91,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   const sendMessage = (textToSend: string) => {
     const trimmed = textToSend.trim();
     if (!trimmed) return;
@@ -134,6 +132,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     sendMessage(inputValue);
   };
 
+  if (!isOpen) return null;
+
   return (
     <div
       data-testid="chat-modal"
@@ -144,13 +144,15 @@ export const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 cursor-pointer"
         data-testid="chat-modal-backdrop"
         onClick={onClose}
       />
 
       {/* Chat Window */}
-      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[560px] max-h-[90vh] animate-in zoom-in-95 duration-200">
+      <div
+        className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[560px] max-h-[90vh] animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="p-4 bg-[#05382b] text-white flex items-center justify-between border-b border-emerald-900/40">
           <div className="flex items-center gap-3">

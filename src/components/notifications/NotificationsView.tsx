@@ -151,12 +151,16 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
         {filteredNotifications.length > 0 ? (
           <div className="space-y-3.5">
             {filteredNotifications.map((notification) => (
-              <NotificationCard
+              <div
                 key={notification.id}
-                notification={notification}
-                onNavigate={onNavigate}
-                onOpenDetails={handleOpenDetails}
-              />
+                className="animate-in fade-in duration-200"
+              >
+                <NotificationCard
+                  notification={notification}
+                  onNavigate={onNavigate}
+                  onOpenDetails={handleOpenDetails}
+                />
+              </div>
             ))}
           </div>
         ) : (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Users, Truck, Package, Scale, Calendar, HelpCircle } from 'lucide-react';
 import { GardenSector } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -25,7 +25,15 @@ export const HarvestLogisticsModal: React.FC<HarvestLogisticsModalProps> = ({
   );
   const [avgYieldTonsPerHa, setAvgYieldTonsPerHa] = useState<number>(35);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const logistics = calculateHarvestLogistics(
     sectors,
@@ -33,47 +41,58 @@ export const HarvestLogisticsModal: React.FC<HarvestLogisticsModalProps> = ({
     avgYieldTonsPerHa
   );
 
+  if (!isOpen) return null;
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="logistics-modal-title"
       data-testid="harvest-logistics-modal"
-      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-2xl w-full p-4 sm:p-6 md:p-7 space-y-5 my-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
-              <Truck className="w-5 h-5 text-emerald-700" />
-            </div>
-            <div>
-              <h2
-                id="logistics-modal-title"
-                data-testid="logistics-modal-title"
-                className="text-base sm:text-lg font-bold text-slate-900 tracking-tight"
-              >
-                {isEnglish
-                  ? 'Harvest Logistics & Resource Planning'
-                  : 'Расчет ресурсов и логистики сбора урожая'}
-              </h2>
-              <p className="text-xs text-slate-500">
-                {farmProfile.name} • {logistics.totalAreaHa} {isEnglish ? 'ha in total' : 'га всего'}
-              </p>
-            </div>
-          </div>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs cursor-pointer animate-in fade-in duration-200"
+      />
 
-          <button
-            type="button"
-            data-testid="logistics-modal-close"
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-            aria-label={isEnglish ? 'Close modal' : 'Закрыть окно'}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      {/* Modal Container */}
+      <div
+        className="relative bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-2xl w-full p-4 sm:p-6 md:p-7 space-y-5 my-auto z-10 animate-in zoom-in-95 fade-in duration-200"
+      >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
+                  <Truck className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div>
+                  <h2
+                    id="logistics-modal-title"
+                    data-testid="logistics-modal-title"
+                    className="text-base sm:text-lg font-bold text-slate-900 tracking-tight"
+                  >
+                    {isEnglish
+                      ? 'Harvest Logistics & Resource Planning'
+                      : 'Расчет ресурсов и логистики сбора урожая'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {farmProfile.name} • {logistics.totalAreaHa} {isEnglish ? 'ha in total' : 'га всего'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                data-testid="logistics-modal-close"
+                onClick={onClose}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label={isEnglish ? 'Close modal' : 'Закрыть окно'}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
         {/* Interactive Parameter Controls */}
         <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 space-y-3">

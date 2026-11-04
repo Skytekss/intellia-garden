@@ -70,8 +70,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   const validate = (): boolean => {
     const newErrors: { subject?: string; message?: string } = {};
     if (!formData.subject.trim()) {
@@ -100,6 +98,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }, 400);
   };
 
+  if (!isOpen) return null;
+
   return (
     <div
       data-testid="feedback-modal"
@@ -110,13 +110,15 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     >
       {/* Backdrop click area */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 cursor-pointer"
         data-testid="feedback-modal-backdrop"
         onClick={onClose}
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 max-h-[90vh]">
+      <div
+        className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-[#f4f7f6]">
           <div className="flex items-center gap-3">
