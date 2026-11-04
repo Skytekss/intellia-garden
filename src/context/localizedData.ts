@@ -174,7 +174,7 @@ export const getLocalizedAgroRecords = (isEnglish: boolean, customRecords?: Agro
     'Профилактическая защита фунгицидами': 'Preventive fungicide protection',
   };
 
-  return initialAgroRecords.map((rec) => ({
+  return baseRecords.map((rec) => ({
     ...rec,
     type: OPERATION_TYPES_EN[rec.type] || rec.type,
     title: RECORD_TITLES_EN[rec.title] || OPERATION_TYPES_EN[rec.title] || rec.title,

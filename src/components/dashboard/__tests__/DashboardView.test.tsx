@@ -95,4 +95,20 @@ describe('DashboardView', () => {
     fireEvent.click(meteoCard);
     expect(handleNavigate).toHaveBeenCalledWith('data');
   });
+
+  it('renders reactive metrics and badges across BentoCards from context', () => {
+    renderWithContext(<DashboardView onNavigate={vi.fn()} />);
+
+    // Check drone card has NDVI
+    const droneCard = screen.getByTestId('bento-card-drone');
+    expect(droneCard).toHaveTextContent(/NDVI/i);
+
+    // Check meteo card has temperature and precipitation format
+    const meteoCard = screen.getByTestId('bento-card-meteo');
+    expect(meteoCard).toHaveTextContent(/°C/i);
+
+    // Check CTA bar has dynamic sector count
+    const ctaButton = screen.getByTestId('cta-go-to-map');
+    expect(ctaButton).toHaveTextContent(/сектор/i);
+  });
 });

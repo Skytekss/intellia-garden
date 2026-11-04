@@ -14,7 +14,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onNavigate,
   className = '',
 }) => {
-  const { isEnglish, t } = useApp();
+  const { isEnglish, t, sectors } = useApp();
+
+  const sectorCount = sectors.length;
+  const sectorsText = isEnglish
+    ? `${sectorCount} ${sectorCount === 1 ? 'sector' : 'sectors'}`
+    : `${sectorCount} ${
+        sectorCount === 1 ? 'сектор' : sectorCount >= 2 && sectorCount <= 4 ? 'сектора' : 'секторов'
+      }`;
 
   return (
     <section
@@ -71,7 +78,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/35 backdrop-blur-md border border-white/15 text-white font-medium">
               <Radio className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t('hero.sectors')}</span>
+              <span>{sectorsText}</span>
             </div>
 
             {onNavigate && (

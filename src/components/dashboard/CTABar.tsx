@@ -13,7 +13,12 @@ export const CTABar: React.FC<CTABarProps> = ({
   onNavigate,
   className = '',
 }) => {
-  const { isEnglish } = useApp();
+  const { isEnglish, sectors } = useApp();
+
+  const sectorCount = sectors.length;
+  const sectorCountText = isEnglish
+    ? `Visualization of ${sectorCount} ${sectorCount === 1 ? 'sector' : 'sectors'}`
+    : `Визуализация ${sectorCount} ${sectorCount === 1 ? 'сектора' : 'секторов'}`;
 
   return (
     <div className={`w-full ${className}`}>
@@ -43,7 +48,7 @@ export const CTABar: React.FC<CTABarProps> = ({
             <div className="text-xs sm:text-sm text-emerald-200/80 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                {isEnglish ? 'Visualization of 5 sectors' : 'Визуализация 5 секторов'}
+                {sectorCountText}
               </span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline">
