@@ -43,3 +43,38 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
 }
+
+export interface GuideStep {
+  stepNumber: number;
+  title: string;
+  description: string;
+  tip?: string;
+}
+
+export interface GuideArticle {
+  id: string;
+  title: string;
+  category: 'uav' | 'spectral' | 'map' | 'hardware';
+  categoryLabel: string;
+  readTimeMinutes: number;
+  summary: string;
+  steps: GuideStep[];
+  updatedAt: string;
+}
+
+export interface VideoChapter {
+  timecode: string;
+  seconds: number;
+  title: string;
+}
+
+export interface VideoTutorial {
+  id: string;
+  title: string;
+  duration: string;
+  category: 'overview' | 'drone' | 'forecasts' | 'map';
+  categoryLabel: string;
+  description: string;
+  chapters: VideoChapter[];
+}
+

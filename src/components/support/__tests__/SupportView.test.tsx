@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { SupportView } from '../SupportView';
-import { FAQ_ITEMS, SUPPORT_CATEGORIES } from '../supportData';
+import { FAQ_ITEMS, SUPPORT_CATEGORIES, GUIDES_DATA, VIDEOS_DATA } from '../supportData';
 
 // Mock scrollIntoView and window.scrollTo since jsdom doesn't support them
 beforeEach(() => {
@@ -33,7 +33,7 @@ describe('SupportView Component', () => {
 
     expect(screen.getByText('Популярные вопросы')).toBeInTheDocument();
 
-    // Verify all 5 FAQ questions are rendered
+    // Verify all FAQ questions are rendered
     FAQ_ITEMS.forEach((item) => {
       expect(screen.getByText(item.question)).toBeInTheDocument();
     });
@@ -57,7 +57,6 @@ describe('SupportView Component', () => {
     const toggleAllBtn = screen.getByTestId('faq-toggle-all-button');
     fireEvent.click(toggleAllBtn);
 
-    // Now all should be expanded or button toggled
     expect(toggleAllBtn).toBeInTheDocument();
   });
 
@@ -89,25 +88,40 @@ describe('SupportView Component', () => {
     expect(screen.getByText('Среднее время ответа — до 2 часов')).toBeInTheDocument();
   });
 
-  it('renders bottom banner with bot avatar, slogan and CTA button', () => {
+  it('renders bottom banner with bot avatar, slogan and action buttons', () => {
     render(<SupportView />);
 
     expect(screen.getByTestId('support-banner')).toBeInTheDocument();
     expect(screen.getByTestId('support-bot-avatar')).toBeInTheDocument();
     expect(screen.getByText('Нужна помощь?')).toBeInTheDocument();
     expect(screen.getByTestId('support-slogan')).toHaveTextContent('Успешного урожая!');
-    expect(screen.getByTestId('support-banner-cta-button')).toHaveTextContent('Написать в поддержку');
+    expect(screen.getByTestId('support-banner-cta-button')).toHaveTextContent(/чат с ассистентом/i);
+    expect(screen.getByTestId('support-banner-secondary-button')).toHaveTextContent(/Оставить заявку/i);
   });
 
-  it('opens FeedbackModal on clicking banner CTA, validates form and submits successfully', async () => {
+  it('opens ChatModal when clicking banner CTA button', () => {
     render(<SupportView />);
 
-    // Initially modal is closed
-    expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('chat-modal')).not.toBeInTheDocument();
 
-    // Click CTA button
     const ctaButton = screen.getByTestId('support-banner-cta-button');
     fireEvent.click(ctaButton);
+
+    expect(screen.getByTestId('chat-modal')).toBeInTheDocument();
+    expect(screen.getByText('ИНТЕЛЛИЯ Бот')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('chat-modal-close'));
+    expect(screen.queryByTestId('chat-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens FeedbackModal on clicking banner secondary button, validates form and submits successfully', async () => {
+    render(<SupportView />);
+
+    expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument();
+
+    // Click secondary button
+    const ticketButton = screen.getByTestId('support-banner-secondary-button');
+    fireEvent.click(ticketButton);
 
     // Modal is now open
     expect(screen.getByTestId('feedback-modal')).toBeInTheDocument();
@@ -157,6 +171,64 @@ describe('SupportView Component', () => {
     const closeBtn = screen.getByTestId('feedback-modal-close');
     fireEvent.click(closeBtn);
     expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens GuidesModal when clicking Guides category card and supports reading guides', () => {
+    render(<SupportView />);
+
+    expect(screen.queryByTestId('guides-modal')).not.toBeInTheDocument();
+
+    const guidesCard = screen.getByTestId('support-category-card-guides');
+    fireEvent.click(guidesCard);
+
+    expect(screen.getByTestId('guides-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('guides-modal-title')).toHaveTextContent(/Инструкции и регламенты/i);
+
+    // Check guide items
+    expect(screen.getByTestId(`guide-item-${GUIDES_DATA[0].id}`)).toBeInTheDocument();
+
+    // Click on guide item to open detailed SOP view
+    fireEvent.click(screen.getByTestId(`guide-item-${GUIDES_DATA[0].id}`));
+    expect(screen.getByTestId('guide-detailed-view')).toBeInTheDocument();
+    expect(screen.getByTestId('guide-back-button')).toBeInTheDocument();
+    expect(screen.getByTestId('guide-copy-button')).toBeInTheDocument();
+
+    // Navigate back to all guides
+    fireEvent.click(screen.getByTestId('guide-back-button'));
+    expect(screen.queryByTestId('guide-detailed-view')).not.toBeInTheDocument();
+
+    // Close modal
+    fireEvent.click(screen.getByTestId('guides-modal-close'));
+    expect(screen.queryByTestId('guides-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens VideoTutorialsModal when clicking Videos category card and controls playback', () => {
+    render(<SupportView />);
+
+    expect(screen.queryByTestId('video-tutorials-modal')).not.toBeInTheDocument();
+
+    const videosCard = screen.getByTestId('support-category-card-videos');
+    fireEvent.click(videosCard);
+
+    expect(screen.getByTestId('video-tutorials-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('videos-modal-title')).toHaveTextContent(/Видеоуроки/i);
+
+    // Player and title
+    expect(screen.getByTestId('video-player-container')).toBeInTheDocument();
+    expect(screen.getByTestId('video-player-title')).toHaveTextContent(VIDEOS_DATA[0].title);
+
+    // Toggle play/pause
+    const toggleBtn = screen.getByTestId('video-player-toggle');
+    fireEvent.click(toggleBtn);
+
+    // Switch video from playlist
+    const secondVideo = VIDEOS_DATA[1];
+    fireEvent.click(screen.getByTestId(`video-item-${secondVideo.id}`));
+    expect(screen.getByTestId('video-player-title')).toHaveTextContent(secondVideo.title);
+
+    // Close modal
+    fireEvent.click(screen.getByTestId('videos-modal-close'));
+    expect(screen.queryByTestId('video-tutorials-modal')).not.toBeInTheDocument();
   });
 
   it('scrolls to FAQ when clicking FAQ category card', () => {

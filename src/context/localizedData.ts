@@ -16,8 +16,8 @@ import {
 } from '../data/mockData';
 import { initialSensors } from '../data/mockSettings';
 import { mockNotifications } from '../data/mockNotifications';
-import { SUPPORT_CATEGORIES, FAQ_ITEMS, CONTACT_CHANNELS } from '../components/support/supportData';
-import { SupportCategoryItem, FaqItem, ContactChannelItem } from '../components/support/types';
+import { SUPPORT_CATEGORIES, FAQ_ITEMS, CONTACT_CHANNELS, GUIDES_DATA, VIDEOS_DATA } from '../components/support/supportData';
+import { SupportCategoryItem, FaqItem, ContactChannelItem, GuideArticle, VideoTutorial } from '../components/support/types';
 
 // Variety dictionary
 export const VARIETY_TRANSLATIONS: Record<string, string> = {
@@ -374,15 +374,107 @@ export const getLocalizedFaqItems = (isEnglish: boolean): FaqItem[] => {
         'Disease analysis utilizes high-resolution hyperspectral imagery across RedEdge and NIR wavelengths. Computer vision identifies early chlorosis, scab, and powdery mildew 5–7 days prior to human visual signs, highlighting chlorophyll stress in spectral heatmaps.',
     },
     'faq-5': {
-      question: 'How do I contact an agronomist directly?',
+      question: 'How frequently are spectral maps and meteorological forecasts refreshed?',
       answer:
-        'Click the "Support" tab in the left navigation sidebar or select "Contact Support" from any dashboard card. You can start a live chat session with our agronomy specialists, call our 24/7 hotline at 8 (800) 555-35-35, or send an inquiry to support@intellia.ru.',
+        'Weather telemetry and soil sensor feeds update every 5 minutes over LoRaWAN. Ripening forecasts and Growing Degree Days (GDD) recalculate daily at 04:00 AM factoring in nocturnal temperatures. Orchard spectral heatmaps refresh instantly whenever a new UAV orthophoto is uploaded.',
+    },
+    'faq-6': {
+      question: 'How do I export harvest logistics reports and sector passports?',
+      answer:
+        'Under the "Forecasts" tab, generate a printable harvest sheet (printer icon) and download a CSV dispatch for logistics. Additionally, each sector passport on the interactive map features an "Export Passport" button exporting all metrics in an Excel-compatible UTF-8 CSV.',
     },
   };
 
   return FAQ_ITEMS.map((item) => {
     const en = FAQ_EN[item.id];
     return en ? { ...item, question: en.question, answer: en.answer } : item;
+  });
+};
+
+export const getLocalizedGuides = (isEnglish: boolean): GuideArticle[] => {
+  if (!isEnglish) return GUIDES_DATA;
+
+  const GUIDES_EN: Record<string, { title: string; categoryLabel: string; summary: string; updatedAt: string }> = {
+    'guide-uav-sop': {
+      title: 'UAV Orchard Survey SOP (DJI Mavic 3M)',
+      categoryLabel: 'UAV & Aerial Survey',
+      updatedAt: 'August 15, 2025',
+      summary:
+        'Standard operational procedure for flight planning, altitude limits (35–45m), DLS downwelling light sensor calibration, and 75/70% image overlap.',
+    },
+    'guide-spectral-calibration': {
+      title: 'Spectral Indices & Fruit Maturity Calibration',
+      categoryLabel: 'Spectral Analysis',
+      updatedAt: 'August 20, 2025',
+      summary:
+        'Methodology for mapping chlorophyll peel absorbance decay to ground truth field Brix refractometer and penetrometer readings.',
+    },
+    'guide-map-passports': {
+      title: 'Interactive Map & Sector Passports Guide',
+      categoryLabel: 'Garden Map',
+      updatedAt: 'August 28, 2025',
+      summary:
+        'Navigation walkthrough: zoom controls, daily ripening curve analysis, in-line metrics editing, and UTF-8 CSV passport exports.',
+    },
+    'guide-meteo-iot': {
+      title: 'Connecting Davis Weather Station & LoRaWAN Sensors',
+      categoryLabel: 'Hardware & IoT',
+      updatedAt: 'September 02, 2025',
+      summary:
+        'Telemetry loop checklist for Davis Vantage Pro2, multi-depth soil moisture sensors, and frost warning alert thresholds.',
+    },
+  };
+
+  return GUIDES_DATA.map((g) => {
+    const en = GUIDES_EN[g.id];
+    return en
+      ? {
+          ...g,
+          title: en.title,
+          categoryLabel: en.categoryLabel,
+          summary: en.summary,
+          updatedAt: en.updatedAt,
+        }
+      : g;
+  });
+};
+
+export const getLocalizedVideos = (isEnglish: boolean): VideoTutorial[] => {
+  if (!isEnglish) return VIDEOS_DATA;
+
+  const VIDEOS_EN: Record<string, { title: string; categoryLabel: string; description: string }> = {
+    'video-quickstart': {
+      title: 'Quickstart: INTELLIA Platform Overview in 4 Minutes',
+      categoryLabel: 'Platform Overview',
+      description: 'Express interface walkthrough: farm dashboard, live bento widgets, interactive sector map, and harvest forecast center.',
+    },
+    'video-drone-flight': {
+      title: 'Drone Survey Operations & Orthophoto Ingestion',
+      categoryLabel: 'UAV Survey',
+      description: 'Practical video guide: DJI Mavic 3M pre-flight checklist, image extraction, and multispectral layer ingestion (RGB, NIR, Red Edge, SWIR).',
+    },
+    'video-whatif-economics': {
+      title: 'What-If Harvest Modeling & Margin Optimization',
+      categoryLabel: 'Forecasts & Economics',
+      description: 'Forecasting harvest windows under temperature anomalies, Growing Degree Days (GDD) tracking, and revenue gains from CA cold storage.',
+    },
+    'video-map-navigation': {
+      title: 'Interactive Orchard Map & Sector Passports',
+      categoryLabel: 'Garden Map',
+      description: 'Pan and zoom controls, sector selection, inline physical-chemical metrics editing, and Excel/CSV passport export.',
+    },
+  };
+
+  return VIDEOS_DATA.map((v) => {
+    const en = VIDEOS_EN[v.id];
+    return en
+      ? {
+          ...v,
+          title: en.title,
+          categoryLabel: en.categoryLabel,
+          description: en.description,
+        }
+      : v;
   });
 };
 

@@ -5,5 +5,7 @@ export * from './ContactChannels';
 export * from './SupportBanner';
 export * from './FeedbackModal';
 export * from './ChatModal';
+export * from './GuidesModal';
+export * from './VideoTutorialsModal';
 export * from './types';
 export * from './supportData';

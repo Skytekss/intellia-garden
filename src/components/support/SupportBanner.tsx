@@ -1,18 +1,22 @@
 import React from 'react';
-import { ArrowRight, Leaf } from 'lucide-react';
+import { ArrowRight, Leaf, MessageCircle, Mail } from 'lucide-react';
 import supportBotImg from '../../assets/support_bot.jpg';
 import { useApp } from '../../context/AppContext';
 
 export interface SupportBannerProps {
-  onOpenFeedback: () => void;
+  onOpenFeedback?: () => void;
+  onOpenChat?: () => void;
   className?: string;
 }
 
 export const SupportBanner: React.FC<SupportBannerProps> = ({
   onOpenFeedback,
+  onOpenChat,
   className = '',
 }) => {
   const { isEnglish } = useApp();
+  const handlePrimaryClick = onOpenChat || onOpenFeedback;
+
   return (
     <div
       data-testid="support-banner"
@@ -42,20 +46,41 @@ export const SupportBanner: React.FC<SupportBannerProps> = ({
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed break-words">
             {isEnglish
-              ? 'Our specialists are always ready to answer your questions and solve any issue.'
-              : 'Наши специалисты всегда готовы ответить на ваши вопросы и помочь решить любую проблему.'}
+              ? 'Our specialists and AI assistant are always ready to answer your questions and solve any issue.'
+              : 'Наши специалисты и AI-ассистент всегда готовы ответить на ваши вопросы и помочь решить любую проблему.'}
           </p>
 
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 justify-center sm:justify-start">
             <button
               type="button"
               data-testid="support-banner-cta-button"
-              onClick={onOpenFeedback}
+              onClick={handlePrimaryClick}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#07503b] hover:bg-[#096047] active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <span>{isEnglish ? 'Contact Support' : 'Написать в поддержку'}</span>
-              <ArrowRight className="w-4 h-4" />
+              {onOpenChat ? (
+                <>
+                  <MessageCircle className="w-4 h-4" />
+                  <span>{isEnglish ? 'Start Live Chat' : 'Открыть чат с ассистентом'}</span>
+                </>
+              ) : (
+                <>
+                  <span>{isEnglish ? 'Contact Support' : 'Написать в поддержку'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
+
+            {onOpenChat && onOpenFeedback && (
+              <button
+                type="button"
+                data-testid="support-banner-secondary-button"
+                onClick={onOpenFeedback}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-300/80 text-emerald-950 bg-white/80 hover:bg-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-2xs hover:border-emerald-400"
+              >
+                <Mail className="w-3.5 h-3.5 text-emerald-700" />
+                <span>{isEnglish ? 'Submit Ticket' : 'Оставить заявку'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ import { ContactChannels } from './ContactChannels';
 import { SupportBanner } from './SupportBanner';
 import { FeedbackModal } from './FeedbackModal';
 import { ChatModal } from './ChatModal';
+import { GuidesModal } from './GuidesModal';
+import { VideoTutorialsModal } from './VideoTutorialsModal';
 import { useApp } from '../../context/AppContext';
 
 export interface SupportViewProps {
@@ -22,6 +24,8 @@ export const SupportView: React.FC<SupportViewProps> = ({
   const defaultCategory = isEnglish ? 'Platform functionality question' : 'Вопрос по функционалу платформы';
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isGuidesOpen, setIsGuidesOpen] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [feedbackCategory, setFeedbackCategory] = useState<string>(defaultCategory);
 
   React.useEffect(() => {
@@ -38,11 +42,9 @@ export const SupportView: React.FC<SupportViewProps> = ({
       setFeedbackCategory(defaultCategory);
       setIsFeedbackOpen(true);
     } else if (categoryId === 'guides') {
-      setFeedbackCategory(isEnglish ? 'User Guides & Manuals' : 'Инструкции и регламенты работы');
-      setIsFeedbackOpen(true);
+      setIsGuidesOpen(true);
     } else if (categoryId === 'videos') {
-      setFeedbackCategory(isEnglish ? 'Video Tutorials & Walkthroughs' : 'Видеоуроки и обзоры');
-      setIsFeedbackOpen(true);
+      setIsVideoOpen(true);
     }
   };
 
@@ -115,7 +117,10 @@ export const SupportView: React.FC<SupportViewProps> = ({
       </div>
 
       {/* 4. Bottom Row: Banner with Bot & Slogan */}
-      <SupportBanner onOpenFeedback={handleOpenFeedbackModal} />
+      <SupportBanner
+        onOpenChat={handleOpenChatModal}
+        onOpenFeedback={handleOpenFeedbackModal}
+      />
 
       {/* 5. Modals */}
       <FeedbackModal
@@ -127,6 +132,16 @@ export const SupportView: React.FC<SupportViewProps> = ({
       <ChatModal
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
+      />
+
+      <GuidesModal
+        isOpen={isGuidesOpen}
+        onClose={() => setIsGuidesOpen(false)}
+      />
+
+      <VideoTutorialsModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
       />
     </div>
   );
