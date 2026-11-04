@@ -568,9 +568,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const formattedDate = formatDate(`${day}.${month}.${year}`);
         return `${formattedDate}, ${time}`;
       }
+      try {
+        const d = new Date(isoOrFormatted);
+        if (!isNaN(d.getTime())) {
+          const tzOffsetMatch = timezone.match(/UTC([+-]\d+)/);
+          const offsetHours = tzOffsetMatch ? parseInt(tzOffsetMatch[1], 10) : 3;
+          const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+          const targetDate = new Date(utc + 3600000 * offsetHours);
+          const dd = String(targetDate.getDate()).padStart(2, '0');
+          const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+          const yyyy = targetDate.getFullYear();
+          const hh = String(targetDate.getHours()).padStart(2, '0');
+          const min = String(targetDate.getMinutes()).padStart(2, '0');
+          const formattedDate = formatDate(`${dd}.${mm}.${yyyy}`);
+          return `${formattedDate}, ${hh}:${min}`;
+        }
+      } catch {
+        // fallback
+      }
       return isoOrFormatted;
     },
-    [formatDate]
+    [formatDate, timezone]
   );
 
   // Translation helper

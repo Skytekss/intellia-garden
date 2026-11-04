@@ -68,4 +68,28 @@ describe('Notifications & Header Real-time Living Sync', () => {
       expect(screen.queryByTestId('header-notifications-badge')).not.toBeInTheDocument();
     });
   });
+
+  it('displays category muted notice when a notification category is disabled in settings', () => {
+    // Pre-populate settings in localStorage with weatherConditions: false
+    window.localStorage.setItem(
+      'intellia_notification_settings',
+      JSON.stringify({
+        harvestAndMaturity: true,
+        weatherConditions: false,
+        agrotechnicalWorks: true,
+        systemUpdates: true,
+      })
+    );
+
+    render(<FullIntegrationApp />);
+
+    // Click Weather tab in NotificationsView
+    const weatherTab = screen.getByTestId('filter-tab-weather');
+    fireEvent.click(weatherTab);
+
+    // Muted notice should be displayed
+    const mutedNotice = screen.getByTestId('category-muted-notice');
+    expect(mutedNotice).toBeInTheDocument();
+    expect(mutedNotice).toHaveTextContent(/отключены в Настройках/i);
+  });
 });

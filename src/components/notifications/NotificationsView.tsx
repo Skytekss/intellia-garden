@@ -22,6 +22,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     isEnglish,
     t,
     notifications: contextNotifications,
+    notificationSettings,
     markNotificationRead,
     markAllNotificationsRead,
   } = useApp();
@@ -43,6 +44,13 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
   const [activeFilter, setActiveFilter] = useState<NotificationFilterTab>('all');
   const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const isCategoryMuted = (cat: NotificationFilterTab): boolean => {
+    if (cat === 'harvest' && notificationSettings?.harvestAndMaturity === false) return true;
+    if (cat === 'weather' && notificationSettings?.weatherConditions === false) return true;
+    if (cat === 'system' && notificationSettings?.systemUpdates === false) return true;
+    return false;
+  };
 
   // Compute counters
   const counts: Record<NotificationFilterTab, number> = {
@@ -145,6 +153,32 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
         counts={counts}
         onMarkAllAsRead={handleMarkAllAsRead}
       />
+
+      {/* Muted Category Notice */}
+      {isCategoryMuted(activeFilter) && (
+        <div
+          data-testid="category-muted-notice"
+          className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium flex items-center justify-between gap-2"
+        >
+          <div className="flex items-center gap-2">
+            <BellOff className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              {isEnglish
+                ? 'Notifications for this category are muted in Settings'
+                : 'Оповещения для этой категории отключены в Настройках'}
+            </span>
+          </div>
+          {onNavigate && (
+            <button
+              type="button"
+              onClick={() => onNavigate('settings')}
+              className="text-xs font-semibold text-emerald-800 hover:underline cursor-pointer"
+            >
+              {isEnglish ? 'Settings →' : 'Настройки →'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 3. Notifications List or Empty State */}
       <div className="space-y-3.5 min-w-0" data-testid="notifications-list">
