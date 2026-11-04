@@ -32,32 +32,32 @@ const SECTOR_GEOMETRIES: SectorGeometry[] = [
   {
     id: 'sector-1',
     name: 'Участок 1',
-    polygon: '5,88 122,62 126,178 2,235',
-    badge: { x: 66, y: 79 },
+    polygon: '20,76 114,58 120,160 14,206',
+    badge: { x: 66, y: 126 },
   },
   {
     id: 'sector-2',
     name: 'Участок 2',
-    polygon: '112,60 240,36 254,122 146,148',
-    badge: { x: 260, y: 70 },
+    polygon: '128,54 222,38 256,120 162,144',
+    badge: { x: 192, y: 88 },
   },
   {
     id: 'sector-3',
     name: 'Участок 3',
-    polygon: '162,154 338,112 356,186 198,226',
-    badge: { x: 369, y: 140 },
+    polygon: '172,160 354,116 372,180 190,224',
+    badge: { x: 272, y: 170 },
   },
   {
     id: 'sector-4',
     name: 'Участок 4',
-    polygon: '206,234 366,188 390,268 265,318',
-    badge: { x: 351, y: 258 },
+    polygon: '204,236 374,192 392,266 268,316',
+    badge: { x: 310, y: 252 },
   },
   {
     id: 'sector-5',
     name: 'Участок 5',
-    polygon: '30,235 126,175 180,270 140,315 45,265',
-    badge: { x: 122, y: 244 },
+    polygon: '24,220 134,172 186,274 78,316',
+    badge: { x: 106, y: 246 },
   },
 ];
 
@@ -244,11 +244,13 @@ export const GardenMap: React.FC<GardenMapProps> = ({
                       : showLayers
                       ? isHovered
                         ? '#ffffff'
-                        : 'rgba(255, 255, 255, 0.65)'
+                        : 'rgba(255, 255, 255, 0.7)'
                       : 'transparent'
                   }
-                  strokeWidth={isSelected ? '2.5' : isHovered ? '2' : showLayers ? '1.2' : '0'}
-                  strokeDasharray={isSelected ? 'none' : showLayers ? '4 2' : 'none'}
+                  strokeWidth={isSelected ? '2.5' : isHovered ? '2' : showLayers ? '1.5' : '0'}
+                  strokeDasharray="none"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
                   filter={isSelected ? 'url(#activeGlow)' : undefined}
                   onClick={() => onSelectSector(geom.id)}
                   onMouseEnter={() => setHoveredSectorId(geom.id)}
@@ -333,26 +335,7 @@ export const GardenMap: React.FC<GardenMapProps> = ({
               );
             })}
 
-            {/* Animated Drone Survey Indicator positioned at selected sector */}
-            {(() => {
-              const currentGeom = SECTOR_GEOMETRIES.find((g) => g.id === selectedSectorId) || SECTOR_GEOMETRIES[3];
-              return (
-                <g
-                  transform={'translate(' + (currentGeom.badge.x - 36) + ', ' + (currentGeom.badge.y - 24) + ')'}
-                  className="pointer-events-none transition-transform duration-500 ease-out"
-                >
-                  <circle cx="0" cy="0" r="16" fill="none" stroke="#10b981" strokeWidth="1.5" opacity="0.6" className="animate-ping" />
-                  <circle cx="0" cy="0" r="8" fill="rgba(5, 56, 43, 0.85)" stroke="#10b981" strokeWidth="1.2" />
-                  <path
-                    d="M -4 -4 L 4 4 M 4 -4 L -4 4"
-                    stroke="#ffffff"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="0" cy="0" r="2" fill="#34d399" />
-                </g>
-              );
-            })()}
+            {/* Sector Badges end */}
           </svg>
         </div>
       </div>

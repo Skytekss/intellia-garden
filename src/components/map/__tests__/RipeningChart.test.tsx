@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { RipeningChart } from '../RipeningChart';
 
 describe('RipeningChart Component', () => {
@@ -31,5 +31,27 @@ describe('RipeningChart Component', () => {
   it('renders null when history is empty', () => {
     const { container } = render(<RipeningChart history={[]} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('updates tooltip upon hovering over data points and resets on mouse leave', () => {
+    render(<RipeningChart history={sampleHistory} currentPercent={72} />);
+
+    // Hover on the first point (01.08: 35%)
+    const firstPointButton = screen.getByLabelText('01.08: 35%');
+    fireEvent.mouseEnter(firstPointButton);
+
+    expect(screen.getByText('35%')).toBeInTheDocument();
+
+    // Hover on another point (15.08: 58%)
+    const midPointButton = screen.getByLabelText('15.08: 58%');
+    fireEvent.mouseEnter(midPointButton);
+
+    expect(screen.getByText('58%')).toBeInTheDocument();
+
+    // Mouse leave resets to idle state showing currentPercent (72%)
+    const chartContainer = screen.getByTestId('ripening-chart');
+    fireEvent.mouseLeave(chartContainer);
+
+    expect(screen.getByText('72%')).toBeInTheDocument();
   });
 });

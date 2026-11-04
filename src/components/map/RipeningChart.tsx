@@ -101,8 +101,24 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
   const stage = getMaturityStage(activePercent, isEnglish);
 
   // Compute safe tooltip position (keep inside SVG bounds)
-  const tooltipX = Math.max(65, Math.min(width - 65, activePoint.x));
-  const tooltipY = Math.max(26, activePoint.y - 12);
+  const tooltipX = Math.max(60, Math.min(width - 60, activePoint.x));
+  const tooltipY = Math.max(32, activePoint.y - 12);
+
+  const handleSvgMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width) return;
+    const svgX = ((e.clientX - rect.left) / rect.width) * width;
+    let closestIdx = 0;
+    let minDistance = Infinity;
+    points.forEach((pt, idx) => {
+      const dist = Math.abs(pt.x - svgX);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIdx = idx;
+      }
+    });
+    setHoveredIndex(closestIdx);
+  };
 
   return (
     <div
@@ -112,7 +128,9 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
     >
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-auto overflow-visible"
+        className="w-full h-auto overflow-visible cursor-crosshair"
+        onMouseMove={handleSvgMouseMove}
+        onMouseLeave={() => setHoveredIndex(null)}
         aria-label={
           isEnglish
             ? 'Interactive fruit ripening dynamics chart with step rankings'
@@ -256,32 +274,38 @@ export const RipeningChart: React.FC<RipeningChartProps> = ({
 
         {/* Floating Tooltip (Interactive on hover, or default badge when idle) */}
         {hoveredIndex !== null ? (
-          <motion.g
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.15 }}
+          <g
             transform={`translate(${tooltipX}, ${tooltipY})`}
             filter="url(#interactiveTooltipShadow)"
-            className="pointer-events-none"
+            className="pointer-events-none transition-transform duration-100 ease-out"
           >
             <rect
               x="-56"
-              y="-22"
+              y="-28"
               width="112"
-              height="26"
+              height="28"
               rx="8"
               fill="#ffffff"
               stroke={stage.color}
-              strokeWidth="1.2"
+              strokeWidth="1.5"
             />
-            <polygon points="-4,4 4,4 0,8" fill="#ffffff" />
-            <text x="-48" y="-5" fontSize="12" fontWeight="600" fill="#64748b" className="font-sans">
+            {/* Tooltip downward caret arrow */}
+            <polygon points="-6,0 6,0 0,6" fill="#ffffff" />
+            <path
+              d="M -6 0 L 0 6 L 6 0"
+              fill="none"
+              stroke={stage.color}
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <text x="-48" y="-10" fontSize="12" fontWeight="600" fill="#64748b" className="font-sans select-none">
               {activePoint.date}
             </text>
-            <text x="48" y="-5" textAnchor="end" fontSize="12" fontWeight="800" fill={stage.color} className="font-sans">
+            <text x="48" y="-10" textAnchor="end" fontSize="12" fontWeight="800" fill={stage.color} className="font-sans select-none">
               {activePercent}%
             </text>
-          </motion.g>
+          </g>
         ) : (
           <g
             transform={`translate(${lastPoint.x - 22}, ${lastPoint.y - 30})`}
