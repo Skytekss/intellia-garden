@@ -32,7 +32,8 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
     initialVideoId || (videos.length > 0 ? videos[0].id : 'video-quickstart')
   );
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playbackProgress, setPlaybackProgress] = useState<number>(25); // initial simulated 25%
+  const [playbackProgress, setPlaybackProgress] = useState<number>(0);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +41,8 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
         setActiveVideoId(initialVideoId);
       }
       setIsPlaying(false);
-      setPlaybackProgress(15);
+      setPlaybackProgress(0);
+      setHasStarted(false);
     }
   }, [isOpen, initialVideoId]);
 
@@ -54,7 +56,7 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Simulated progress timer when playing
+  // Simulated progress timer only when playing
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
@@ -73,17 +75,33 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
 
   const currentVideo = videos.find((v) => v.id === activeVideoId) || videos[0];
 
+  const togglePlay = () => {
+    setHasStarted(true);
+    setIsPlaying((prev) => !prev);
+  };
+
   const handleSelectVideo = (video: VideoTutorial) => {
     setActiveVideoId(video.id);
-    setIsPlaying(true);
+    setIsPlaying(false);
     setPlaybackProgress(0);
+    setHasStarted(false);
   };
 
   const handleJumpToChapter = (seconds: number) => {
-    // estimate progress percent
     const progress = Math.min(100, Math.max(0, Math.round((seconds / 300) * 100)));
     setPlaybackProgress(progress);
+    setHasStarted(true);
     setIsPlaying(true);
+  };
+
+  const formatTime = () => {
+    if (!hasStarted && playbackProgress === 0) {
+      return `0:00 / ${currentVideo.duration}`;
+    }
+    const elapsedSeconds = Math.floor((playbackProgress / 100) * 240);
+    const mins = Math.floor(elapsedSeconds / 60);
+    const secs = String(elapsedSeconds % 60).padStart(2, '0');
+    return `${mins}:${secs} / ${currentVideo.duration}`;
   };
 
   return (
@@ -141,13 +159,13 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
           {/* Simulated Video Player Stage */}
           <div
             data-testid="video-player-container"
-            className="relative rounded-2xl bg-[#03261d] overflow-hidden aspect-video border border-emerald-950/60 shadow-lg flex flex-col justify-between p-4 sm:p-6 text-white group"
+            className="relative rounded-2xl bg-[#03261d] overflow-hidden aspect-video border border-emerald-950/60 shadow-lg flex flex-col justify-between p-4 sm:p-6 text-white group select-none"
           >
             {/* Background Texture & Watermark */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/70 pointer-events-none" />
             <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-xs text-xs font-semibold text-emerald-300 border border-emerald-800/40">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Full HD 1080p</span>
+              <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
+              <span>{isPlaying ? 'Full HD • Воспроизведение' : 'Full HD • Ожидание'}</span>
             </div>
 
             {/* Video Title in Player */}
@@ -168,14 +186,24 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
               <button
                 type="button"
                 data-testid="video-player-toggle"
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#07503b] hover:bg-[#096047] text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-emerald-400/40"
+                onClick={togglePlay}
+                className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-[#07503b] hover:bg-[#096047] text-white shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-emerald-400/40"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
-                  <Pause className="w-7 h-7 fill-white" />
+                  <>
+                    <Pause className="w-6 h-6 fill-white" />
+                    <span className="text-xs sm:text-sm font-semibold">{isEnglish ? 'Pause' : 'Пауза'}</span>
+                  </>
                 ) : (
-                  <Play className="w-7 h-7 fill-white translate-x-0.5" />
+                  <>
+                    <Play className="w-6 h-6 fill-white translate-x-0.5" />
+                    <span className="text-xs sm:text-sm font-semibold">
+                      {hasStarted
+                        ? (isEnglish ? 'Resume' : 'Продолжить')
+                        : (isEnglish ? 'Play Tutorial' : 'Смотреть урок')}
+                    </span>
+                  </>
                 )}
               </button>
             </div>
@@ -190,6 +218,7 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
                   const clickX = e.clientX - rect.left;
                   const ratio = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
                   setPlaybackProgress(Math.round(ratio));
+                  setHasStarted(true);
                 }}
                 className="w-full h-1.5 bg-white/20 rounded-full cursor-pointer overflow-hidden hover:h-2 transition-all relative"
               >
@@ -205,21 +234,25 @@ export const VideoTutorialsModal: React.FC<VideoTutorialsModalProps> = ({
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={togglePlay}
                     className="hover:text-white cursor-pointer"
                   >
                     {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPlaybackProgress(0)}
+                    onClick={() => {
+                      setPlaybackProgress(0);
+                      setIsPlaying(false);
+                      setHasStarted(false);
+                    }}
                     className="hover:text-white cursor-pointer"
                     title={isEnglish ? 'Replay' : 'В начало'}
                   >
                     <RotateCcw className="w-4 h-4" />
                   </button>
                   <span className="font-mono text-xs text-slate-300">
-                    {Math.floor((playbackProgress / 100) * 4)}:{String(Math.floor(((playbackProgress / 100) * 240) % 60)).padStart(2, '0')} / {currentVideo.duration}
+                    {formatTime()}
                   </span>
                 </div>
 

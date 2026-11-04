@@ -122,27 +122,35 @@ export const SupportView: React.FC<SupportViewProps> = ({
         onOpenFeedback={handleOpenFeedbackModal}
       />
 
-      {/* 5. Modals */}
-      <FeedbackModal
-        isOpen={isFeedbackOpen}
-        onClose={() => setIsFeedbackOpen(false)}
-        initialCategory={feedbackCategory}
-      />
+      {/* 5. Modals - mounted on demand to avoid background timers and state */}
+      {isFeedbackOpen && (
+        <FeedbackModal
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
+          initialCategory={feedbackCategory}
+        />
+      )}
 
-      <ChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-      />
+      {isChatOpen && (
+        <ChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
 
-      <GuidesModal
-        isOpen={isGuidesOpen}
-        onClose={() => setIsGuidesOpen(false)}
-      />
+      {isGuidesOpen && (
+        <GuidesModal
+          isOpen={isGuidesOpen}
+          onClose={() => setIsGuidesOpen(false)}
+        />
+      )}
 
-      <VideoTutorialsModal
-        isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
-      />
+      {isVideoOpen && (
+        <VideoTutorialsModal
+          isOpen={isVideoOpen}
+          onClose={() => setIsVideoOpen(false)}
+        />
+      )}
     </div>
   );
 };
