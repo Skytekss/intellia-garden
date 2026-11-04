@@ -7,6 +7,7 @@ import { ForecastAiCard } from './ForecastAiCard';
 import { ForecastMaturityPreview } from './ForecastMaturityPreview';
 import { ForecastRecommendations } from './ForecastRecommendations';
 import { WhatIfSimulatorWidget } from './WhatIfSimulatorWidget';
+import { GddProgressCard } from './GddProgressCard';
 import { useApp } from '../../context/AppContext';
 import { getLocalizedForecastRows } from '../../context/localizedData';
 import { simulateHarvestForecast } from '../../utils/harvestSimulation';
@@ -132,6 +133,9 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
 
           {/* Interactive What-If Scenario Simulator */}
           <WhatIfSimulatorWidget />
+
+          {/* Growing Degree Days (GDD) Phenological Model Card */}
+          <GddProgressCard />
 
           {/* Interactive Table with real simulated rows */}
           <ForecastTable rows={simulatedRows} onNavigate={onNavigate} />

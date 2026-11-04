@@ -251,4 +251,20 @@ describe('ForecastsView Component', () => {
     fireEvent.click(row1);
     expect(screen.queryByTestId('forecast-row-detail-summary')).not.toBeInTheDocument();
   });
+
+  it('renders GddProgressCard with cultivar thermal tracking and supports sector switching', () => {
+    renderWithContext(<ForecastsView />);
+
+    const gddCard = screen.getByTestId('gdd-progress-card');
+    expect(gddCard).toBeInTheDocument();
+    expect(gddCard).toHaveTextContent(/GDD/i);
+    expect(screen.getByTestId('gdd-progress-bar')).toBeInTheDocument();
+
+    // Click on sector 4 button
+    const sector4Btn = screen.getByTestId('gdd-sector-btn-sector-4');
+    fireEvent.click(sector4Btn);
+
+    expect(gddCard).toHaveTextContent('Участок 4');
+    expect(gddCard).toHaveTextContent('Ред Делишес');
+  });
 });
