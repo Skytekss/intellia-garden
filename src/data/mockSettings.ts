@@ -4,6 +4,7 @@ import {
   NotificationSettings,
   DataManagementSettings,
   FarmProfileSettings,
+  UserProfile,
 } from '../types';
 
 export const initialGeneralSettings: GeneralSettings = {
@@ -83,3 +84,59 @@ export const initialFarmProfileSettings: FarmProfileSettings = {
   region: 'Тульская область',
   lastSurveyDate: '12.08.2025',
 };
+
+export const initialUserProfile: UserProfile = {
+  id: 'user-elizaveta',
+  fullName: 'Елизавета Белова',
+  fullNameEn: 'Elizaveta Belova',
+  initials: 'ЕБ',
+  role: 'Главный агроном',
+  roleEn: 'Chief Agronomist',
+  email: 'e.belova@intellia.agro',
+  phone: '+7 (916) 842-19-04',
+  telegram: '@eliza_agronomy',
+  status: 'online',
+  statusNote: 'Центральная агролаборатория',
+  statusNoteEn: 'Central Agro-Laboratory',
+  avatarGradient: 'from-emerald-800 to-teal-600',
+  specialization: 'Интенсивные сады, капельный полив, фитосанитария',
+  specializationEn: 'Intensive orchards, drip irrigation, plant protection',
+};
+
+export const DEMO_USERS: UserProfile[] = [
+  initialUserProfile,
+  {
+    id: 'user-mikhail',
+    fullName: 'Михаил Сорокин',
+    fullNameEn: 'Mikhail Sorokin',
+    initials: 'МС',
+    role: 'Оператор БПЛА / Агроскаут',
+    roleEn: 'UAV Operator / Agroscout',
+    email: 'm.sorokin@intellia.agro',
+    phone: '+7 (920) 731-55-12',
+    telegram: '@mikhail_drone',
+    status: 'field',
+    statusNote: 'Облет БПЛА: Сектор 4',
+    statusNoteEn: 'UAV flight: Sector 4',
+    avatarGradient: 'from-blue-700 to-cyan-500',
+    specialization: 'Мультиспектральная съемка DJI Mavic 3M, NDVI картографирование',
+    specializationEn: 'Multispectral imaging DJI Mavic 3M, NDVI mapping',
+  },
+  {
+    id: 'user-anna',
+    fullName: 'Анна Климова',
+    fullNameEn: 'Anna Klimova',
+    initials: 'АК',
+    role: 'Менеджер хранения и сбыта',
+    roleEn: 'Storage & Logistics Manager',
+    email: 'a.klimova@intellia.agro',
+    phone: '+7 (903) 115-44-89',
+    telegram: '@anna_logistics',
+    status: 'online',
+    statusNote: 'Камеры РГС / ULO',
+    statusNoteEn: 'ULO / CA Storage Rooms',
+    avatarGradient: 'from-amber-700 to-emerald-600',
+    specialization: 'Контролируемая газовая среда (ULO), логистика свежего урожая',
+    specializationEn: 'Controlled atmosphere (ULO), fresh harvest logistics',
+  },
+];

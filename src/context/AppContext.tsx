@@ -11,6 +11,8 @@ import {
   NotificationItem,
   SurveyHistoryEntry,
   RainCondition,
+  UserProfile,
+  UserStatus,
 } from '../types';
 import {
   initialGeneralSettings,
@@ -18,6 +20,7 @@ import {
   initialNotificationSettings,
   initialDataManagementSettings,
   initialFarmProfileSettings,
+  initialUserProfile,
 } from '../data/mockSettings';
 import { FARMS_DATA, getFarmById } from '../data/farmsData';
 import { mockNotifications } from '../data/mockNotifications';
@@ -54,6 +57,11 @@ export interface AppContextType {
   currentFarm: FarmData;
   farmProfile: FarmProfileSettings;
   updateFarmProfile: (updated: FarmProfileSettings) => void;
+
+  // User Profile
+  userProfile: UserProfile;
+  updateUserProfile: (updated: Partial<UserProfile>) => void;
+  setUserStatus: (status: UserStatus, note?: string) => void;
 
   // Sectors (Single Source of Truth)
   sectors: GardenSector[];
@@ -111,6 +119,7 @@ const STORAGE_KEYS = {
   notificationsList: 'intellia_notifications_list',
   dataManagement: 'intellia_datamanagement_settings',
   sensors: 'intellia_sensors',
+  userProfile: 'intellia_user_profile',
 };
 
 const safeGetStorage = <T,>(key: string, fallback: T): T => {
@@ -227,6 +236,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [dataManagementSettings, setDataManagementSettingsState] = useState<DataManagementSettings>(() =>
     safeGetStorage<DataManagementSettings>(STORAGE_KEYS.dataManagement, initialDataManagementSettings)
   );
+
+  // User Profile State
+  const [userProfile, setUserProfileState] = useState<UserProfile>(() =>
+    safeGetStorage<UserProfile>(STORAGE_KEYS.userProfile, initialUserProfile)
+  );
+
+  const updateUserProfile = useCallback((updated: Partial<UserProfile>) => {
+    setUserProfileState((prev) => {
+      let nextInitials = updated.initials ?? prev.initials;
+      if (updated.fullName && !updated.initials) {
+        const parts = updated.fullName.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          nextInitials = `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        } else if (parts.length === 1 && parts[0].length > 0) {
+          nextInitials = parts[0].slice(0, 2).toUpperCase();
+        }
+      }
+      const next: UserProfile = {
+        ...prev,
+        ...updated,
+        initials: nextInitials,
+      };
+      safeSetStorage(STORAGE_KEYS.userProfile, next);
+      return next;
+    });
+  }, []);
+
+  const setUserStatus = useCallback((status: UserStatus, note?: string) => {
+    setUserProfileState((prev) => {
+      const next: UserProfile = {
+        ...prev,
+        status,
+        ...(note !== undefined ? { statusNote: note } : {}),
+      };
+      safeSetStorage(STORAGE_KEYS.userProfile, next);
+      return next;
+    });
+  }, []);
 
   // What-If Harvest Simulation (Sprint 2)
   const [tempAnomaly, setTempAnomaly] = useState<number>(0);
@@ -626,6 +673,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentFarm,
       farmProfile,
       updateFarmProfile,
+      userProfile,
+      updateUserProfile,
+      setUserStatus,
       sectors,
       updateSector,
       agroRecords,
@@ -680,6 +730,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentFarm,
       farmProfile,
       updateFarmProfile,
+      userProfile,
+      updateUserProfile,
+      setUserStatus,
       sectors,
       updateSector,
       agroRecords,
@@ -746,6 +799,9 @@ export const useApp = (): AppContextType => {
       currentFarm: defaultFarm,
       farmProfile: initialFarmProfileSettings,
       updateFarmProfile: () => {},
+      userProfile: initialUserProfile,
+      updateUserProfile: () => {},
+      setUserStatus: () => {},
       sectors: defaultFarm.sectors,
       updateSector: () => {},
       agroRecords: defaultFarm.agroRecords,
