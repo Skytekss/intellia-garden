@@ -341,7 +341,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Елизавета Белова"
+                    placeholder="Буданцева Елизавета"
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
                     data-testid="input-full-name"
                   />
@@ -399,7 +399,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.belova@intellia.agro"
+                    placeholder="e.budantseva@intellia.agro"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
                     data-testid="input-email"
                   />
@@ -429,7 +429,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                     type="text"
                     value={telegram}
                     onChange={(e) => setTelegram(e.target.value)}
-                    placeholder="@eliza_agronomy"
+                    placeholder="@eliza_budantseva"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
                     data-testid="input-telegram"
                   />

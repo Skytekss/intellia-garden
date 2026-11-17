@@ -238,9 +238,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   // User Profile State
-  const [userProfile, setUserProfileState] = useState<UserProfile>(() =>
-    safeGetStorage<UserProfile>(STORAGE_KEYS.userProfile, initialUserProfile)
-  );
+  const [userProfile, setUserProfileState] = useState<UserProfile>(() => {
+    const stored = safeGetStorage<UserProfile>(STORAGE_KEYS.userProfile, initialUserProfile);
+    // Auto-migrate if stored profile is the obsolete mock "Елизавета Белова"
+    if (!stored || stored.fullName === 'Елизавета Белова' || stored.fullNameEn === 'Elizaveta Belova' || stored.email?.includes('belova')) {
+      safeSetStorage(STORAGE_KEYS.userProfile, initialUserProfile);
+      return initialUserProfile;
+    }
+    return stored;
+  });
 
   const updateUserProfile = useCallback((updated: Partial<UserProfile>) => {
     setUserProfileState((prev) => {
