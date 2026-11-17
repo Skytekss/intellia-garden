@@ -19,7 +19,7 @@ export const TRANSLATIONS: Record<'ru' | 'en', Record<string, string>> = {
     'header.title.notifications': 'Центр уведомлений',
     'header.title.settings': 'Настройки системы',
     'header.title.support': 'Служба агрономической поддержки',
-    'header.user.name': 'Елизавета Б.',
+    'header.user.name': 'Буданцева Елизавета',
     'header.user.role': 'Главный агроном',
     'header.farmAreaPrefix': 'Площадь:',
 
@@ -249,7 +249,7 @@ export const TRANSLATIONS: Record<'ru' | 'en', Record<string, string>> = {
     'header.title.notifications': 'Notification Center',
     'header.title.settings': 'System Settings',
     'header.title.support': 'Agronomic Support Service',
-    'header.user.name': 'Elizaveta B.',
+    'header.user.name': 'Elizaveta Budantseva',
     'header.user.role': 'Chief Agronomist',
     'header.farmAreaPrefix': 'Area:',
 

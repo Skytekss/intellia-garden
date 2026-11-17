@@ -28,7 +28,7 @@ describe('User Profile Feature & Interactivity', () => {
     fireEvent.click(profileButton);
     expect(profileButton).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('user-profile-dropdown')).toBeInTheDocument();
-    expect(screen.getByText('e.belova@intellia.agro')).toBeInTheDocument();
+    expect(screen.getByText('e.budantseva@intellia.agro')).toBeInTheDocument();
   });
 
   it('allows switching work status in 1 click from dropdown', () => {
@@ -60,13 +60,13 @@ describe('User Profile Feature & Interactivity', () => {
     // Open dropdown
     fireEvent.click(screen.getByTestId('user-profile-button'));
 
-    // Click Mikhail Sorokin demo preset
-    const mikhailBtn = screen.getByRole('button', { name: /Михаил Сорокин/i });
-    fireEvent.click(mikhailBtn);
+    // Click Anastasia Nechaeva demo preset
+    const anastasiaBtn = screen.getByRole('button', { name: /Нечаева Анастасия/i });
+    fireEvent.click(anastasiaBtn);
 
-    // Header now reflects Mikhail
-    expect(screen.getAllByText('МС').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Михаил Сорокин').length).toBeGreaterThan(0);
+    // Header now reflects Anastasia
+    expect(screen.getAllByText('АН').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Нечаева Анастасия').length).toBeGreaterThan(0);
   });
 
   it('opens EditProfileModal and updates profile credentials and persists to localStorage', async () => {
@@ -140,7 +140,7 @@ describe('User Profile Feature & Interactivity', () => {
     );
 
     expect(screen.getByTestId('user-profile-card')).toBeInTheDocument();
-    expect(screen.getByText('Елизавета Белова')).toBeInTheDocument();
+    expect(screen.getByText('Буданцева Елизавета')).toBeInTheDocument();
 
     const editBtn = screen.getByTestId('edit-user-profile-button');
     fireEvent.click(editBtn);
