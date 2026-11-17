@@ -10,7 +10,6 @@ import { ForecastsView } from './components/forecasts';
 import { NotificationsView } from './components/notifications';
 import { SettingsView } from './components/settings';
 import { SupportView } from './components/support';
-import { PlaceholderView } from './components/placeholder/PlaceholderView';
 
 const VALID_TABS: NavigationTab[] = [
   'overview',
@@ -127,10 +126,7 @@ export const AppContent: React.FC = () => {
         ) : activeTab === 'support' ? (
           <SupportView onNavigate={handleSelectTab} />
         ) : (
-          <PlaceholderView
-            tab={activeTab}
-            onNavigateBack={() => handleSelectTab('overview')}
-          />
+          <DashboardView onNavigate={handleSelectTab} />
         )}
       </motion.div>
     </AppShell>

@@ -17,6 +17,7 @@ import { FarmProfileCard } from './FarmProfileCard';
 import { SupportBanner } from './SupportBanner';
 import { EditFarmModal } from './EditFarmModal';
 import { HardwareModal } from './HardwareModal';
+import { UserProfileCard, EditProfileModal } from '../profile';
 import { useApp } from '../../context/AppContext';
 
 export interface SettingsViewProps {
@@ -63,6 +64,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   }, [app.dataManagementSettings]);
 
   // Modals state
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isEditFarmModalOpen, setIsEditFarmModalOpen] = useState(false);
   const [isHardwareModalOpen, setIsHardwareModalOpen] = useState(false);
 
@@ -157,8 +159,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
       {/* Two-column layout grid: 2 cols on Tablet (md: >=768px) and Desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 items-start">
-        {/* Left Column: General & Sensors */}
+        {/* Left Column: User Profile, General & Sensors */}
         <div className="space-y-4 sm:space-y-5 min-w-0">
+          <UserProfileCard
+            profile={app.userProfile}
+            onEdit={() => setIsEditProfileModalOpen(true)}
+          />
+
           <GeneralSettingsCard
             settings={generalSettings}
             onChange={handleGeneralChange}
@@ -170,8 +177,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           />
         </div>
 
-        {/* Right Column: Notifications, Data Management, Farm Profile */}
+        {/* Right Column: Farm Profile, Notifications, Data Management */}
         <div className="space-y-4 sm:space-y-5 min-w-0">
+          <FarmProfileCard
+            farm={farmProfile}
+            onEdit={() => setIsEditFarmModalOpen(true)}
+          />
+
           <NotificationsCard
             settings={notificationSettings}
             onChange={handleNotificationsChange}
@@ -182,11 +194,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             onChange={handleDataManagementChange}
             onBackupSuccess={handleBackupSuccess}
           />
-
-          <FarmProfileCard
-            farm={farmProfile}
-            onEdit={() => setIsEditFarmModalOpen(true)}
-          />
         </div>
       </div>
 
@@ -196,6 +203,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* Modals */}
+      <EditProfileModal
+        isOpen={isEditProfileModalOpen}
+        onClose={() => setIsEditProfileModalOpen(false)}
+        onSaveSuccess={showToast}
+      />
+
       <EditFarmModal
         isOpen={isEditFarmModalOpen}
         onClose={() => setIsEditFarmModalOpen(false)}

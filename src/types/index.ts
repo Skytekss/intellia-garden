@@ -204,4 +204,26 @@ export interface StreifIndexResult {
   maxStorageMonths: number;
 }
 
+// User Profile & Status Types
+export type UserStatus = 'online' | 'field' | 'vacation' | 'offline';
+
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  fullNameEn: string;
+  initials: string;
+  role: string;
+  roleEn: string;
+  email: string;
+  phone: string;
+  telegram?: string;
+  status: UserStatus;
+  statusNote?: string;
+  statusNoteEn?: string;
+  avatarUrl?: string; // base64 DataURL or image url
+  avatarGradient: string; // Tailwind gradient, e.g. 'from-emerald-800 to-teal-600'
+  specialization: string;
+  specializationEn?: string;
+}
+
 export * from './settings';
